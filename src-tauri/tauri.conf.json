@@ -11,13 +11,15 @@
     "windows": [
       {
         "title": "waiting-game",
-        "width": 600,
-        "height": 300,
+        "width": 1920,
+        "height": 1080,
+        "fullscreen": true,
         "decorations": false,
         "transparent": true,
         "alwaysOnTop": true,
         "resizable": false,
-        "skipTaskbar": true
+        "skipTaskbar": true,
+        "visible": false
       }
     ],
     "security": {
