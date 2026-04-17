@@ -1,4 +1,4 @@
-use tauri::{Manager, WebviewWindowBuilder, WebviewUrl};
+use tauri::{Manager};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 use std::process::Command;
 use std::sync::Mutex;
@@ -46,7 +46,7 @@ pub fn run() {
                     
                     let action = if *is_pinned { "pin" } else { "unpin" };
                     let _ = Command::new("hyprctl")
-                        .args(["dispatch", "pin", "title:^(waiting-game)$"])
+                        .args(["dispatch", action, "title:^(waiting-game)$"])
                         .spawn();
                     
                     println!("Overlay Global Mode: {}", *is_pinned);
