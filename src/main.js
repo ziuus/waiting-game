@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 
 // Set canvas to a large enough area for the bottom of the screen
 canvas.width = window.innerWidth;
-canvas.height = 300; // Only use the bottom 300px of the screen
+canvas.height = 500; // Increased height to prevent clipping during high jumps
 
 let score = 0;
 let gameSpeed = 8;
@@ -12,7 +12,7 @@ let animationId;
 
 const dino = {
     x: 100,
-    y: canvas.height - 60,
+    y: canvas.height - 80,
     width: 30,
     height: 60,
     dy: 0,
@@ -28,7 +28,7 @@ function createObstacle() {
     const height = Math.random() * 50 + 30;
     obstacles.push({
         x: canvas.width,
-        y: canvas.height - height,
+        y: canvas.height - height - 20,
         width: 30,
         height: height,
         color: '#ff4b2b'
@@ -44,8 +44,8 @@ function update() {
         dino.y += dino.dy;
     }
 
-    if (dino.y + dino.height > canvas.height) {
-        dino.y = canvas.height - dino.height;
+    if (dino.y + dino.height > canvas.height - 20) {
+        dino.y = canvas.height - dino.height - 20;
         dino.dy = 0;
         dino.grounded = true;
     }
@@ -124,7 +124,7 @@ function draw() {
 
     if (isGameOver) {
         ctx.fillStyle = '#ff4b2b';
-        ctx.font = 'black 32px Space Grotesk, sans-serif';
+        ctx.font = 'bold 32px Space Grotesk, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('TERMINATED', canvas.width / 2, canvas.height / 2);
         ctx.font = '12px Space Grotesk, sans-serif';
