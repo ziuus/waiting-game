@@ -18,6 +18,7 @@ pub fn run() {
                         } else {
                             let _ = window.show();
                             let _ = window.set_focus();
+                            let _ = window.set_always_on_top(true);
                         }
                     }
                 }
