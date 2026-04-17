@@ -1,14 +1,19 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
+const highScoreElement = document.getElementById('highScore');
 
 canvas.width = 500;
 canvas.height = 150;
 
 let score = 0;
+let highScore = parseInt(localStorage.getItem('waiting_game_hi') || '0');
 let gameSpeed = 5;
 let isGameOver = false;
 let animationId;
+
+// Initialize High Score UI
+highScoreElement.innerText = `HI ${highScore.toString().padStart(5, '0')}`;
 
 const dino = {
     x: 50,
@@ -69,6 +74,13 @@ function update() {
             obstacles.splice(index, 1);
             score++;
             scoreElement.innerText = score.toString().padStart(5, '0');
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('waiting_game_hi', highScore.toString());
+                highScoreElement.innerText = `HI ${highScore.toString().padStart(5, '0')}`;
+            }
+            
             if (score % 10 === 0) gameSpeed += 0.2;
         }
     });
@@ -83,31 +95,62 @@ function update() {
     animationId = requestAnimationFrame(update);
 }
 
+function drawDino(x, y) {
+    ctx.fillStyle = dino.color;
+    // Body
+    ctx.fillRect(x, y + 10, 20, 20);
+    // Head
+    ctx.fillRect(x + 10, y, 15, 12);
+    // Eye
+    ctx.fillStyle = '#000';
+    ctx.fillRect(x + 18, y + 3, 3, 3);
+    // Legs
+    ctx.fillStyle = dino.color;
+    const legOffset = Math.sin(Date.now() / 50) * 5;
+    ctx.fillRect(x + 2, y + 30, 5, 10 + (dino.grounded ? legOffset : 0));
+    ctx.fillRect(x + 13, y + 30, 5, 10 - (dino.grounded ? legOffset : 0));
+}
+
+function drawCactus(x, y, w, h) {
+    ctx.fillStyle = '#ff4b2b';
+    // Main stem
+    ctx.fillRect(x + w/4, y, w/2, h);
+    // Arms
+    ctx.fillRect(x, y + h/3, w, h/6);
+    ctx.fillRect(x, y + h/6, w/6, h/6);
+    ctx.fillRect(x + w - w/6, y + h/6, w/6, h/6);
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Ground line
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height);
-    ctx.lineTo(canvas.width, canvas.height);
-    ctx.stroke();
+    // Subtle ground shadow
+    ctx.fillStyle = 'rgba(104, 186, 127, 0.1)';
+    ctx.fillRect(0, canvas.height - 2, canvas.width, 2);
 
-    // Dino
-    ctx.fillStyle = dino.color;
-    ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+    // Dino with glow
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = dino.color;
+    drawDino(dino.x, dino.y);
 
-    // Obstacles
+    // Obstacles with glow
+    ctx.shadowBlur = 10;
     obstacles.forEach(obstacle => {
-        ctx.fillStyle = obstacle.color;
-        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+        ctx.shadowColor = obstacle.color;
+        drawCactus(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
     });
 
+    // Reset shadow for text
+    ctx.shadowBlur = 0;
+...
     if (isGameOver) {
-        ctx.fillStyle = 'white';
-        ctx.font = '20px Arial';
+        ctx.fillStyle = '#ff4b2b';
+        ctx.font = 'bold 24px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('GAME OVER - PRESS SPACE TO RESTART', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 10);
+        ctx.font = '14px Inter, sans-serif';
+        ctx.fillStyle = 'white';
+        ctx.fillText('PRESS SPACE TO RESTART', canvas.width / 2, canvas.height / 2 + 20);
     }
 }
 
