@@ -19,10 +19,10 @@ pub fn run() {
                 let _ = window.hide();
             }
 
-            let ctrl_shift_g = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyG);
-            let ctrl_shift_p = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyP);
+            let super_shift_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
+            let super_shift_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
             
-            app.global_shortcut().on_shortcut(ctrl_shift_g, move |app, _shortcut, event| {
+            app.global_shortcut().on_shortcut(super_shift_g, move |app, _shortcut, event| {
                 if event.state() == ShortcutState::Pressed {
                     if let Some(window) = app.get_webview_window("main") {
                         let is_visible = window.is_visible().unwrap_or(false);
@@ -43,7 +43,7 @@ pub fn run() {
                 }
             }).expect("error registering toggle shortcut");
 
-            app.global_shortcut().on_shortcut(ctrl_shift_p, move |app, _shortcut, event| {
+            app.global_shortcut().on_shortcut(super_shift_p, move |app, _shortcut, event| {
                 if event.state() == ShortcutState::Pressed {
                     let state = app.state::<AppState>();
                     let mut is_pinned = state.is_pinned.lock().unwrap();
