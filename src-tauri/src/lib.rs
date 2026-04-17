@@ -14,6 +14,11 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .setup(|app| {
+            // Get window and hide it immediately so it maps but doesn't show
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.hide();
+            }
+
             let ctrl_shift_g = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyG);
             let ctrl_shift_p = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyP);
             
@@ -25,9 +30,9 @@ pub fn run() {
                         if is_visible {
                             let _ = window.hide();
                         } else {
-                            // Summoning Logic: Move to current workspace in Hyprland
+                            // Summoning Logic: Use class for more reliability in Hyprland
                             let _ = Command::new("hyprctl")
-                                .args(["dispatch", "movetoworkspace", "current,title:^(waiting-game)$"])
+                                .args(["dispatch", "movetoworkspace", "current,class:^(waiting-game)$"])
                                 .spawn();
                             
                             let _ = window.show();
@@ -46,10 +51,8 @@ pub fn run() {
                     
                     let action = if *is_pinned { "pin" } else { "unpin" };
                     let _ = Command::new("hyprctl")
-                        .args(["dispatch", action, "title:^(waiting-game)$"])
+                        .args(["dispatch", action, "class:^(waiting-game)$"])
                         .spawn();
-                    
-                    println!("Overlay Global Mode: {}", *is_pinned);
                 }
             }).expect("error registering pin shortcut");
 
