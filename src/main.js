@@ -3,32 +3,40 @@ const ctx = canvas.getContext('2d');
 
 // Set canvas to a large enough area for the bottom of the screen
 canvas.width = window.innerWidth;
-canvas.height = 500; // Increased height to prevent clipping during high jumps
+canvas.height = 500; 
 
 let score = 0;
 let gameSpeed = 8;
 let isGameOver = false;
 let animationId;
 
+// GROUND_OFFSET: Lowered to 20 to sit closer to the screen border
+const GROUND_OFFSET = 20; 
+
 const dino = {
-    x: 100,
-    y: canvas.height - 80,
+    targetX: canvas.width * 0.25, // Goal: Half of the first half (25%)
+    x: -50, // Start off-screen to the left
+    y: canvas.height - GROUND_OFFSET - 60,
     width: 30,
     height: 60,
     dy: 0,
     jumpForce: 15,
     gravity: 0.7,
     grounded: false,
-    color: '#68BA7F'
+    color: '#68BA7F',
+    isIntro: true // Flag for the startup run
 };
 
 const obstacles = [];
 
 function createObstacle() {
+    // Only create obstacles after intro is done
+    if (dino.isIntro) return;
+    
     const height = Math.random() * 50 + 30;
     obstacles.push({
         x: canvas.width,
-        y: canvas.height - height - 20,
+        y: canvas.height - height - GROUND_OFFSET,
         width: 30,
         height: height,
         color: '#ff4b2b'
@@ -38,43 +46,55 @@ function createObstacle() {
 function update() {
     if (isGameOver) return;
 
+    // Startup Animation Logic
+    if (dino.isIntro) {
+        if (dino.x < dino.targetX) {
+            dino.x += 5; // Run speed during intro
+        } else {
+            dino.x = dino.targetX;
+            dino.isIntro = false;
+        }
+    }
+
     // Dino physics
     if (!dino.grounded) {
         dino.dy += dino.gravity;
         dino.y += dino.dy;
     }
 
-    if (dino.y + dino.height > canvas.height - 20) {
-        dino.y = canvas.height - dino.height - 20;
+    if (dino.y + dino.height > canvas.height - GROUND_OFFSET) {
+        dino.y = canvas.height - dino.height - GROUND_OFFSET;
         dino.dy = 0;
         dino.grounded = true;
     }
 
     // Move obstacles
-    obstacles.forEach((obstacle, index) => {
-        obstacle.x -= gameSpeed;
+    if (!dino.isIntro) {
+        obstacles.forEach((obstacle, index) => {
+            obstacle.x -= gameSpeed;
 
-        // Collision detection
-        if (
-            dino.x < obstacle.x + obstacle.width &&
-            dino.x + dino.width > obstacle.x &&
-            dino.y < obstacle.y + obstacle.height &&
-            dino.y + dino.height > obstacle.y
-        ) {
-            isGameOver = true;
-        }
+            // Collision detection
+            if (
+                dino.x < obstacle.x + obstacle.width &&
+                dino.x + dino.width > obstacle.x &&
+                dino.y < obstacle.y + obstacle.height &&
+                dino.y + dino.height > obstacle.y
+            ) {
+                isGameOver = true;
+            }
 
-        // Remove off-screen obstacles
-        if (obstacle.x + obstacle.width < 0) {
-            obstacles.splice(index, 1);
-            score++;
-            if (score % 5 === 0) gameSpeed += 0.5;
-        }
-    });
+            // Remove off-screen obstacles
+            if (obstacle.x + obstacle.width < 0) {
+                obstacles.splice(index, 1);
+                score++;
+                if (score % 5 === 0) gameSpeed += 0.5;
+            }
+        });
 
-    if (Math.random() < 0.015) {
-        if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width - 400) {
-            createObstacle();
+        if (Math.random() < 0.015) {
+            if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width - 400) {
+                createObstacle();
+            }
         }
     }
 
