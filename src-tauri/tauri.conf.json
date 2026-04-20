@@ -9,19 +9,31 @@
   "app": {
     "withGlobalTauri": true,
     "windows": [
-    {
-    "label": "main",
-    "title": "waiting-game",
-    "width": 1920,
-    "height": 1080,
-    "fullscreen": false,
-    "decorations": false,
-    "transparent": true,
-    "alwaysOnTop": false,
-    "resizable": false,
-    "skipTaskbar": true,
-    "visible": true
-    }
+      {
+        "label": "main",
+        "title": "waiting-game",
+        "width": 1920,
+        "height": 1080,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": false,
+        "resizable": false,
+        "skipTaskbar": true,
+        "visible": true
+      },
+      {
+        "label": "settings",
+        "title": "Settings Hub",
+        "width": 800,
+        "height": 600,
+        "decorations": false,
+        "transparent": true,
+        "center": true,
+        "visible": false,
+        "resizable": false,
+        "alwaysOnTop": true
+      }
     ],    "security": {
       "csp": null
     }
