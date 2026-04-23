@@ -1,0 +1,25 @@
+{
+  "activeGame": "flappy",
+  "theme": {
+    "dinoColor": "#68BA7F",
+    "obstacleColor": "#ff4b2b",
+    "scoreColor": "rgba(104, 186, 127, 0.8)"
+  },
+  "difficulty": {
+    "initialSpeed": 8,
+    "gravity": 0.7,
+    "jumpForce": 15
+  },
+  "games": [
+    {
+      "id": "dino",
+      "name": "Dino Runner",
+      "enabled": false
+    },
+    {
+      "id": "flappy",
+      "name": "Flappy Bird",
+      "enabled": true
+    }
+  ]
+}

@@ -20,19 +20,40 @@
         display: flex;
         align-items: flex-end;
         justify-content: center;
+        position: relative;
       }
       canvas {
         background: transparent !important;
         display: block;
       }
-      /* Hide everything except the canvas */
-      .score-container, .instructions {
-        display: none !important;
+      #ui-layer {
+        position: absolute;
+        top: 20px;
+        right: 40px;
+        color: rgba(104, 186, 127, 0.8);
+        font-family: 'Space Grotesk', sans-serif;
+        text-align: right;
+        pointer-events: none;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+      .score-value {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .high-score {
+        font-size: 12px;
+        opacity: 0.6;
+        margin-top: 4px;
       }
     </style>
   </head>
   <body>
     <div id="game-container">
+      <div id="ui-layer">
+        <div class="score-value" id="score">00000</div>
+        <div class="high-score">HI <span id="highScore">00000</span></div>
+      </div>
       <canvas id="gameCanvas"></canvas>
     </div>
     <script src="main.js"></script>
