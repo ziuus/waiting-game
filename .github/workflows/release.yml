@@ -38,6 +38,7 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: "Waiting Game v__VERSION__"
-          releaseBody: "Automated release by GitHub Actions"
-          releaseDraft: true
+          releaseBody: "Autonomous kinetic overlay. Multi-platform installers for Linux, Mac, and Windows."
+          releaseDraft: false
           prerelease: false
+          includeRelease: true
