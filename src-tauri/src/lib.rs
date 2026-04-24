@@ -1,6 +1,6 @@
 use tauri::{Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
-use tauri_plugin_autostart::MacosLauncher;
+use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -36,9 +36,8 @@ pub fn run() {
             app.global_shortcut().register(ctrl_shift_g)?;
             app.global_shortcut().register(ctrl_shift_p)?;
 
-            // Enable autostart by default
-            use tauri_plugin_autostart::ManagerExt;
-            let _ = app.autostart().enable();
+            // Enable autostart by default (using AppHandle)
+            let _ = app.handle().autostart().enable();
 
             // Create Tray Menu
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
