@@ -1,10 +1,45 @@
 use tauri::{Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
+use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+use tauri_plugin_autostart::MacosLauncher;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let ctrl_shift_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
+    let ctrl_shift_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
+        .plugin(tauri_plugin_global_shortcut::Builder::new()
+            .with_handler(move |app, shortcut, event| {
+                if event.state() == ShortcutState::Pressed {
+                    if let Some(window) = app.get_webview_window("main") {
+                        if shortcut == &ctrl_shift_g {
+                            let is_visible = window.is_visible().unwrap_or(false);
+                            if is_visible {
+                                let _ = window.hide();
+                            } else {
+                                let _ = window.show();
+                                let _ = window.set_focus();
+                            }
+                        } else if shortcut == &ctrl_shift_p {
+                            let is_on_top = window.is_always_on_top().unwrap_or(false);
+                            let _ = window.set_always_on_top(!is_on_top);
+                        }
+                    }
+                }
+            })
+            .build()
+        )
         .setup(|app| {
+            // Register shortcuts
+            app.global_shortcut().register(ctrl_shift_g)?;
+            app.global_shortcut().register(ctrl_shift_p)?;
+
+            // Enable autostart by default
+            use tauri_plugin_autostart::ManagerExt;
+            let _ = app.autostart().enable();
+
             // Create Tray Menu
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
             let settings_i = MenuItem::with_id(app, "settings", "Settings Hub", true, None::<&str>)?;
