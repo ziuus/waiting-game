@@ -36,8 +36,8 @@ pub fn run() {
             app.global_shortcut().register(ctrl_shift_g)?;
             app.global_shortcut().register(ctrl_shift_p)?;
 
-            // Enable autostart by default (using AppHandle)
-            let _ = app.handle().autostart().enable();
+            // Enable autostart by default (using AppHandle and the correct method name 'autolaunch')
+            let _ = app.handle().autolaunch().enable();
 
             // Create Tray Menu
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
