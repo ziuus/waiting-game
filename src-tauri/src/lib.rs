@@ -7,6 +7,14 @@ pub fn run() {
     let ctrl_shift_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
     let ctrl_shift_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
 
+    // Clone for the handler
+    let g_handler = ctrl_shift_g.clone();
+    let p_handler = ctrl_shift_p.clone();
+
+    // Clone for the setup
+    let g_setup = ctrl_shift_g.clone();
+    let p_setup = ctrl_shift_p.clone();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
@@ -14,7 +22,7 @@ pub fn run() {
             .with_handler(move |app, shortcut, event| {
                 if event.state() == ShortcutState::Pressed {
                     if let Some(window) = app.get_webview_window("main") {
-                        if shortcut == &ctrl_shift_g {
+                        if shortcut == &g_handler {
                             let is_visible = window.is_visible().unwrap_or(false);
                             if is_visible {
                                 let _ = window.hide();
@@ -22,7 +30,7 @@ pub fn run() {
                                 let _ = window.show();
                                 let _ = window.set_focus();
                             }
-                        } else if shortcut == &ctrl_shift_p {
+                        } else if shortcut == &p_handler {
                             let is_on_top = window.is_always_on_top().unwrap_or(false);
                             let _ = window.set_always_on_top(!is_on_top);
                         }
@@ -31,12 +39,12 @@ pub fn run() {
             })
             .build()
         )
-        .setup(|app| {
-            // Register shortcuts
-            app.global_shortcut().register(ctrl_shift_g)?;
-            app.global_shortcut().register(ctrl_shift_p)?;
+        .setup(move |app| {
+            // Register shortcuts using the setup clones
+            app.global_shortcut().register(g_setup)?;
+            app.global_shortcut().register(p_setup)?;
 
-            // Enable autostart by default (using AppHandle and the correct method name 'autolaunch')
+            // Enable autostart by default
             let _ = app.handle().autolaunch().enable();
 
             // Create Tray Menu
