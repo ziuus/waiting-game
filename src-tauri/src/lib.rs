@@ -4,16 +4,18 @@ use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let ctrl_shift_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
-    let ctrl_shift_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
+    // Primary: Super+Shift+G
+    let super_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
+    let super_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
+    
+    // Fallback: Alt+Shift+G (More reliable on some Linux distros)
+    let alt_g = Shortcut::new(Some(Modifiers::ALT | Modifiers::SHIFT), Code::KeyG);
+    let alt_p = Shortcut::new(Some(Modifiers::ALT | Modifiers::SHIFT), Code::KeyP);
 
-    // Clone for the handler
-    let g_handler = ctrl_shift_g.clone();
-    let p_handler = ctrl_shift_p.clone();
-
-    // Clone for the setup
-    let g_setup = ctrl_shift_g.clone();
-    let p_setup = ctrl_shift_p.clone();
+    let g_handler = super_g.clone();
+    let p_handler = super_p.clone();
+    let g_alt_handler = alt_g.clone();
+    let p_alt_handler = alt_p.clone();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -22,7 +24,7 @@ pub fn run() {
             .with_handler(move |app, shortcut, event| {
                 if event.state() == ShortcutState::Pressed {
                     if let Some(window) = app.get_webview_window("main") {
-                        if shortcut == &g_handler {
+                        if shortcut == &g_handler || shortcut == &g_alt_handler {
                             let is_visible = window.is_visible().unwrap_or(false);
                             if is_visible {
                                 let _ = window.hide();
@@ -30,7 +32,7 @@ pub fn run() {
                                 let _ = window.show();
                                 let _ = window.set_focus();
                             }
-                        } else if shortcut == &p_handler {
+                        } else if shortcut == &p_handler || shortcut == &p_alt_handler {
                             let is_on_top = window.is_always_on_top().unwrap_or(false);
                             let _ = window.set_always_on_top(!is_on_top);
                         }
@@ -40,22 +42,22 @@ pub fn run() {
             .build()
         )
         .setup(move |app| {
-            // Register shortcuts and log results
-            match app.global_shortcut().register(g_setup) {
-                Ok(_) => println!("Registered Super+Shift+G successfully"),
-                Err(e) => eprintln!("Failed to register Super+Shift+G: {}", e),
-            }
-            match app.global_shortcut().register(p_setup) {
-                Ok(_) => println!("Registered Super+Shift+P successfully"),
-                Err(e) => eprintln!("Failed to register Super+Shift+P: {}", e),
-            }
+            let shortcut_manager = app.global_shortcut();
+            
+            // Try to register Super shortcuts
+            let _ = shortcut_manager.register(super_g);
+            let _ = shortcut_manager.register(super_p);
+            
+            // Try to register Alt fallbacks
+            let _ = shortcut_manager.register(alt_g);
+            let _ = shortcut_manager.register(alt_p);
 
-            // Enable autostart by default
+            // Enable autostart
             let _ = app.handle().autolaunch().enable();
 
-            // Create Tray Menu
-            let toggle_i = MenuItem::with_id(app, "toggle", "Toggle Visibility (Super+Shift+G)", true, None::<&str>)?;
-            let sticky_i = MenuItem::with_id(app, "sticky", "Toggle Sticky Mode (Super+Shift+P)", true, None::<&str>)?;
+            // Create Tray Menu with visible hints
+            let toggle_i = MenuItem::with_id(app, "toggle", "Toggle Visibility (Super/Alt+Shift+G)", true, None::<&str>)?;
+            let sticky_i = MenuItem::with_id(app, "sticky", "Toggle Sticky Mode (Super/Alt+Shift+P)", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
             let settings_i = MenuItem::with_id(app, "settings", "Settings Hub", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&toggle_i, &sticky_i, &MenuItem::with_id(app, "sep", "---", false, None::<&str>)?, &settings_i, &quit_i])?;
@@ -66,9 +68,7 @@ pub fn run() {
                 .show_menu_on_left_click(true)
                 .on_menu_event(|app_handle: &tauri::AppHandle, event| {
                     match event.id.as_ref() {
-                        "quit" => {
-                            app_handle.exit(0);
-                        }
+                        "quit" => { app_handle.exit(0); }
                         "toggle" => {
                             if let Some(window) = app_handle.get_webview_window("main") {
                                 let is_visible = window.is_visible().unwrap_or(false);
