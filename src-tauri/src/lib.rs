@@ -40,17 +40,25 @@ pub fn run() {
             .build()
         )
         .setup(move |app| {
-            // Register shortcuts using the setup clones
-            app.global_shortcut().register(g_setup)?;
-            app.global_shortcut().register(p_setup)?;
+            // Register shortcuts and log results
+            match app.global_shortcut().register(g_setup) {
+                Ok(_) => println!("Registered Super+Shift+G successfully"),
+                Err(e) => eprintln!("Failed to register Super+Shift+G: {}", e),
+            }
+            match app.global_shortcut().register(p_setup) {
+                Ok(_) => println!("Registered Super+Shift+P successfully"),
+                Err(e) => eprintln!("Failed to register Super+Shift+P: {}", e),
+            }
 
             // Enable autostart by default
             let _ = app.handle().autolaunch().enable();
 
             // Create Tray Menu
+            let toggle_i = MenuItem::with_id(app, "toggle", "Toggle Visibility (Super+Shift+G)", true, None::<&str>)?;
+            let sticky_i = MenuItem::with_id(app, "sticky", "Toggle Sticky Mode (Super+Shift+P)", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
             let settings_i = MenuItem::with_id(app, "settings", "Settings Hub", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&settings_i, &quit_i])?;
+            let menu = Menu::with_items(app, &[&toggle_i, &sticky_i, &MenuItem::with_id(app, "sep", "---", false, None::<&str>)?, &settings_i, &quit_i])?;
 
             let _tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
@@ -60,6 +68,18 @@ pub fn run() {
                     match event.id.as_ref() {
                         "quit" => {
                             app_handle.exit(0);
+                        }
+                        "toggle" => {
+                            if let Some(window) = app_handle.get_webview_window("main") {
+                                let is_visible = window.is_visible().unwrap_or(false);
+                                if is_visible { let _ = window.hide(); } else { let _ = window.show(); let _ = window.set_focus(); }
+                            }
+                        }
+                        "sticky" => {
+                            if let Some(window) = app_handle.get_webview_window("main") {
+                                let is_on_top = window.is_always_on_top().unwrap_or(false);
+                                let _ = window.set_always_on_top(!is_on_top);
+                            }
                         }
                         "settings" => {
                             if let Some(settings_window) = app_handle.get_webview_window("settings") {
