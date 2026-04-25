@@ -1,5 +1,5 @@
 {
-  "activeGame": "flappy",
+  "activeGame": "dino",
   "theme": {
     "dinoColor": "#68BA7F",
     "obstacleColor": "#ff4b2b",
@@ -14,7 +14,7 @@
     {
       "id": "dino",
       "name": "Dino Runner",
-      "enabled": false
+      "enabled": true
     },
     {
       "id": "flappy",
