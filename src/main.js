@@ -2,12 +2,8 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 function resizeCanvas() {
-    const scale = window.devicePixelRatio || 1;
-    canvas.width = window.innerWidth * scale;
-    canvas.height = 500 * scale; 
-    canvas.style.width = window.innerWidth + 'px';
-    canvas.style.height = '500px';
-    ctx.scale(scale, scale);
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 }
 
 resizeCanvas();
