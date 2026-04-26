@@ -5,13 +5,9 @@ use std::time::Duration;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Define the official shortcuts
+    // We use the official shortcuts: Super+Shift+G and Super+Shift+P
     let s_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
     let s_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
-
-    // Clones for comparison in the handler
-    let h_g = s_g.clone();
-    let h_p = s_p.clone();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -19,16 +15,22 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new()
             .with_handler(move |app, shortcut, event| {
                 if event.state() == ShortcutState::Pressed {
-                    println!("🎯 APP RECEIVED SHORTCUT: {:?}", shortcut);
-                    
+                    // Match by comparing the internal key and modifiers directly
+                    let is_g = shortcut.key() == Code::KeyG;
+                    let is_p = shortcut.key() == Code::KeyP;
+
                     if let Some(window) = app.get_webview_window("main") {
-                        if shortcut == &h_g {
+                        if is_g {
                             let is_visible = window.is_visible().unwrap_or(false);
-                            if is_visible { let _ = window.hide(); } else { let _ = window.show(); let _ = window.set_focus(); }
-                        } else if shortcut == &h_p {
+                            if is_visible { 
+                                let _ = window.hide(); 
+                            } else { 
+                                let _ = window.show(); 
+                                let _ = window.set_focus(); 
+                            }
+                        } else if is_p {
                             let is_on_top = window.is_always_on_top().unwrap_or(false);
                             let _ = window.set_always_on_top(!is_on_top);
-                            println!("📍 Sticky Mode Toggled: {}", !is_on_top);
                         }
                     }
                 }
@@ -38,17 +40,26 @@ pub fn run() {
         .setup(move |app| {
             let handle = app.handle().clone();
             
-            // Register shortcuts after a Safe-Start delay
+            // Fix GTK Assertion & Register: Wait for system to settle
             tauri::async_runtime::spawn(async move {
                 tokio::time::sleep(Duration::from_millis(1500)).await;
                 
-                let _ = handle.global_shortcut().register(s_g);
-                let _ = handle.global_shortcut().register(s_p);
+                let shortcut_manager = handle.global_shortcut();
                 
-                println!("✅ Shortcuts registered after Safe-Start delay.");
+                // Re-register to ensure the OS sees the app as "Active"
+                let _ = shortcut_manager.register(Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG));
+                let _ = shortcut_manager.register(Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP));
                 
+                println!("🚀 Official Shortcuts (Super+Shift+G/P) Active.");
+
                 if let Some(window) = handle.get_webview_window("main") {
+                    // Initial visibility state
                     let _ = window.set_always_on_top(true);
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                    // Brief hide to sit in tray
+                    tokio::time::sleep(Duration::from_millis(200)).await;
+                    let _ = window.hide();
                 }
             });
 
