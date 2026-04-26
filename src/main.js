@@ -52,6 +52,12 @@ async function init() {
 }
 
 function gameLoop() {
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+    }
+    
+    // Super Clear: Reset transform and clear everything
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (currentGame) {

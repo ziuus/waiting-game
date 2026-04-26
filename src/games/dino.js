@@ -92,6 +92,7 @@ export default class DinoGame {
     }
 
     draw() {
+        this.ctx.shadowBlur = 0;
         this.ctx.shadowBlur = 20;
         this.ctx.shadowColor = this.dino.color;
         this.drawDino(this.dino.x, this.dino.y);

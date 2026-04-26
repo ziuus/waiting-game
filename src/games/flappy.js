@@ -72,6 +72,7 @@ export default class FlappyGame {
     }
 
     draw() {
+        this.ctx.shadowBlur = 0;
         // Draw Flying Dino
         this.ctx.shadowBlur = 20;
         this.ctx.shadowColor = this.bird.color;
