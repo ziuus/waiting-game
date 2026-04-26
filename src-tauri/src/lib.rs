@@ -5,17 +5,11 @@ use std::time::Duration;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Define shortcuts
-    let s_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
-    let s_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
-    let a_g = Shortcut::new(Some(Modifiers::ALT | Modifiers::SHIFT), Code::KeyG);
-    let a_p = Shortcut::new(Some(Modifiers::ALT | Modifiers::SHIFT), Code::KeyP);
-    let c_g = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyG);
-    let c_p = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyP);
+    let super_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
+    let super_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
 
-    // Clones for handler comparison
-    let h_s_g = s_g.clone(); let h_a_g = a_g.clone(); let h_c_g = c_g.clone();
-    let h_s_p = s_p.clone(); let h_a_p = a_p.clone(); let h_c_p = c_p.clone();
+    let g_handler = super_g.clone();
+    let p_handler = super_p.clone();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -23,12 +17,11 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new()
             .with_handler(move |app, shortcut, event| {
                 if event.state() == ShortcutState::Pressed {
-                    println!("🔔 Global Shortcut Triggered: {:?}", shortcut);
                     if let Some(window) = app.get_webview_window("main") {
-                        if shortcut == &h_s_g || shortcut == &h_a_g || shortcut == &h_c_g {
+                        if shortcut == &g_handler {
                             let is_visible = window.is_visible().unwrap_or(false);
                             if is_visible { let _ = window.hide(); } else { let _ = window.show(); let _ = window.set_focus(); }
-                        } else if shortcut == &h_s_p || shortcut == &h_a_p || shortcut == &h_c_p {
+                        } else if shortcut == &p_handler {
                             let is_on_top = window.is_always_on_top().unwrap_or(false);
                             let _ = window.set_always_on_top(!is_on_top);
                         }
@@ -40,33 +33,29 @@ pub fn run() {
         .setup(move |app| {
             let handle = app.handle().clone();
             
-            // Fix GTK Assertion Error: Wait for window to map before setting always-on-top
+            // Register standard shortcuts
+            let shortcut_manager = app.global_shortcut();
+            
+            if let Err(_) = shortcut_manager.register(super_g) {
+                eprintln!("⚠️ System blocked Super+Shift+G");
+            }
+            if let Err(_) = shortcut_manager.register(super_p) {
+                eprintln!("⚠️ System blocked Super+Shift+P");
+            }
+
+            // Fix GTK mapping delay
             tauri::async_runtime::spawn(async move {
                 tokio::time::sleep(Duration::from_millis(500)).await;
                 if let Some(window) = handle.get_webview_window("main") {
                     let _ = window.set_always_on_top(true);
-                    println!("✨ Window mapped and pinned to top successfully.");
                 }
             });
 
-            // Register shortcuts
-            let shortcut_manager = app.global_shortcut();
-            let _ = shortcut_manager.register(s_g);
-            let _ = shortcut_manager.register(s_p);
-            let _ = shortcut_manager.register(a_g);
-            let _ = shortcut_manager.register(a_p);
-            let _ = shortcut_manager.register(c_g);
-            let _ = shortcut_manager.register(c_p);
-
-            if std::env::var("WAYLAND_DISPLAY").is_ok() {
-                println!("🌐 Wayland Detected: If shortcuts fail, use the Tray Menu or bind Super+Shift+G/P in your Compositor settings.");
-            }
-
             let _ = app.handle().autolaunch().enable();
 
-            // Create Tray Menu
-            let toggle_i = MenuItem::with_id(app, "toggle", "Toggle Visibility (Super/Alt/Ctrl+Shift+G)", true, None::<&str>)?;
-            let sticky_i = MenuItem::with_id(app, "sticky", "Toggle Sticky Mode (Super/Alt/Ctrl+Shift+P)", true, None::<&str>)?;
+            // Tray Menu
+            let toggle_i = MenuItem::with_id(app, "toggle", "Toggle Visibility (Super+Shift+G)", true, None::<&str>)?;
+            let sticky_i = MenuItem::with_id(app, "sticky", "Toggle Sticky Mode (Super+Shift+P)", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&toggle_i, &sticky_i, &MenuItem::with_id(app, "sep", "---", false, None::<&str>)?, &quit_i])?;
 
@@ -74,7 +63,7 @@ pub fn run() {
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&menu)
                 .show_menu_on_left_click(true)
-                .on_menu_event(|app_handle: &tauri::AppHandle, event| {
+                .on_menu_event(|app_handle, event| {
                     match event.id.as_ref() {
                         "quit" => { app_handle.exit(0); }
                         "toggle" => {
