@@ -31,29 +31,33 @@ pub fn run() {
             .build()
         )
         .setup(move |app| {
-            let handle = app.handle().clone();
+            let app_handle = app.handle().clone();
             
-            // Register standard shortcuts
+            // 1. Register Shortcuts with explicit feedback
             let shortcut_manager = app.global_shortcut();
             
-            if let Err(_) = shortcut_manager.register(super_g) {
-                eprintln!("⚠️ System blocked Super+Shift+G");
+            match shortcut_manager.register(super_g) {
+                Ok(_) => println!("✅ Registered Super+Shift+G successfully"),
+                Err(e) => eprintln!("❌ Failed to register Super+Shift+G: {}", e),
             }
-            if let Err(_) = shortcut_manager.register(super_p) {
-                eprintln!("⚠️ System blocked Super+Shift+P");
+            match shortcut_manager.register(super_p) {
+                Ok(_) => println!("✅ Registered Super+Shift+P successfully"),
+                Err(e) => eprintln!("❌ Failed to register Super+Shift+P: {}", e),
             }
 
-            // Fix GTK mapping delay
+            // 2. Fix GTK Error: Perform window setup in an async task with safety checks
             tauri::async_runtime::spawn(async move {
-                tokio::time::sleep(Duration::from_millis(500)).await;
-                if let Some(window) = handle.get_webview_window("main") {
+                tokio::time::sleep(Duration::from_millis(800)).await;
+                if let Some(window) = app_handle.get_webview_window("main") {
+                    // Only apply if the window is actually initialized
                     let _ = window.set_always_on_top(true);
+                    println!("✨ App initialization complete.");
                 }
             });
 
             let _ = app.handle().autolaunch().enable();
 
-            // Tray Menu
+            // 3. Tray Menu (The 100% reliable fallback)
             let toggle_i = MenuItem::with_id(app, "toggle", "Toggle Visibility (Super+Shift+G)", true, None::<&str>)?;
             let sticky_i = MenuItem::with_id(app, "sticky", "Toggle Sticky Mode (Super+Shift+P)", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
