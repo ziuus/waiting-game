@@ -5,23 +5,27 @@ use std::time::Duration;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Define the official shortcuts
+    let s_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
+    let s_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
+
+    // Clones for comparison in the handler
+    let h_g = s_g.clone();
+    let h_p = s_p.clone();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
         .plugin(tauri_plugin_global_shortcut::Builder::new()
             .with_handler(move |app, shortcut, event| {
                 if event.state() == ShortcutState::Pressed {
-                    // This will confirm if the app actually receives the event
                     println!("🎯 APP RECEIVED SHORTCUT: {:?}", shortcut);
                     
                     if let Some(window) = app.get_webview_window("main") {
-                        let is_g = shortcut.key() == Code::KeyG;
-                        let is_p = shortcut.key() == Code::KeyP;
-
-                        if is_g {
+                        if shortcut == &h_g {
                             let is_visible = window.is_visible().unwrap_or(false);
                             if is_visible { let _ = window.hide(); } else { let _ = window.show(); let _ = window.set_focus(); }
-                        } else if is_p {
+                        } else if shortcut == &h_p {
                             let is_on_top = window.is_always_on_top().unwrap_or(false);
                             let _ = window.set_always_on_top(!is_on_top);
                             println!("📍 Sticky Mode Toggled: {}", !is_on_top);
@@ -34,12 +38,9 @@ pub fn run() {
         .setup(move |app| {
             let handle = app.handle().clone();
             
-            // CRITICAL: Delay registration to avoid Wayland/GTK race conditions
+            // Register shortcuts after a Safe-Start delay
             tauri::async_runtime::spawn(async move {
                 tokio::time::sleep(Duration::from_millis(1500)).await;
-                
-                let s_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
-                let s_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
                 
                 let _ = handle.global_shortcut().register(s_g);
                 let _ = handle.global_shortcut().register(s_p);
