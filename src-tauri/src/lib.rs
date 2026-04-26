@@ -5,25 +5,26 @@ use std::time::Duration;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let super_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
-    let super_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
-
-    let g_handler = super_g.clone();
-    let p_handler = super_p.clone();
-
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
         .plugin(tauri_plugin_global_shortcut::Builder::new()
             .with_handler(move |app, shortcut, event| {
                 if event.state() == ShortcutState::Pressed {
+                    // This will confirm if the app actually receives the event
+                    println!("🎯 APP RECEIVED SHORTCUT: {:?}", shortcut);
+                    
                     if let Some(window) = app.get_webview_window("main") {
-                        if shortcut == &g_handler {
+                        let is_g = shortcut.key() == Code::KeyG;
+                        let is_p = shortcut.key() == Code::KeyP;
+
+                        if is_g {
                             let is_visible = window.is_visible().unwrap_or(false);
                             if is_visible { let _ = window.hide(); } else { let _ = window.show(); let _ = window.set_focus(); }
-                        } else if shortcut == &p_handler {
+                        } else if is_p {
                             let is_on_top = window.is_always_on_top().unwrap_or(false);
                             let _ = window.set_always_on_top(!is_on_top);
+                            println!("📍 Sticky Mode Toggled: {}", !is_on_top);
                         }
                     }
                 }
@@ -31,33 +32,28 @@ pub fn run() {
             .build()
         )
         .setup(move |app| {
-            let app_handle = app.handle().clone();
+            let handle = app.handle().clone();
             
-            // 1. Register Shortcuts with explicit feedback
-            let shortcut_manager = app.global_shortcut();
-            
-            match shortcut_manager.register(super_g) {
-                Ok(_) => println!("✅ Registered Super+Shift+G successfully"),
-                Err(e) => eprintln!("❌ Failed to register Super+Shift+G: {}", e),
-            }
-            match shortcut_manager.register(super_p) {
-                Ok(_) => println!("✅ Registered Super+Shift+P successfully"),
-                Err(e) => eprintln!("❌ Failed to register Super+Shift+P: {}", e),
-            }
-
-            // 2. Fix GTK Error: Perform window setup in an async task with safety checks
+            // CRITICAL: Delay registration to avoid Wayland/GTK race conditions
             tauri::async_runtime::spawn(async move {
-                tokio::time::sleep(Duration::from_millis(800)).await;
-                if let Some(window) = app_handle.get_webview_window("main") {
-                    // Only apply if the window is actually initialized
+                tokio::time::sleep(Duration::from_millis(1500)).await;
+                
+                let s_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
+                let s_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
+                
+                let _ = handle.global_shortcut().register(s_g);
+                let _ = handle.global_shortcut().register(s_p);
+                
+                println!("✅ Shortcuts registered after Safe-Start delay.");
+                
+                if let Some(window) = handle.get_webview_window("main") {
                     let _ = window.set_always_on_top(true);
-                    println!("✨ App initialization complete.");
                 }
             });
 
             let _ = app.handle().autolaunch().enable();
 
-            // 3. Tray Menu (The 100% reliable fallback)
+            // Tray Menu
             let toggle_i = MenuItem::with_id(app, "toggle", "Toggle Visibility (Super+Shift+G)", true, None::<&str>)?;
             let sticky_i = MenuItem::with_id(app, "sticky", "Toggle Sticky Mode (Super+Shift+P)", true, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
