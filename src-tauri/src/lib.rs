@@ -5,7 +5,7 @@ use std::time::Duration;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // We use the official shortcuts: Super+Shift+G and Super+Shift+P
+    // Official shortcuts: Super+Shift+G and Super+Shift+P
     let s_g = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
     let s_p = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
 
@@ -15,9 +15,9 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new()
             .with_handler(move |app, shortcut, event| {
                 if event.state() == ShortcutState::Pressed {
-                    // Match by comparing the internal key and modifiers directly
-                    let is_g = shortcut.key() == Code::KeyG;
-                    let is_p = shortcut.key() == Code::KeyP;
+                    // Match by comparing the internal key field directly
+                    let is_g = shortcut.key == Code::KeyG;
+                    let is_p = shortcut.key == Code::KeyP;
 
                     if let Some(window) = app.get_webview_window("main") {
                         if is_g {
@@ -53,11 +53,9 @@ pub fn run() {
                 println!("🚀 Official Shortcuts (Super+Shift+G/P) Active.");
 
                 if let Some(window) = handle.get_webview_window("main") {
-                    // Initial visibility state
                     let _ = window.set_always_on_top(true);
                     let _ = window.show();
                     let _ = window.set_focus();
-                    // Brief hide to sit in tray
                     tokio::time::sleep(Duration::from_millis(200)).await;
                     let _ = window.hide();
                 }
