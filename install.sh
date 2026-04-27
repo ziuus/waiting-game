@@ -9,20 +9,20 @@ echo "🦖 Initializing Waiting Game - System Integration Protocol..."
 HYPR_PREFS="$HOME/.config/hypr/userprefs.conf"
 HYPR_KEYS="$HOME/.config/hypr/keybindings.conf"
 
-# 2. Window Rules (Fix transparency, blur, borders, and positioning)
+# 2. Window Rules (Modern windowrulev2 syntax)
 RULES="
 # Waiting Game Overlay Rules
-windowrule = float, ^(waiting-game)$
-windowrule = workspace special:waiting-game silent, ^(waiting-game)$
-windowrule = size 100% 100%, ^(waiting-game)$
-windowrule = move 0 0, ^(waiting-game)$
-windowrule = noblur, ^(waiting-game)$
-windowrule = noborder, ^(waiting-game)$
-windowrule = noshadow, ^(waiting-game)$
-windowrule = nodim, ^(waiting-game)$
-windowrule = opacity 1.0 override 1.0 override, ^(waiting-game)$
-windowrule = pin, ^(waiting-game)$
-windowrule = keepaspectratio, ^(waiting-game)$
+windowrulev2 = float, class:^(waiting-game)$
+windowrulev2 = workspace special:waiting-game silent, class:^(waiting-game)$
+windowrulev2 = size 100% 100%, class:^(waiting-game)$
+windowrulev2 = move 0 0, class:^(waiting-game)$
+windowrulev2 = noblur, class:^(waiting-game)$
+windowrulev2 = noborder, class:^(waiting-game)$
+windowrulev2 = noshadow, class:^(waiting-game)$
+windowrulev2 = nodim, class:^(waiting-game)$
+windowrulev2 = opacity 1.0 override 1.0 override, class:^(waiting-game)$
+windowrulev2 = pin, class:^(waiting-game)$
+windowrulev2 = keepaspectratio, class:^(waiting-game)$
 "
 
 # 3. Keybindings
@@ -34,10 +34,11 @@ bindd = \$mainMod SHIFT, P, toggle pinning waiting game, exec, ~/.config/hypr/sc
 
 # 4. Apply Configuration
 echo "🛠️ Applying System Rules..."
-if ! grep -q "Waiting Game Overlay Rules" "$HYPR_PREFS" 2>/dev/null; then
-    echo "$RULES" >> "$HYPR_PREFS"
-    echo "✅ Applied window rules to $HYPR_PREFS"
-fi
+# Clean up old rules if they exist to avoid duplicates
+sed -i '/# Waiting Game Overlay Rules/,+12d' "$HYPR_PREFS" 2>/dev/null
+
+echo "$RULES" >> "$HYPR_PREFS"
+echo "✅ Applied modern window rules to $HYPR_PREFS"
 
 if ! grep -q "toggle waiting game" "$HYPR_KEYS" 2>/dev/null; then
     echo "$BINDINGS" >> "$HYPR_KEYS"
@@ -50,23 +51,21 @@ if ! grep -q "exec-once = waiting-game" "$HYPR_PREFS" 2>/dev/null; then
     echo "✅ Enabled autostart in $HYPR_PREFS"
 fi
 
-echo "🚀 Installation Complete! The game will now be perfectly transparent and borderless."
+echo "🚀 Installation Complete!"
 
-# 6. Immediate Launch
+# 6. Immediate Launch (Only if not running)
 if ! pgrep -x "waiting-game" > /dev/null; then
     echo "🎮 Starting Waiting Game in background..."
-    # Try to launch from PATH, then common AppImage locations
-    if command -v waiting-game >/dev/null 2>&1; then
+    # Try common paths
+    if [ -f "./src-tauri/target/debug/waiting-game" ]; then
+        ./src-tauri/target/debug/waiting-game &
+    elif command -v waiting-game >/dev/null 2>&1; then
         waiting-game &
-    elif [ -f "$HOME/AppImages/waitinggame.appimage" ]; then
-        "$HOME/AppImages/waitinggame.appimage" &
-    elif [ -f "./src-tauri/target/release/waiting-game" ]; then
-        "./src-tauri/target/release/waiting-game" &
     else
-        echo "💡 Game process not found in common paths. Please launch it manually once to activate the tray icon."
+        echo "💡 Game binary not found. Run 'pnpm tauri dev' to start."
     fi
 else
-    echo "🔄 Waiting Game is already running. Shortcuts are now active."
+    echo "🔄 Waiting Game is already running."
 fi
 
 echo "✨ All set! Press Super+Shift+G to summon the Dino."

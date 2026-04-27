@@ -1,6 +1,5 @@
 use tauri::{Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
-use std::time::Duration;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -8,21 +7,10 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
         .setup(move |app| {
-            let handle = app.handle().clone();
-            
-            // App stays hidden on startup; setup is handled silently
-            tauri::async_runtime::spawn(async move {
-                tokio::time::sleep(Duration::from_millis(1000)).await;
-                if let Some(window) = handle.get_webview_window("main") {
-                    // Set initial state without showing
-                    let _ = window.set_always_on_top(true);
-                    println!("🚀 Waiting Game initialized in background.");
-                }
-            });
-
+            // Enable autostart
             let _ = app.handle().autolaunch().enable();
 
-            // Tray Menu
+            // Create Tray Menu
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&quit_i])?;
 
