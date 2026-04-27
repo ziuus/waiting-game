@@ -51,4 +51,22 @@ if ! grep -q "exec-once = waiting-game" "$HYPR_PREFS" 2>/dev/null; then
 fi
 
 echo "🚀 Installation Complete! The game will now be perfectly transparent and borderless."
-echo "💡 Restart Hyprland or run the app once to activate."
+
+# 6. Immediate Launch
+if ! pgrep -x "waiting-game" > /dev/null; then
+    echo "🎮 Starting Waiting Game in background..."
+    # Try to launch from PATH, then common AppImage locations
+    if command -v waiting-game >/dev/null 2>&1; then
+        waiting-game &
+    elif [ -f "$HOME/AppImages/waitinggame.appimage" ]; then
+        "$HOME/AppImages/waitinggame.appimage" &
+    elif [ -f "./src-tauri/target/release/waiting-game" ]; then
+        "./src-tauri/target/release/waiting-game" &
+    else
+        echo "💡 Game process not found in common paths. Please launch it manually once to activate the tray icon."
+    fi
+else
+    echo "🔄 Waiting Game is already running. Shortcuts are now active."
+fi
+
+echo "✨ All set! Press Super+Shift+G to summon the Dino."
