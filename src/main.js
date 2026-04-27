@@ -1,9 +1,16 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+let scale = 1;
+
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    scale = window.devicePixelRatio || 1;
+    // Physical pixels
+    canvas.width = window.innerWidth * scale;
+    canvas.height = window.innerHeight * scale;
+    // Logical CSS pixels
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
 }
 
 resizeCanvas();
@@ -56,9 +63,15 @@ function gameLoop() {
         cancelAnimationFrame(animationId);
     }
     
-    // Super Clear: Reset transform and clear everything
+    // WebKitGTK Safe Clear for Transparent Windows
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'copy';
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'source-over';
+    
+    // Apply Retina Scale for drawing
+    ctx.scale(scale, scale);
     
     if (currentGame) {
         currentGame.update();
@@ -77,10 +90,10 @@ function drawGameOver() {
     ctx.fillStyle = config.theme.obstacleColor;
     ctx.font = 'bold 32px Space Grotesk, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('TERMINATED', canvas.width / 2, canvas.height / 2);
+    ctx.fillText('TERMINATED', window.innerWidth / 2, window.innerHeight / 2);
     ctx.font = '12px Space Grotesk, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.fillText('SPACE TO INITIALIZE', canvas.width / 2, canvas.height / 2 + 40);
+    ctx.fillText('SPACE TO INITIALIZE', window.innerWidth / 2, window.innerHeight / 2 + 40);
 }
 
 window.addEventListener('keydown', (e) => {
@@ -94,3 +107,4 @@ window.addEventListener('keydown', (e) => {
 });
 
 init();
+

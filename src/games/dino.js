@@ -13,9 +13,9 @@ export default class DinoGame {
         this.isGameOver = false;
         this.obstacles = [];
         this.dino = {
-            targetX: this.canvas.width * 0.25,
+            targetX: window.innerWidth * 0.25,
             x: -50,
-            y: this.canvas.height - this.GROUND_OFFSET - 60,
+            y: window.innerHeight - this.GROUND_OFFSET - 60,
             width: 30,
             height: 60,
             dy: 0,
@@ -46,8 +46,8 @@ export default class DinoGame {
             this.dino.y += this.dino.dy;
         }
 
-        if (this.dino.y + this.dino.height > this.canvas.height - this.GROUND_OFFSET) {
-            this.dino.y = this.canvas.height - this.dino.height - this.GROUND_OFFSET;
+        if (this.dino.y + this.dino.height > window.innerHeight - this.GROUND_OFFSET) {
+            this.dino.y = window.innerHeight - this.dino.height - this.GROUND_OFFSET;
             this.dino.dy = 0;
             this.dino.grounded = true;
         }
@@ -73,7 +73,7 @@ export default class DinoGame {
             });
 
             if (Math.random() < 0.015) {
-                if (this.obstacles.length === 0 || this.obstacles[this.obstacles.length - 1].x < this.canvas.width - 400) {
+                if (this.obstacles.length === 0 || this.obstacles[this.obstacles.length - 1].x < window.innerWidth - 400) {
                     this.createObstacle();
                 }
             }
@@ -83,8 +83,8 @@ export default class DinoGame {
     createObstacle() {
         const height = Math.random() * 50 + 30;
         this.obstacles.push({
-            x: this.canvas.width,
-            y: this.canvas.height - height - this.GROUND_OFFSET,
+            x: window.innerWidth,
+            y: window.innerHeight - height - this.GROUND_OFFSET,
             width: 30,
             height: height,
             color: this.config.theme.obstacleColor

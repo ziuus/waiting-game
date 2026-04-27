@@ -12,7 +12,7 @@ export default class FlappyGame {
         this.pipes = [];
         this.bird = {
             x: 150,
-            y: this.canvas.height / 2,
+            y: window.innerHeight / 2,
             width: 30,
             height: 45,
             dy: 0,
@@ -30,7 +30,7 @@ export default class FlappyGame {
         this.bird.y += this.bird.dy;
 
         // Collision with floor/ceiling
-        if (this.bird.y + this.bird.height > this.canvas.height || this.bird.y < 0) {
+        if (this.bird.y + this.bird.height > window.innerHeight || this.bird.y < 0) {
             this.isGameOver = true;
         }
 
@@ -38,11 +38,11 @@ export default class FlappyGame {
         if (this.frame % 90 === 0) {
             const gap = 160;
             const minHeight = 60;
-            const height = Math.random() * (this.canvas.height - gap - 2 * minHeight) + minHeight;
+            const height = Math.random() * (window.innerHeight - gap - 2 * minHeight) + minHeight;
             this.pipes.push({
-                x: this.canvas.width,
+                x: window.innerWidth,
                 top: height,
-                bottom: this.canvas.height - height - gap,
+                bottom: window.innerHeight - height - gap,
                 width: 60,
                 passed: false
             });
@@ -54,7 +54,7 @@ export default class FlappyGame {
             // Collision
             if (this.bird.x < pipe.x + pipe.width &&
                 this.bird.x + this.bird.width > pipe.x &&
-                (this.bird.y < pipe.top || this.bird.y + this.bird.height > this.canvas.height - pipe.bottom)) {
+                (this.bird.y < pipe.top || this.bird.y + this.bird.height > window.innerHeight - pipe.bottom)) {
                 this.isGameOver = true;
             }
 
@@ -86,7 +86,7 @@ export default class FlappyGame {
             // Top Pipe
             this.ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
             // Bottom Pipe
-            this.ctx.fillRect(pipe.x, this.canvas.height - pipe.bottom, pipe.width, pipe.bottom);
+            this.ctx.fillRect(pipe.x, window.innerHeight - pipe.bottom, pipe.width, pipe.bottom);
         });
         this.ctx.shadowBlur = 0;
     }
