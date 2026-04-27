@@ -10,21 +10,19 @@ pub fn run() {
         .setup(move |app| {
             let handle = app.handle().clone();
             
-            // Fix GTK Assertion & Initial State
+            // App stays hidden on startup; setup is handled silently
             tauri::async_runtime::spawn(async move {
-                tokio::time::sleep(Duration::from_millis(1500)).await;
-                
+                tokio::time::sleep(Duration::from_millis(1000)).await;
                 if let Some(window) = handle.get_webview_window("main") {
+                    // Set initial state without showing
                     let _ = window.set_always_on_top(true);
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                    println!("🚀 Waiting Game is now active and managed by Hyprland.");
+                    println!("🚀 Waiting Game initialized in background.");
                 }
             });
 
             let _ = app.handle().autolaunch().enable();
 
-            // Tray Menu (Keep for manual control)
+            // Tray Menu
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&quit_i])?;
 
