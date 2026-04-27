@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=Game;
+Comment=Cinematic kinetic overlay game for developers.
+Exec=waiting-game
+Icon=waiting-game
+Name=waiting-game
+Terminal=false
+Type=Application
+X-AppImage-Version=0.3.3
