@@ -1,5 +1,8 @@
 # 🦖 Waiting Game
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
 <p align="center">
   <img src="exports/demo_workflow.gif" width="100%" alt="Waiting Game Workflow" />
 </p>
