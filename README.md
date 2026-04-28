@@ -39,5 +39,9 @@ curl -sSL https://raw.githubusercontent.com/ziuus/waiting-game/master/install.sh
 - **Frontend**: Vanilla JS / Canvas
 - **Platform**: Linux (Optimized for Wayland/Hyprland)
 
+## 🤝 Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
 ---
 *Built for the Autonomous Desktop Era.*
