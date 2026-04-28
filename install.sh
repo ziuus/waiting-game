@@ -126,7 +126,26 @@ fi
 
 echo "🚀 Installation Complete!"
 
-# --- 2. Immediate Launch ---
+# --- 2. System Path Integration ---
+BIN_DEST="$HOME/.local/bin"
+mkdir -p "$BIN_DEST"
+SOURCE_BIN="./src-tauri/target/release/waiting-game"
+
+if [ -f "$SOURCE_BIN" ]; then
+    cp "$SOURCE_BIN" "$BIN_DEST/waiting-game"
+    chmod +x "$BIN_DEST/waiting-game"
+    echo "✅ Binary installed to $BIN_DEST/waiting-game"
+    
+    # Check if ~/.local/bin is in PATH
+    if [[ ":$PATH:" != *":$BIN_DEST:"* ]]; then
+        echo "⚠️  Note: $BIN_DEST is not in your PATH. You might need to add it to your .bashrc or .zshrc:"
+        echo "   export PATH=\$PATH:\$HOME/.local/bin"
+    fi
+else
+    echo "⚠️  Could not find release binary for installation to PATH."
+fi
+
+# --- 3. Immediate Launch ---
 if ! pgrep -x "waiting-game" > /dev/null; then
     echo "🎮 Starting Waiting Game in background..."
     if [ -f "./src-tauri/target/release/waiting-game" ]; then
