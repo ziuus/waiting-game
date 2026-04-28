@@ -18,19 +18,20 @@ if [ "$USE_DEFAULTS" = true ]; then
     SCORE_BOOL="true"
     PIN_RULE=""
 else
+    # We use /dev/tty for input to allow curl | bash interaction
     # --- Default Game ---
     printf "🎮 Default Game [dino/flappy] (default: dino): "
-    read -r CONF_GAME
+    read -r CONF_GAME < /dev/tty
     CONF_GAME=${CONF_GAME:-dino}
 
     # --- Initial Speed ---
     printf "⚡ Initial Speed (default: 8): "
-    read -r CONF_SPEED
+    read -r CONF_SPEED < /dev/tty
     CONF_SPEED=${CONF_SPEED:-8}
 
     # --- Scoreboard ---
     printf "📊 Show Scoreboard? [Y/n] (default: Y): "
-    read -r CONF_SCORE
+    read -r CONF_SCORE < /dev/tty
     CONF_SCORE=${CONF_SCORE:-Y}
     case "$CONF_SCORE" in
         [Nn]*) SCORE_BOOL="false" ;;
@@ -39,7 +40,7 @@ else
 
     # --- Sticky Mode ---
     printf "📌 Enable Sticky Mode by default? [y/N] (default: N): "
-    read -r CONF_STICKY
+    read -r CONF_STICKY < /dev/tty
     CONF_STICKY=${CONF_STICKY:-N}
     case "$CONF_STICKY" in
         [Yy]*) PIN_RULE="    pin = on" ;;
