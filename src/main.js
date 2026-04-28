@@ -112,6 +112,7 @@ function drawGameOver() {
     if (!gameOverShown) {
         gameOverShown = true;
         const gameOverLayer = document.getElementById('game-over-layer');
+        gameOverLayer.classList.add('terminated');
         gameOverLayer.style.display = 'flex';
         gameOverLayer.style.pointerEvents = 'auto';
         gameOverLayer.querySelector('.go-title').textContent = 'TERMINATED';
@@ -137,7 +138,10 @@ function resetGameOver() {
             opacity: 0, 
             duration: 0.3, 
             onComplete: () => {
-                if (!gameOverShown && !pausedShown) gameOverLayer.style.display = 'none';
+                if (!gameOverShown && !pausedShown) {
+                    gameOverLayer.style.display = 'none';
+                    gameOverLayer.classList.remove('terminated');
+                }
             }
         });
     }
@@ -149,9 +153,16 @@ function drawPaused() {
     if (!pausedShown && !gameOverShown) {
         pausedShown = true;
         const gameOverLayer = document.getElementById('game-over-layer');
+        gameOverLayer.classList.remove('terminated'); // Ensure no blur when just paused
         gameOverLayer.style.display = 'flex';
         gameOverLayer.querySelector('.go-title').textContent = 'PAUSED';
-        gameOverLayer.querySelector('.go-subtitle').textContent = 'CLICK OR FOCUS TO RESUME';
+        gameOverLayer.querySelector('.go-subtitle').innerHTML = 'CLICK TO RESUME<br><br><button id="hide-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 14px;">HIDE [H]</button>';
+        
+        document.getElementById('hide-btn').onclick = (e) => {
+            e.stopPropagation();
+            window.__TAURI__.window.getCurrent().hide();
+        };
+
         gsap.to(gameOverLayer, { opacity: 1, duration: 0.3 });
     }
 }
@@ -165,7 +176,9 @@ function resetPaused() {
                 opacity: 0, 
                 duration: 0.3, 
                 onComplete: () => {
-                    if (!gameOverShown && !pausedShown) gameOverLayer.style.display = 'none';
+                    if (!gameOverShown && !pausedShown) {
+                        gameOverLayer.style.display = 'none';
+                    }
                 }
             });
         }
