@@ -3,6 +3,25 @@ set -e
 
 echo "⚙️ Waiting Game - Initial Configuration"
 
+# Check if we are in the project root; if not, try to find it
+if [ ! -f "package.json" ] || [ ! -d "src-tauri" ]; then
+    # If the user is running this from their home dir after a curl | bash,
+    # and we assume they've cloned it to ~/Projects/waiting-game
+    PROJECT_DIR="$HOME/Projects/waiting-game"
+    if [ -d "$PROJECT_DIR" ]; then
+        cd "$PROJECT_DIR"
+    else
+        # If we can't find it, we might be in the middle of a first-time setup
+        # but for now, we expect the user to have the source.
+        # However, for a 'curl | bash' installer, we should probably clone if missing.
+        echo "📂 Searching for project root..."
+        # Just check current dir for the expected subfolder
+        if [ -d "waiting-game" ]; then
+            cd "waiting-game"
+        fi
+    fi
+fi
+
 USE_DEFAULTS=false
 for arg in "$@"; do
     if [ "$arg" = "--default" ] || [ "$arg" = "-y" ] || [ "$arg" = "-d" ]; then
@@ -50,18 +69,23 @@ fi
 
 echo "💾 Saving configuration..."
 if command -v jq >/dev/null; then
+    # Ensure src directory exists before writing
+    mkdir -p src
     jq ".activeGame = \"$CONF_GAME\" | .difficulty.initialSpeed = $CONF_SPEED | .showScore = $SCORE_BOOL" src/config.json > src/config.tmp.json && mv src/config.tmp.json src/config.json
 else
     echo "⚠️ jq not installed. Default config.json will be used."
 fi
 
 echo "🔨 Building production binary with new configuration (this may take a minute)..."
-pnpm tauri build > /dev/null 2>&1
+# Check if pnpm is installed, otherwise use npm
+BUILD_CMD="pnpm tauri build"
+if ! command -v pnpm >/dev/null; then
+    BUILD_CMD="npm run tauri build"
+fi
+
+$BUILD_CMD > /dev/null 2>&1 || echo "⚠️ Build failed. You might need to run 'pnpm install' first."
 
 echo "🦖 Initializing Waiting Game - Universal Installation Protocol..."
-
-# Native capabilities (Autostart & Global Shortcuts) are now handled entirely by the Tauri backend!
-# This script only needs to configure specific compositor rules (like Hyprland window rules) if necessary.
 
 # --- 1. Check for Hyprland ---
 if [ -d "$HOME/.config/hypr" ]; then
