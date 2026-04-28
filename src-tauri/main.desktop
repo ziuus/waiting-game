@@ -1,9 +1,10 @@
 [Desktop Entry]
-Categories=Game;
-Comment=Cinematic kinetic overlay game for developers.
+Name=Waiting Game
+Comment=Kinetic Overlay Intelligence
 Exec=waiting-game
 Icon=waiting-game
-Name=waiting-game
 Terminal=false
 Type=Application
-X-AppImage-Version=0.3.6
+Categories=Game;Utility;
+StartupNotify=false
+X-GNOME-Autostart-enabled=true

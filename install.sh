@@ -141,6 +141,16 @@ if [ -f "$SOURCE_BIN" ]; then
         echo "⚠️  Note: $BIN_DEST is not in your PATH. You might need to add it to your .bashrc or .zshrc:"
         echo "   export PATH=\$PATH:\$HOME/.local/bin"
     fi
+
+    # --- 2b. Desktop Integration ---
+    echo "🖥️  Integrating with desktop environment..."
+    DESKTOP_DIR="$HOME/.local/share/applications"
+    ICON_DIR="$HOME/.local/share/icons"
+    mkdir -p "$DESKTOP_DIR" "$ICON_DIR"
+    
+    cp "./src-tauri/main.desktop" "$DESKTOP_DIR/waiting-game.desktop"
+    cp "./src-tauri/icons/icon.png" "$ICON_DIR/waiting-game.png"
+    echo "✅ Desktop entry and icon installed."
 else
     echo "⚠️  Could not find release binary for installation to PATH."
 fi
