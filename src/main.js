@@ -68,6 +68,7 @@ async function init() {
 }
 
 let isRunning = true;
+let isPaused = false;
 
 function gameLoop() {
     if (animationId) {
@@ -84,7 +85,9 @@ function gameLoop() {
     ctx.scale(scale, scale);
     
     if (currentGame) {
-        currentGame.update();
+        if (!isPaused) {
+            currentGame.update();
+        }
         currentGame.draw();
         updateScoreDisplay();
 
@@ -92,6 +95,12 @@ function gameLoop() {
             drawGameOver();
             return; // Halt loop completely to save resources
         }
+    }
+    
+    if (isPaused) {
+        drawPaused();
+    } else {
+        resetPaused();
     }
     
     animationId = requestAnimationFrame(gameLoop);
@@ -104,6 +113,8 @@ function drawGameOver() {
         gameOverShown = true;
         const gameOverLayer = document.getElementById('game-over-layer');
         gameOverLayer.style.pointerEvents = 'auto';
+        gameOverLayer.querySelector('.go-title').textContent = 'TERMINATED';
+        gameOverLayer.querySelector('.go-subtitle').textContent = 'SPACE TO INITIALIZE';
         gsap.to(gameOverLayer, { opacity: 1, duration: 0.8, ease: "power2.out" });
         gsap.fromTo('.go-title', 
             { y: -50, scale: 0.8, opacity: 0 }, 
@@ -125,6 +136,28 @@ function resetGameOver() {
     }
 }
 
+let pausedShown = false;
+
+function drawPaused() {
+    if (!pausedShown && !gameOverShown) {
+        pausedShown = true;
+        const gameOverLayer = document.getElementById('game-over-layer');
+        gameOverLayer.querySelector('.go-title').textContent = 'PAUSED';
+        gameOverLayer.querySelector('.go-subtitle').textContent = 'CLICK OR FOCUS TO RESUME';
+        gsap.to(gameOverLayer, { opacity: 1, duration: 0.3 });
+    }
+}
+
+function resetPaused() {
+    if (pausedShown) {
+        pausedShown = false;
+        if (!gameOverShown) {
+            const gameOverLayer = document.getElementById('game-over-layer');
+            gsap.to(gameOverLayer, { opacity: 0, duration: 0.3 });
+        }
+    }
+}
+
 window.addEventListener('keydown', (e) => {
     if (currentGame) {
         const wasGameOver = currentGame.isGameOver;
@@ -142,7 +175,7 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-// Resource Optimizations: Halt rendering entirely when hidden or unfocused
+// Resource Optimizations: Halt rendering entirely when hidden
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         isRunning = false;
@@ -153,12 +186,14 @@ document.addEventListener('visibilitychange', () => {
 });
 
 window.addEventListener('blur', () => {
-    isRunning = false;
+    isPaused = true;
 });
 
 window.addEventListener('focus', () => {
-    isRunning = true;
-    if (currentGame && !currentGame.isGameOver) gameLoop();
+    isPaused = false;
+    if (isRunning && currentGame && !currentGame.isGameOver) {
+        gameLoop();
+    }
 });
 
 init();
