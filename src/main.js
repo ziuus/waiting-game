@@ -112,6 +112,7 @@ function drawGameOver() {
     if (!gameOverShown) {
         gameOverShown = true;
         const gameOverLayer = document.getElementById('game-over-layer');
+        gameOverLayer.style.display = 'flex';
         gameOverLayer.style.pointerEvents = 'auto';
         gameOverLayer.querySelector('.go-title').textContent = 'TERMINATED';
         gameOverLayer.querySelector('.go-subtitle').textContent = 'SPACE TO INITIALIZE';
@@ -132,7 +133,13 @@ function resetGameOver() {
         gameOverShown = false;
         const gameOverLayer = document.getElementById('game-over-layer');
         gameOverLayer.style.pointerEvents = 'none';
-        gsap.to(gameOverLayer, { opacity: 0, duration: 0.3 });
+        gsap.to(gameOverLayer, { 
+            opacity: 0, 
+            duration: 0.3, 
+            onComplete: () => {
+                if (!gameOverShown && !pausedShown) gameOverLayer.style.display = 'none';
+            }
+        });
     }
 }
 
@@ -142,6 +149,7 @@ function drawPaused() {
     if (!pausedShown && !gameOverShown) {
         pausedShown = true;
         const gameOverLayer = document.getElementById('game-over-layer');
+        gameOverLayer.style.display = 'flex';
         gameOverLayer.querySelector('.go-title').textContent = 'PAUSED';
         gameOverLayer.querySelector('.go-subtitle').textContent = 'CLICK OR FOCUS TO RESUME';
         gsap.to(gameOverLayer, { opacity: 1, duration: 0.3 });
@@ -153,7 +161,13 @@ function resetPaused() {
         pausedShown = false;
         if (!gameOverShown) {
             const gameOverLayer = document.getElementById('game-over-layer');
-            gsap.to(gameOverLayer, { opacity: 0, duration: 0.3 });
+            gsap.to(gameOverLayer, { 
+                opacity: 0, 
+                duration: 0.3, 
+                onComplete: () => {
+                    if (!gameOverShown && !pausedShown) gameOverLayer.style.display = 'none';
+                }
+            });
         }
     }
 }

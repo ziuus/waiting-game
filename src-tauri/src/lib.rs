@@ -10,8 +10,10 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().with_handler(|app, shortcut, event| {
             if event.state() == ShortcutState::Pressed {
                 if shortcut.matches(Modifiers::SUPER | Modifiers::SHIFT, Code::KeyG) {
+                    println!("Shortcut triggered: SUPER+SHIFT+G");
                     if let Some(window) = app.get_webview_window("main") {
-                        if window.is_visible().unwrap_or(false) {
+                        let is_visible = window.is_visible().unwrap_or(false);
+                        if is_visible {
                             let _ = window.hide();
                         } else {
                             let _ = window.show();
@@ -19,9 +21,10 @@ pub fn run() {
                         }
                     }
                 } else if shortcut.matches(Modifiers::SUPER | Modifiers::SHIFT, Code::KeyP) {
+                    println!("Shortcut triggered: SUPER+SHIFT+P");
                     if let Some(window) = app.get_webview_window("main") {
-                        // Toggle always on top (sticky mode)
-                        let _ = window.set_always_on_top(true);
+                        let is_top = window.is_always_on_top().unwrap_or(false);
+                        let _ = window.set_always_on_top(!is_top);
                     }
                 }
             }
@@ -30,11 +33,16 @@ pub fn run() {
             // Enable autostart
             let _ = app.handle().autolaunch().enable();
 
-            // Register shortcuts
+            // Register shortcuts explicitly with error handling check
             let toggle_shortcut = tauri_plugin_global_shortcut::Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
             let sticky_shortcut = tauri_plugin_global_shortcut::Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
-            let _ = app.global_shortcut().register(toggle_shortcut);
-            let _ = app.global_shortcut().register(sticky_shortcut);
+            
+            if let Err(e) = app.global_shortcut().register(toggle_shortcut) {
+                println!("Failed to register toggle shortcut: {}", e);
+            }
+            if let Err(e) = app.global_shortcut().register(sticky_shortcut) {
+                println!("Failed to register sticky shortcut: {}", e);
+            }
 
             // Create Tray Menu
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
