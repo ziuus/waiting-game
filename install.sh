@@ -131,7 +131,9 @@ case "\$1" in
             echo "🔄 Waiting Game is already running."
         else
             echo "🎮 Starting Waiting Game in background..."
-            waiting-game-bin &
+            # nohup and redirection to /dev/null ensures it detaches and stays quiet
+            nohup waiting-game-bin >/dev/null 2>&1 &
+            disown
         fi
         ;;
     stop)
@@ -148,7 +150,8 @@ case "\$1" in
                 echo "🔄 Waiting Game is already running."
             else
                 echo "🎮 Starting Waiting Game..."
-                waiting-game-bin &
+                nohup waiting-game-bin >/dev/null 2>&1 &
+                disown
             fi
         else
             echo "Usage: waiting-game {run|stop}"
