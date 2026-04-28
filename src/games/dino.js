@@ -3,7 +3,7 @@ export default class DinoGame {
         this.canvas = canvas;
         this.ctx = ctx;
         this.config = config;
-        this.GROUND_OFFSET = 20;
+        this.GROUND_OFFSET = 30;
         this.reset();
     }
 

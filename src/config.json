@@ -1,4 +1,5 @@
 {
+  "showScore": true,
   "activeGame": "dino",
   "theme": {
     "dinoColor": "#68BA7F",
@@ -6,7 +7,7 @@
     "scoreColor": "rgba(104, 186, 127, 0.8)"
   },
   "difficulty": {
-    "initialSpeed": 8,
+    "initialSpeed": 10,
     "gravity": 0.7,
     "jumpForce": 15
   },

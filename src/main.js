@@ -5,10 +5,8 @@ let scale = 1;
 
 function resizeCanvas() {
     scale = window.devicePixelRatio || 1;
-    // Physical pixels
     canvas.width = window.innerWidth * scale;
     canvas.height = window.innerHeight * scale;
-    // Logical CSS pixels
     canvas.style.width = window.innerWidth + 'px';
     canvas.style.height = window.innerHeight + 'px';
 }
@@ -27,7 +25,18 @@ const uiLayer = document.getElementById('ui-layer');
 
 function updateScoreDisplay() {
     if (currentGame) {
-        scoreElement.textContent = currentGame.score.toString().padStart(5, '0');
+        const newScoreText = currentGame.score.toString().padStart(5, '0');
+        if (scoreElement.textContent !== newScoreText) {
+            scoreElement.textContent = newScoreText;
+            // Subtle pop animation for score
+            if (currentGame.score % 100 === 0 && currentGame.score > 0) {
+                gsap.fromTo(scoreElement, 
+                    { scale: 1.2, color: '#fff', textShadow: '0 0 20px #fff' }, 
+                    { scale: 1, color: '#68BA7F', textShadow: '0 0 10px rgba(104, 186, 127, 0.5)', duration: 0.5, ease: "back.out(1.7)" }
+                );
+            }
+        }
+        
         if (currentGame.score > highScore) {
             highScore = currentGame.score;
             localStorage.setItem(`${config.activeGame}-high-score`, highScore);
@@ -41,16 +50,16 @@ async function init() {
         const response = await fetch('config.json');
         config = await response.json();
         
-        // Dynamic Import of the active game plugin
         const GameModule = await import(`./games/${config.activeGame}.js`);
         const GameClass = GameModule.default;
         
-        // Load high score for this specific game
         highScore = localStorage.getItem(`${config.activeGame}-high-score`) || 0;
         
-        // Initialize Game
         currentGame = new GameClass(canvas, ctx, config);
         uiLayer.style.color = config.theme.scoreColor;
+        if (config.showScore === false) {
+            uiLayer.style.display = 'none';
+        }
         
         gameLoop();
     } catch (e) {
@@ -63,14 +72,11 @@ function gameLoop() {
         cancelAnimationFrame(animationId);
     }
     
-    // WebKitGTK Safe Clear for Transparent Windows
+    // Stable Clear
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.globalCompositeOperation = 'copy';
-    ctx.fillStyle = 'rgba(0,0,0,0)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Apply Retina Scale for drawing
+    // Apply DPI Scale
     ctx.scale(scale, scale);
     
     if (currentGame) {
@@ -86,18 +92,39 @@ function gameLoop() {
     animationId = requestAnimationFrame(gameLoop);
 }
 
+let gameOverShown = false;
+
 function drawGameOver() {
-    ctx.fillStyle = config.theme.obstacleColor;
-    ctx.font = 'bold 32px Space Grotesk, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('TERMINATED', window.innerWidth / 2, window.innerHeight / 2);
-    ctx.font = '12px Space Grotesk, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.fillText('SPACE TO INITIALIZE', window.innerWidth / 2, window.innerHeight / 2 + 40);
+    if (!gameOverShown) {
+        gameOverShown = true;
+        const gameOverLayer = document.getElementById('game-over-layer');
+        gameOverLayer.style.pointerEvents = 'auto';
+        gsap.to(gameOverLayer, { opacity: 1, duration: 0.8, ease: "power2.out" });
+        gsap.fromTo('.go-title', 
+            { y: -50, scale: 0.8, opacity: 0 }, 
+            { y: 0, scale: 1, opacity: 1, duration: 0.8, ease: "elastic.out(1, 0.5)", delay: 0.2 }
+        );
+        gsap.fromTo('.go-subtitle', 
+            { y: 20, opacity: 0 }, 
+            { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.5 }
+        );
+    }
+}
+
+function resetGameOver() {
+    if (gameOverShown) {
+        gameOverShown = false;
+        const gameOverLayer = document.getElementById('game-over-layer');
+        gameOverLayer.style.pointerEvents = 'none';
+        gsap.to(gameOverLayer, { opacity: 0, duration: 0.3 });
+    }
 }
 
 window.addEventListener('keydown', (e) => {
     if (currentGame) {
+        if (currentGame.isGameOver && e.code === 'Space') {
+            resetGameOver();
+        }
         currentGame.onInput(e.code);
     }
     
@@ -107,4 +134,3 @@ window.addEventListener('keydown', (e) => {
 });
 
 init();
-

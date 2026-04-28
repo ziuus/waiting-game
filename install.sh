@@ -1,71 +1,93 @@
 #!/bin/bash
 
-# Waiting Game - Ultimate Installer for Hyprland
-# This script configures transparency, no-blur rules, and native keybindings.
+echo "⚙️ Waiting Game - Initial Configuration"
+read -p "🎮 Default Game [dino/flappy] (default: dino): " CONF_GAME
+CONF_GAME=${CONF_GAME:-dino}
 
-echo "🦖 Initializing Waiting Game - System Integration Protocol..."
+read -p "⚡ Initial Speed (default: 8): " CONF_SPEED
+CONF_SPEED=${CONF_SPEED:-8}
 
-# 1. Paths
-HYPR_PREFS="$HOME/.config/hypr/userprefs.conf"
-HYPR_KEYS="$HOME/.config/hypr/keybindings.conf"
+read -p "📊 Show Scoreboard? [Y/n] (default: Y): " CONF_SCORE
+CONF_SCORE=${CONF_SCORE:-Y}
+if [[ "$CONF_SCORE" =~ ^[Nn] ]]; then SCORE_BOOL="false"; else SCORE_BOOL="true"; fi
 
-# 2. Window Rules (Modern windowrulev2 syntax)
-RULES="
-# Waiting Game Overlay Rules
-windowrulev2 = float, class:^(waiting-game)$
-windowrulev2 = workspace special:waiting-game silent, class:^(waiting-game)$
-windowrulev2 = size 100% 100%, class:^(waiting-game)$
-windowrulev2 = move 0 0, class:^(waiting-game)$
-windowrulev2 = noblur, class:^(waiting-game)$
-windowrulev2 = noborder, class:^(waiting-game)$
-windowrulev2 = noshadow, class:^(waiting-game)$
-windowrulev2 = nodim, class:^(waiting-game)$
-windowrulev2 = opacity 1.0 override 1.0 override, class:^(waiting-game)$
-windowrulev2 = pin, class:^(waiting-game)$
-windowrulev2 = keepaspectratio, class:^(waiting-game)$
-"
-
-# 3. Keybindings
-BINDINGS="
-# Waiting Game Smart Toggles
-bindd = \$mainMod SHIFT, G, toggle waiting game, exec, ~/.config/hypr/scripts/toggle-waiting-game.sh
-bindd = \$mainMod SHIFT, P, toggle pinning waiting game, exec, ~/.config/hypr/scripts/toggle-pin-waiting-game.sh
-"
-
-# 4. Apply Configuration
-echo "🛠️ Applying System Rules..."
-# Clean up old rules if they exist to avoid duplicates
-sed -i '/# Waiting Game Overlay Rules/,+12d' "$HYPR_PREFS" 2>/dev/null
-
-echo "$RULES" >> "$HYPR_PREFS"
-echo "✅ Applied modern window rules to $HYPR_PREFS"
-
-if ! grep -q "toggle waiting game" "$HYPR_KEYS" 2>/dev/null; then
-    echo "$BINDINGS" >> "$HYPR_KEYS"
-    echo "✅ Added keybindings to $HYPR_KEYS"
+read -p "📌 Enable Sticky Mode by default? [y/N] (default: N): " CONF_STICKY
+CONF_STICKY=${CONF_STICKY:-N}
+if [[ "$CONF_STICKY" =~ ^[Yy] ]]; then 
+    PIN_RULE="    pin = on"
+else 
+    PIN_RULE=""
 fi
 
-# 5. Enable Autostart
-if ! grep -q "exec-once = waiting-game" "$HYPR_PREFS" 2>/dev/null; then
-    echo "exec-once = waiting-game" >> "$HYPR_PREFS"
-    echo "✅ Enabled autostart in $HYPR_PREFS"
+echo "💾 Saving configuration..."
+if command -v jq >/dev/null; then
+    jq ".activeGame = \"$CONF_GAME\" | .difficulty.initialSpeed = $CONF_SPEED | .showScore = $SCORE_BOOL" src/config.json > src/config.tmp.json && mv src/config.tmp.json src/config.json
+else
+    echo "⚠️ jq not installed. Default config.json will be used."
+fi
+
+echo "🔨 Building production binary with new configuration (this may take a minute)..."
+pnpm tauri build > /dev/null 2>&1
+
+echo "🦖 Initializing Waiting Game - Universal Installation Protocol..."
+
+# Native capabilities (Autostart & Global Shortcuts) are now handled entirely by the Tauri backend!
+# This script only needs to configure specific compositor rules (like Hyprland window rules) if necessary.
+
+# --- 1. Check for Hyprland ---
+if [ -d "$HOME/.config/hypr" ]; then
+    echo "🌊 Hyprland detected. Applying compositor rules for perfect transparency..."
+    
+    # Try to find the right config file to append rules to
+    HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
+    if [ -f "$HOME/.config/hypr/userprefs.conf" ]; then
+        HYPR_CONF="$HOME/.config/hypr/userprefs.conf"
+    fi
+
+    RULES="
+# Waiting Game Overlay Rules
+windowrule {
+    name = waiting-game-overlay
+    match:class = ^(waiting-game)$
+    float = on
+    workspace = special:waiting-game silent
+    size = 100% 100%
+    move = 0 0
+    no_blur = on
+    border_size = 0
+    no_shadow = on
+    no_dim = on
+$PIN_RULE
+}
+"
+    
+    # Clean up old rules
+    sed -i '/# Waiting Game Overlay Rules/,+19d' "$HYPR_CONF" 2>/dev/null
+
+    echo "$RULES" >> "$HYPR_CONF"
+    echo "✅ Applied Hyprland window rules to $HYPR_CONF"
+else
+    echo "🖥️ Standard Desktop Environment detected (GNOME/KDE/XFCE)."
+    echo "✅ No special compositor rules needed. Transparency will be handled natively."
 fi
 
 echo "🚀 Installation Complete!"
 
-# 6. Immediate Launch (Only if not running)
+# --- 2. Immediate Launch ---
 if ! pgrep -x "waiting-game" > /dev/null; then
     echo "🎮 Starting Waiting Game in background..."
-    # Try common paths
-    if [ -f "./src-tauri/target/debug/waiting-game" ]; then
+    if [ -f "./src-tauri/target/release/waiting-game" ]; then
+        ./src-tauri/target/release/waiting-game &
+    elif [ -f "./src-tauri/target/debug/waiting-game" ]; then
         ./src-tauri/target/debug/waiting-game &
     elif command -v waiting-game >/dev/null 2>&1; then
         waiting-game &
     else
-        echo "💡 Game binary not found. Run 'pnpm tauri dev' to start."
+        echo "💡 Game binary not found. Please build the project or run 'pnpm tauri dev'."
     fi
 else
     echo "🔄 Waiting Game is already running."
 fi
 
-echo "✨ All set! Press Super+Shift+G to summon the Dino."
+echo "✨ All set! The app will automatically register to autostart."
+echo "Press Super+Shift+G anywhere to summon the Dino."

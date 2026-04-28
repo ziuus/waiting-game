@@ -14,9 +14,10 @@
         "title": "waiting-game",
         "width": 1920,
         "height": 1080,
-        "fullscreen": true,
+        "fullscreen": false,
         "decorations": false,
         "transparent": true,
+        "backgroundColor": [0, 0, 0, 0],
         "alwaysOnTop": false,
         "resizable": false,
         "skipTaskbar": true,
@@ -35,7 +36,7 @@
         "alwaysOnTop": true
       }
     ],    "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' ipc:;"
     }
   },
   "bundle": {

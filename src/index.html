@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Waiting Game</title>
+    <!-- Modern Typography: Space Grotesk & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
     <style>
       body, html {
         margin: 0;
@@ -25,34 +29,101 @@
       canvas {
         background: transparent !important;
         display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
       }
       #ui-layer {
         position: absolute;
-        top: 20px;
-        right: 40px;
-        color: rgba(104, 186, 127, 0.8);
-        font-family: 'Space Grotesk', sans-serif;
-        text-align: right;
+        top: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         pointer-events: none;
+      }
+      .score-board {
+        background: rgba(8, 18, 18, 0.4);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 16px 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        color: #68BA7F;
+        font-family: 'Space Grotesk', sans-serif;
+        text-align: center;
         text-transform: uppercase;
         letter-spacing: 2px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
       }
       .score-value {
-        font-size: 24px;
-        font-weight: bold;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 32px;
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(104, 186, 127, 0.5);
       }
       .high-score {
-        font-size: 12px;
-        opacity: 0.6;
-        margin-top: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+        opacity: 0.7;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        color: #A0A0A0;
+      }
+      .high-score span {
+        color: #68BA7F;
+      }
+      #game-over-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+        opacity: 0;
+        pointer-events: none;
+        background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%);
+        backdrop-filter: blur(4px);
+      }
+      .go-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 48px;
+        font-weight: 700;
+        color: #ff4b2b;
+        letter-spacing: 8px;
+        margin-bottom: 16px;
+        text-shadow: 0 0 20px rgba(255, 75, 43, 0.4);
+      }
+      .go-subtitle {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.7);
+        letter-spacing: 2px;
       }
     </style>
   </head>
   <body>
     <div id="game-container">
       <div id="ui-layer">
-        <div class="score-value" id="score">00000</div>
-        <div class="high-score">HI <span id="highScore">00000</span></div>
+        <div class="score-board">
+          <div class="score-value" id="score">00000</div>
+          <div class="high-score">HI <span id="highScore">00000</span></div>
+        </div>
+      </div>
+      <div id="game-over-layer">
+        <div class="go-title">TERMINATED</div>
+        <div class="go-subtitle">SPACE TO INITIALIZE</div>
       </div>
       <canvas id="gameCanvas"></canvas>
     </div>
