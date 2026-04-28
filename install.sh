@@ -1,22 +1,39 @@
 #!/bin/bash
 
 echo "⚙️ Waiting Game - Initial Configuration"
-read -p "🎮 Default Game [dino/flappy] (default: dino): " CONF_GAME
-CONF_GAME=${CONF_GAME:-dino}
 
-read -p "⚡ Initial Speed (default: 8): " CONF_SPEED
-CONF_SPEED=${CONF_SPEED:-8}
+USE_DEFAULTS=false
+for arg in "$@"; do
+    if [ "$arg" == "--default" ] || [ "$arg" == "-y" ] || [ "$arg" == "-d" ]; then
+        USE_DEFAULTS=true
+        break
+    fi
+done
 
-read -p "📊 Show Scoreboard? [Y/n] (default: Y): " CONF_SCORE
-CONF_SCORE=${CONF_SCORE:-Y}
-if [[ "$CONF_SCORE" =~ ^[Nn] ]]; then SCORE_BOOL="false"; else SCORE_BOOL="true"; fi
-
-read -p "📌 Enable Sticky Mode by default? [y/N] (default: N): " CONF_STICKY
-CONF_STICKY=${CONF_STICKY:-N}
-if [[ "$CONF_STICKY" =~ ^[Yy] ]]; then 
-    PIN_RULE="    pin = on"
-else 
+if [ "$USE_DEFAULTS" = true ]; then
+    echo "⏩ Using default configuration (--default passed)"
+    CONF_GAME="dino"
+    CONF_SPEED=8
+    SCORE_BOOL="true"
     PIN_RULE=""
+else
+    read -p "🎮 Default Game [dino/flappy] (default: dino): " CONF_GAME
+    CONF_GAME=${CONF_GAME:-dino}
+
+    read -p "⚡ Initial Speed (default: 8): " CONF_SPEED
+    CONF_SPEED=${CONF_SPEED:-8}
+
+    read -p "📊 Show Scoreboard? [Y/n] (default: Y): " CONF_SCORE
+    CONF_SCORE=${CONF_SCORE:-Y}
+    if [[ "$CONF_SCORE" =~ ^[Nn] ]]; then SCORE_BOOL="false"; else SCORE_BOOL="true"; fi
+
+    read -p "📌 Enable Sticky Mode by default? [y/N] (default: N): " CONF_STICKY
+    CONF_STICKY=${CONF_STICKY:-N}
+    if [[ "$CONF_STICKY" =~ ^[Yy] ]]; then 
+        PIN_RULE="    pin = on"
+    else 
+        PIN_RULE=""
+    fi
 fi
 
 echo "💾 Saving configuration..."
