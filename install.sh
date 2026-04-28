@@ -1,10 +1,11 @@
 #!/bin/bash
+set -e
 
 echo "⚙️ Waiting Game - Initial Configuration"
 
 USE_DEFAULTS=false
 for arg in "$@"; do
-    if [ "$arg" == "--default" ] || [ "$arg" == "-y" ] || [ "$arg" == "-d" ]; then
+    if [ "$arg" = "--default" ] || [ "$arg" = "-y" ] || [ "$arg" = "-d" ]; then
         USE_DEFAULTS=true
         break
     fi
@@ -17,23 +18,33 @@ if [ "$USE_DEFAULTS" = true ]; then
     SCORE_BOOL="true"
     PIN_RULE=""
 else
-    read -p "🎮 Default Game [dino/flappy] (default: dino): " CONF_GAME
+    # --- Default Game ---
+    printf "🎮 Default Game [dino/flappy] (default: dino): "
+    read -r CONF_GAME
     CONF_GAME=${CONF_GAME:-dino}
 
-    read -p "⚡ Initial Speed (default: 8): " CONF_SPEED
+    # --- Initial Speed ---
+    printf "⚡ Initial Speed (default: 8): "
+    read -r CONF_SPEED
     CONF_SPEED=${CONF_SPEED:-8}
 
-    read -p "📊 Show Scoreboard? [Y/n] (default: Y): " CONF_SCORE
+    # --- Scoreboard ---
+    printf "📊 Show Scoreboard? [Y/n] (default: Y): "
+    read -r CONF_SCORE
     CONF_SCORE=${CONF_SCORE:-Y}
-    if [[ "$CONF_SCORE" =~ ^[Nn] ]]; then SCORE_BOOL="false"; else SCORE_BOOL="true"; fi
+    case "$CONF_SCORE" in
+        [Nn]*) SCORE_BOOL="false" ;;
+        *)     SCORE_BOOL="true"  ;;
+    esac
 
-    read -p "📌 Enable Sticky Mode by default? [y/N] (default: N): " CONF_STICKY
+    # --- Sticky Mode ---
+    printf "📌 Enable Sticky Mode by default? [y/N] (default: N): "
+    read -r CONF_STICKY
     CONF_STICKY=${CONF_STICKY:-N}
-    if [[ "$CONF_STICKY" =~ ^[Yy] ]]; then 
-        PIN_RULE="    pin = on"
-    else 
-        PIN_RULE=""
-    fi
+    case "$CONF_STICKY" in
+        [Yy]*) PIN_RULE="    pin = on" ;;
+        *)     PIN_RULE=""            ;;
+    esac
 fi
 
 echo "💾 Saving configuration..."
