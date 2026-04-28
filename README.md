@@ -31,6 +31,11 @@ Waiting Game is a minimalist, cinematic overlay built with **Tauri and Rust**. I
 curl -sSL https://raw.githubusercontent.com/ziuus/waiting-game/master/install.sh | bash
 ```
 
+## 🕹️ CLI Commands
+
+- **`waiting-game run`**: Start the game in the background.
+- **`waiting-game stop`**: Terminate the game process.
+
 ## 🕹️ Tech Stack
 
 - **Core Logic**: [Rust](https://www.rust-lang.org/)

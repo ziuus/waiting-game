@@ -5,17 +5,11 @@ echo "⚙️ Waiting Game - Initial Configuration"
 
 # Check if we are in the project root; if not, try to find it
 if [ ! -f "package.json" ] || [ ! -d "src-tauri" ]; then
-    # If the user is running this from their home dir after a curl | bash,
-    # and we assume they've cloned it to ~/Projects/waiting-game
     PROJECT_DIR="$HOME/Projects/waiting-game"
     if [ -d "$PROJECT_DIR" ]; then
         cd "$PROJECT_DIR"
     else
-        # If we can't find it, we might be in the middle of a first-time setup
-        # but for now, we expect the user to have the source.
-        # However, for a 'curl | bash' installer, we should probably clone if missing.
         echo "📂 Searching for project root..."
-        # Just check current dir for the expected subfolder
         if [ -d "waiting-game" ]; then
             cd "waiting-game"
         fi
@@ -37,7 +31,6 @@ if [ "$USE_DEFAULTS" = true ]; then
     SCORE_BOOL="true"
     PIN_RULE=""
 else
-    # We use /dev/tty for input to allow curl | bash interaction
     # --- Default Game ---
     printf "🎮 Default Game [dino/flappy] (default: dino): "
     read -r CONF_GAME < /dev/tty
@@ -69,7 +62,6 @@ fi
 
 echo "💾 Saving configuration..."
 if command -v jq >/dev/null; then
-    # Ensure src directory exists before writing
     mkdir -p src
     jq ".activeGame = \"$CONF_GAME\" | .difficulty.initialSpeed = $CONF_SPEED | .showScore = $SCORE_BOOL" src/config.json > src/config.tmp.json && mv src/config.tmp.json src/config.json
 else
@@ -77,7 +69,6 @@ else
 fi
 
 echo "🔨 Building production binary with new configuration (this may take a minute)..."
-# Check if pnpm is installed, otherwise use npm
 BUILD_CMD="pnpm tauri build"
 if ! command -v pnpm >/dev/null; then
     BUILD_CMD="npm run tauri build"
@@ -90,8 +81,6 @@ echo "🦖 Initializing Waiting Game - Universal Installation Protocol..."
 # --- 1. Check for Hyprland ---
 if [ -d "$HOME/.config/hypr" ]; then
     echo "🌊 Hyprland detected. Applying compositor rules for perfect transparency..."
-    
-    # Try to find the right config file to append rules to
     HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
     if [ -f "$HOME/.config/hypr/userprefs.conf" ]; then
         HYPR_CONF="$HOME/.config/hypr/userprefs.conf"
@@ -113,10 +102,7 @@ windowrule {
 $PIN_RULE
 }
 "
-    
-    # Clean up old rules
     sed -i '/# Waiting Game Overlay Rules/,+19d' "$HYPR_CONF" 2>/dev/null
-
     echo "$RULES" >> "$HYPR_CONF"
     echo "✅ Applied Hyprland window rules to $HYPR_CONF"
 else
@@ -126,50 +112,75 @@ fi
 
 echo "🚀 Installation Complete!"
 
-# --- 2. System Path Integration ---
+# --- 2. System Integration ---
 BIN_DEST="$HOME/.local/bin"
 mkdir -p "$BIN_DEST"
 SOURCE_BIN="./src-tauri/target/release/waiting-game"
 
 if [ -f "$SOURCE_BIN" ]; then
-    cp "$SOURCE_BIN" "$BIN_DEST/waiting-game"
-    chmod +x "$BIN_DEST/waiting-game"
-    echo "✅ Binary installed to $BIN_DEST/waiting-game"
+    # Install the actual binary as waiting-game-bin
+    cp "$SOURCE_BIN" "$BIN_DEST/waiting-game-bin"
+    chmod +x "$BIN_DEST/waiting-game-bin"
     
-    # Check if ~/.local/bin is in PATH
+    # Create the wrapper script
+    cat > "$BIN_DEST/waiting-game" <<EOF
+#!/bin/bash
+case "\$1" in
+    run)
+        if pgrep -x "waiting-game-bin" > /dev/null; then
+            echo "🔄 Waiting Game is already running."
+        else
+            echo "🎮 Starting Waiting Game in background..."
+            waiting-game-bin &
+        fi
+        ;;
+    stop)
+        if pkill -x "waiting-game-bin"; then
+            echo "🛑 Waiting Game stopped."
+        else
+            echo "💡 Waiting Game is not running."
+        fi
+        ;;
+    *)
+        # Default behavior: run if no args
+        if [ -z "\$1" ]; then
+            if pgrep -x "waiting-game-bin" > /dev/null; then
+                echo "🔄 Waiting Game is already running."
+            else
+                echo "🎮 Starting Waiting Game..."
+                waiting-game-bin &
+            fi
+        else
+            echo "Usage: waiting-game {run|stop}"
+        fi
+        ;;
+esac
+EOF
+    chmod +x "$BIN_DEST/waiting-game"
+    echo "✅ Binary and command wrapper installed to $BIN_DEST/waiting-game"
+    
     if [[ ":$PATH:" != *":$BIN_DEST:"* ]]; then
-        echo "⚠️  Note: $BIN_DEST is not in your PATH. You might need to add it to your .bashrc or .zshrc:"
-        echo "   export PATH=\$PATH:\$HOME/.local/bin"
+        echo "⚠️  Note: $BIN_DEST is not in your PATH."
     fi
 
-    # --- 2b. Desktop Integration ---
+    # Desktop Integration
     echo "🖥️  Integrating with desktop environment..."
     DESKTOP_DIR="$HOME/.local/share/applications"
     ICON_DIR="$HOME/.local/share/icons"
     mkdir -p "$DESKTOP_DIR" "$ICON_DIR"
     
-    cp "./src-tauri/main.desktop" "$DESKTOP_DIR/waiting-game.desktop"
+    # Update desktop file to use 'run' command
+    sed 's/Exec=waiting-game/Exec=waiting-game run/' "./src-tauri/main.desktop" > "$DESKTOP_DIR/waiting-game.desktop"
     cp "./src-tauri/icons/icon.png" "$ICON_DIR/waiting-game.png"
     echo "✅ Desktop entry and icon installed."
 else
-    echo "⚠️  Could not find release binary for installation to PATH."
+    echo "⚠️  Could not find release binary for installation."
 fi
 
 # --- 3. Immediate Launch ---
-if ! pgrep -x "waiting-game" > /dev/null; then
-    echo "🎮 Starting Waiting Game in background..."
-    if [ -f "./src-tauri/target/release/waiting-game" ]; then
-        ./src-tauri/target/release/waiting-game &
-    elif [ -f "./src-tauri/target/debug/waiting-game" ]; then
-        ./src-tauri/target/debug/waiting-game &
-    elif command -v waiting-game >/dev/null 2>&1; then
-        waiting-game &
-    else
-        echo "💡 Game binary not found. Please build the project or run 'pnpm tauri dev'."
-    fi
-else
-    echo "🔄 Waiting Game is already running."
-fi
+echo "🎮 Starting Waiting Game..."
+"$BIN_DEST/waiting-game" run
 
 echo "✨ All set! The app will automatically register to autostart."
+echo "Commands: 'waiting-game run' to start, 'waiting-game stop' to quit."
 echo "Press Super+Shift+G anywhere to summon the Dino."
