@@ -7,16 +7,16 @@
   <img src="exports/demo_workflow.gif" width="100%" alt="Waiting Game Workflow" />
 </p>
 
-> **Kinetic Overlay Intelligence — An ultra-lightweight, full-screen transparent overlay game designed for high-performance focus.**
+> **Kinetic Overlay Intelligence — An ultra-lightweight, full-screen transparent overlay game powered by a high-performance Rust core.**
 
-Waiting Game is a minimalist, cinematic overlay built with **Tauri**. It sits invisibly in the background of your Linux environment and only appears when summoned, providing a frictionless kinetic experience during idle time without impacting system resources.
+Waiting Game is a minimalist, cinematic overlay built with **Tauri and Rust**. It sits invisibly in the background of your Linux environment and only appears when summoned, providing a frictionless kinetic experience during idle time without impacting system resources.
 
 ## ⚡ Core Features
 
 - **Invisible Protocol**: Starts completely hidden; zero UI footprint until triggered.
 - **Pure Transparency**: Advanced compositing ensures only the kinetic Dino and obstacles are visible.
 - **Deep System Integration**: Native Hyprland support with automatic window rules.
-- **Zero Impact Architecture**: Near-zero CPU/RAM overhead when inactive.
+- **Rust-Engineered Performance**: Near-zero CPU/RAM overhead when inactive, leveraging Rust's memory safety and speed.
 
 ## 📸 Interface
 
@@ -30,6 +30,13 @@ Waiting Game is a minimalist, cinematic overlay built with **Tauri**. It sits in
 ```bash
 curl -sSL https://raw.githubusercontent.com/ziuus/waiting-game/master/install.sh | bash
 ```
+
+## 🕹️ Tech Stack
+
+- **Core Logic**: [Rust](https://www.rust-lang.org/)
+- **Framework**: [Tauri v2](https://v2.tauri.app/)
+- **Frontend**: Vanilla JS / Canvas
+- **Environment**: Linux (Optimized for Wayland/Hyprland)
 
 ## 🕹️ Shortcuts
 
