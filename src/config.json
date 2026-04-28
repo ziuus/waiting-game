@@ -7,7 +7,7 @@
     "scoreColor": "rgba(104, 186, 127, 0.8)"
   },
   "difficulty": {
-    "initialSpeed": 10,
+    "initialSpeed": 8,
     "gravity": 0.7,
     "jumpForce": 15
   },

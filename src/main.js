@@ -67,10 +67,14 @@ async function init() {
     }
 }
 
+let isRunning = true;
+
 function gameLoop() {
     if (animationId) {
         cancelAnimationFrame(animationId);
     }
+    
+    if (!isRunning) return;
     
     // Stable Clear
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -86,6 +90,7 @@ function gameLoop() {
 
         if (currentGame.isGameOver) {
             drawGameOver();
+            return; // Halt loop completely to save resources
         }
     }
     
@@ -122,15 +127,38 @@ function resetGameOver() {
 
 window.addEventListener('keydown', (e) => {
     if (currentGame) {
-        if (currentGame.isGameOver && e.code === 'Space') {
-            resetGameOver();
-        }
+        const wasGameOver = currentGame.isGameOver;
         currentGame.onInput(e.code);
+        
+        // If the game was restarted from game over state, resume loop
+        if (wasGameOver && !currentGame.isGameOver && isRunning) {
+            resetGameOver();
+            gameLoop();
+        }
     }
     
     if (e.key === 'h' || e.key === 'H') {
         window.__TAURI__.window.getCurrent().hide();
     }
+});
+
+// Resource Optimizations: Halt rendering entirely when hidden or unfocused
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        isRunning = false;
+    } else {
+        isRunning = true;
+        if (currentGame && !currentGame.isGameOver) gameLoop();
+    }
+});
+
+window.addEventListener('blur', () => {
+    isRunning = false;
+});
+
+window.addEventListener('focus', () => {
+    isRunning = true;
+    if (currentGame && !currentGame.isGameOver) gameLoop();
 });
 
 init();
