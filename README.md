@@ -1,5 +1,9 @@
 # 🦖 Waiting Game
 
+<p align="center">
+  <img src="exports/demo_workflow.gif" width="100%" alt="Waiting Game Workflow" />
+</p>
+
 > **Kinetic Overlay Intelligence — An ultra-lightweight, full-screen transparent overlay game designed for high-performance focus.**
 
 Waiting Game is a minimalist, cinematic overlay built with **Tauri**. It sits invisibly in the background of your Linux environment and only appears when summoned, providing a frictionless kinetic experience during idle time without impacting system resources.
@@ -7,57 +11,29 @@ Waiting Game is a minimalist, cinematic overlay built with **Tauri**. It sits in
 ## ⚡ Core Features
 
 - **Invisible Protocol**: Starts completely hidden; zero UI footprint until triggered.
-- **Pure Transparency**: Advanced compositing ensures only the kinetic Dino and obstacles are visible—zero blur, borders, or backgrounds.
-- **Deep System Integration**: Native Hyprland support with automatic window rules and autostart configuration.
-- **Zero Impact Architecture**: Near-zero CPU/RAM overhead when inactive, optimized for background persistence.
+- **Pure Transparency**: Advanced compositing ensures only the kinetic Dino and obstacles are visible.
+- **Deep System Integration**: Native Hyprland support with automatic window rules.
+- **Zero Impact Architecture**: Near-zero CPU/RAM overhead when inactive.
 
-## 🎬 Visual Showcase
-
-### 🔄 Dynamic Workflow
-![Workflow Demo](exports/demo_workflow.gif)
-*Seamlessly summon and hide the overlay while maintaining focus.*
-
-### 🕹️ Gameplay & Modes
-| Dino Protocol | Flappy Mode |
-| :---: | :---: |
-| ![Gameplay Dino](exports/demo_gameplay.gif) | ![Gameplay Flappy](exports/demo_flappy.gif) |
-
-## 📸 Gallery
+## 📸 Interface
 
 <p align="center">
-  <img src="exports/1.png" width="45%" />
-  <img src="exports/2.png" width="45%" />
-  <img src="exports/3.png" width="45%" />
-  <img src="exports/4.png" width="45%" />
+  <img src="exports/1.png" width="48%" />
+  <img src="exports/2.png" width="48%" />
 </p>
 
 ## 🚀 Quick Install (Hyprland)
-
-The most efficient way to set up the Waiting Game with perfect transparency and autostart:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/ziuus/waiting-game/master/install.sh | bash
 ```
 
-*Note: This will download the installer and configure your `hyprland.conf` automatically.*
+## 🕹️ Shortcuts
 
-## 📦 Manual Installation
-
-1.  **Download**: Grab the latest `.AppImage` or `.deb` from the [Releases](https://github.com/ziuus/waiting-game/releases) page.
-2.  **Configure**: Run `./install.sh` from the project root to apply the transparency rules.
-
-## 🕹️ Controls & Shortcuts
-
-- **`SUPER` + `SHIFT` + `G`**: **Toggle Visibility** (Summon to current workspace).
-- **`SUPER` + `SHIFT` + `P`**: **Toggle Sticky Mode** (Follow across all workspaces).
-- **`SPACE`**: Jump / Initialize Protocol.
-- **`H`**: Instant Hide (Focus mode).
-
-## 🛠 Tech Stack
-
-- **Backend**: Tauri (Rust)
-- **Frontend**: Vanilla JS / Canvas
-- **Platform**: Linux (Optimized for Wayland/Hyprland)
+- **`SUPER` + `SHIFT` + `G`**: **Toggle Visibility**
+- **`SUPER` + `SHIFT` + `P`**: **Toggle Sticky Mode**
+- **`SPACE`**: Jump / Initialize
+- **`H`**: Instant Hide
 
 ## 🤝 Contributing
 
