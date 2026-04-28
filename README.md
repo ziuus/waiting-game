@@ -11,6 +11,26 @@ Waiting Game is a minimalist, cinematic overlay built with **Tauri**. It sits in
 - **Deep System Integration**: Native Hyprland support with automatic window rules and autostart configuration.
 - **Zero Impact Architecture**: Near-zero CPU/RAM overhead when inactive, optimized for background persistence.
 
+## 🎬 Visual Showcase
+
+### 🔄 Dynamic Workflow
+![Workflow Demo](exports/demo_workflow.gif)
+*Seamlessly summon and hide the overlay while maintaining focus.*
+
+### 🕹️ Gameplay & Modes
+| Dino Protocol | Flappy Mode |
+| :---: | :---: |
+| ![Gameplay Dino](exports/demo_gameplay.gif) | ![Gameplay Flappy](exports/demo_flappy.gif) |
+
+## 📸 Gallery
+
+<p align="center">
+  <img src="exports/1.png" width="45%" />
+  <img src="exports/2.png" width="45%" />
+  <img src="exports/3.png" width="45%" />
+  <img src="exports/4.png" width="45%" />
+</p>
+
 ## 🚀 Quick Install (Hyprland)
 
 The most efficient way to set up the Waiting Game with perfect transparency and autostart:
