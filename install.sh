@@ -63,7 +63,7 @@ fi
 echo "💾 Saving configuration..."
 if command -v jq >/dev/null; then
     mkdir -p src
-    jq ".activeGame = \"$CONF_GAME\" | .difficulty.initialSpeed = $CONF_SPEED | .showScore = $SCORE_BOOL" src/config.json > src/config.tmp.json && mv src/config.tmp.json src/config.json
+    jq ".activeGame = \"$CONF_GAME\" | .difficulty.initialSpeed = $CONF_SPEED | .showScore = $SCORE_BOOL | .background.opacity = 0 | .background.color = \"0, 0, 0\"" src/config.json > src/config.tmp.json && mv src/config.tmp.json src/config.json
 else
     echo "⚠️ jq not installed. Default config.json will be used."
 fi

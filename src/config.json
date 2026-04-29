@@ -1,6 +1,10 @@
 {
   "showScore": true,
   "activeGame": "dino",
+  "background": {
+    "opacity": 0,
+    "color": "0, 0, 0"
+  },
   "theme": {
     "dinoColor": "#68BA7F",
     "obstacleColor": "#ff4b2b",

@@ -50,6 +50,11 @@ async function init() {
         const response = await fetch('config.json');
         config = await response.json();
         
+        // Apply configurable background — default fully transparent
+        const bg = config.background || { opacity: 0, color: '0, 0, 0' };
+        const container = document.getElementById('game-container');
+        container.style.background = `rgba(${bg.color}, ${bg.opacity})`;
+        
         const GameModule = await import(`./games/${config.activeGame}.js`);
         const GameClass = GameModule.default;
         
