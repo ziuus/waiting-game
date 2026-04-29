@@ -3,16 +3,8 @@ use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState, Code, Modifiers};
 
 #[tauri::command]
-fn toggle_window(app: tauri::AppHandle) {
-    if let Some(window) = app.get_webview_window("main") {
-        let is_visible = window.is_visible().unwrap_or(false);
-        if is_visible {
-            let _ = window.hide();
-        } else {
-            let _ = window.show();
-            let _ = window.set_focus();
-        }
-    }
+fn hide_window(window: tauri::Window) {
+    let _ = window.hide();
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -20,7 +12,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
-        .invoke_handler(tauri::generate_handler![toggle_window])
+        .invoke_handler(tauri::generate_handler![hide_window])
         .plugin(tauri_plugin_global_shortcut::Builder::new().with_handler(|app, shortcut, event| {
             if event.state() == ShortcutState::Pressed {
                 if shortcut.matches(Modifiers::SUPER | Modifiers::SHIFT, Code::KeyG) {
@@ -44,6 +36,55 @@ pub fn run() {
             }
         }).build())
         .setup(move |app| {
+            let app_handle = app.handle().clone();
+            
+            // Smart Compositor Detection
+            let is_hyprland = std::env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok();
+            
+            if !is_hyprland {
+                // Universal Wayland/X11/Mac/Windows background handling
+                let hide_handle = app_handle.clone();
+                std::thread::spawn(move || {
+                    std::thread::sleep(std::time::Duration::from_millis(150));
+                    if let Some(window) = hide_handle.get_webview_window("main") {
+                        let _ = window.hide();
+                    }
+                });
+            }
+            
+            let app_handle_1 = app_handle.clone();
+            std::thread::spawn(move || {
+                loop {
+                    if std::path::Path::new("/tmp/waiting-game-toggle").exists() {
+                        let _ = std::fs::remove_file("/tmp/waiting-game-toggle");
+                        if let Some(window) = app_handle_1.get_webview_window("main") {
+                            // On Hyprland, the toggle IPC is bypassed in favor of native scratchpads
+                            if !is_hyprland {
+                                let is_visible = window.is_visible().unwrap_or(false);
+                                if is_visible {
+                                    let _ = window.hide();
+                                } else {
+                                    let _ = window.show();
+                                    std::thread::sleep(std::time::Duration::from_millis(100));
+                                    let _ = window.set_fullscreen(true);
+                                    let _ = window.set_focus();
+                                }
+                            }
+                        }
+                    }
+                    
+                    if std::path::Path::new("/tmp/waiting-game-pin").exists() {
+                        let _ = std::fs::remove_file("/tmp/waiting-game-pin");
+                            if let Some(window) = app_handle_1.get_webview_window("main") {
+                                let is_top = window.is_always_on_top().unwrap_or(false);
+                                let _ = window.set_always_on_top(!is_top);
+                            }
+                        }
+                        
+                        std::thread::sleep(std::time::Duration::from_millis(50));
+                    }
+                });
+
             // Enable autostart
             let _ = app.handle().autolaunch().enable();
 

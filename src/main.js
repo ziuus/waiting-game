@@ -77,6 +77,13 @@ function gameLoop() {
     
     if (!isRunning) return;
     
+    if (isPaused) {
+        drawPaused();
+        return; // CPU Optimization: Halt loop while paused
+    } else {
+        resetPaused();
+    }
+    
     // Stable Clear
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -85,9 +92,7 @@ function gameLoop() {
     ctx.scale(scale, scale);
     
     if (currentGame) {
-        if (!isPaused) {
-            currentGame.update();
-        }
+        currentGame.update();
         currentGame.draw();
         updateScoreDisplay();
 
@@ -95,12 +100,6 @@ function gameLoop() {
             drawGameOver();
             return; // Halt loop completely to save resources
         }
-    }
-    
-    if (isPaused) {
-        drawPaused();
-    } else {
-        resetPaused();
     }
     
     animationId = requestAnimationFrame(gameLoop);
@@ -160,7 +159,7 @@ function drawPaused() {
         
         document.getElementById('hide-btn').onclick = (e) => {
             e.stopPropagation();
-            window.__TAURI__.window.getCurrent().hide();
+            window.__TAURI__.core.invoke('hide_window');
         };
 
         gsap.to(gameOverLayer, { opacity: 1, duration: 0.3 });
@@ -198,7 +197,7 @@ window.addEventListener('keydown', (e) => {
     }
     
     if (e.key === 'h' || e.key === 'H') {
-        window.__TAURI__.window.getCurrent().hide();
+        window.__TAURI__.core.invoke('hide_window');
     }
 });
 

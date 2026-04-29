@@ -55,7 +55,7 @@ else
     read -r CONF_STICKY < /dev/tty
     CONF_STICKY=${CONF_STICKY:-N}
     case "$CONF_STICKY" in
-        [Yy]*) PIN_RULE="    pin = on" ;;
+        [Yy]*) PIN_RULE="windowrulev2 = pin, class:^(waiting-game)$" ;;
         *)     PIN_RULE=""            ;;
     esac
 fi
@@ -69,46 +69,19 @@ else
 fi
 
 echo "🔨 Building production binary with new configuration (this may take a minute)..."
-BUILD_CMD="pnpm tauri build"
+BUILD_CMD="pnpm tauri build --no-bundle"
 if ! command -v pnpm >/dev/null; then
-    BUILD_CMD="npm run tauri build"
+    BUILD_CMD="npm run tauri build --no-bundle"
 fi
 
-$BUILD_CMD > /dev/null 2>&1 || echo "⚠️ Build failed. You might need to run 'pnpm install' first."
+if ! $BUILD_CMD; then
+    echo "❌ Build failed. Please check the logs above."
+    exit 1
+fi
 
 echo "🦖 Initializing Waiting Game - Universal Installation Protocol..."
 
-# --- 1. Check for Hyprland ---
-if [ -d "$HOME/.config/hypr" ]; then
-    echo "🌊 Hyprland detected. Applying compositor rules for perfect transparency..."
-    HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
-    if [ -f "$HOME/.config/hypr/userprefs.conf" ]; then
-        HYPR_CONF="$HOME/.config/hypr/userprefs.conf"
-    fi
-
-    RULES="
-# Waiting Game Overlay Rules
-windowrule {
-    name = waiting-game-overlay
-    match:class = ^(waiting-game)$
-    float = on
-    workspace = special:waiting-game silent
-    size = 100% 100%
-    move = 0 0
-    no_blur = on
-    border_size = 0
-    no_shadow = on
-    no_dim = on
-$PIN_RULE
-}
-"
-    sed -i '/# Waiting Game Overlay Rules/,+19d' "$HYPR_CONF" 2>/dev/null
-    echo "$RULES" >> "$HYPR_CONF"
-    echo "✅ Applied Hyprland window rules to $HYPR_CONF"
-else
-    echo "🖥️ Standard Desktop Environment detected (GNOME/KDE/XFCE)."
-    echo "✅ No special compositor rules needed. Transparency will be handled natively."
-fi
+    echo "✅ Universal setup: No compositor-specific rules applied."
 
 echo "🚀 Installation Complete!"
 
@@ -118,6 +91,10 @@ mkdir -p "$BIN_DEST"
 SOURCE_BIN="./src-tauri/target/release/waiting-game"
 
 if [ -f "$SOURCE_BIN" ]; then
+    # Kill existing process and strictly unlink the old file to prevent "Text file busy"
+    pkill -9 -f "\.local/bin/waiting-game-bin" 2>/dev/null || true
+    rm -f "$BIN_DEST/waiting-game-bin"
+    
     # Install the actual binary as waiting-game-bin
     cp "$SOURCE_BIN" "$BIN_DEST/waiting-game-bin"
     chmod +x "$BIN_DEST/waiting-game-bin"
@@ -127,35 +104,47 @@ if [ -f "$SOURCE_BIN" ]; then
 #!/bin/bash
 case "\$1" in
     run)
-        if pgrep -x "waiting-game-bin" > /dev/null; then
-            echo "🔄 Waiting Game is already running."
+        if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
+            echo "✅ Waiting Game daemon is already running."
         else
             echo "🎮 Starting Waiting Game in background..."
-            # nohup and redirection to /dev/null ensures it detaches and stays quiet
-            nohup waiting-game-bin >/dev/null 2>&1 &
+            nohup "$BIN_DEST/waiting-game-bin" >/dev/null 2>&1 &
             disown
         fi
         ;;
     stop)
-        if pkill -x "waiting-game-bin"; then
+        if pkill -9 -f "\.local/bin/waiting-game-bin"; then
             echo "🛑 Waiting Game stopped."
         else
             echo "💡 Waiting Game is not running."
         fi
         ;;
-    *)
-        # Default behavior: run if no args
-        if [ -z "\$1" ]; then
-            if pgrep -x "waiting-game-bin" > /dev/null; then
-                echo "🔄 Waiting Game is already running."
-            else
-                echo "🎮 Starting Waiting Game..."
-                nohup waiting-game-bin >/dev/null 2>&1 &
-                disown
-            fi
+    status)
+        if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
+            echo "🟢 Waiting Game is running."
         else
-            echo "Usage: waiting-game {run|stop}"
+            echo "🔴 Waiting Game is NOT running."
         fi
+        ;;
+    toggle)
+        if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
+            touch /tmp/waiting-game-toggle
+            echo "🔄 Toggled Waiting Game visibility."
+        else
+            echo "💡 Daemon not running. Starting it now..."
+            nohup "$BIN_DEST/waiting-game-bin" >/dev/null 2>&1 &
+            disown
+            (sleep 1 && touch /tmp/waiting-game-toggle) &
+        fi
+        ;;
+    pin)
+        if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
+            touch /tmp/waiting-game-pin
+            echo "📌 Toggled pin status."
+        fi
+        ;;
+    *)
+        echo "Usage: waiting-game {run|stop|status|toggle|pin}"
         ;;
 esac
 EOF
@@ -176,6 +165,32 @@ EOF
     sed 's/Exec=waiting-game/Exec=waiting-game run/' "./src-tauri/main.desktop" > "$DESKTOP_DIR/waiting-game.desktop"
     cp "./src-tauri/icons/icon.png" "$ICON_DIR/waiting-game.png"
     echo "✅ Desktop entry and icon installed."
+
+    # Hyprland Integration
+    if command -v hyprctl >/dev/null 2>&1; then
+        echo "💙 Hyprland detected! Applying native integration..."
+        HYPR_CONF="$HOME/.config/hypr/userprefs.conf"
+        if [ -f "$HYPR_CONF" ]; then
+            # Remove ALL previous waiting-game entries (any syntax variant) to prevent duplicates
+            sed -i '/waiting-game\|Waiting Game\|waiting_game\|togglespecialworkspace, waiting\|special:waiting/d' "$HYPR_CONF"
+            
+            # Append clean rules
+            cat >> "$HYPR_CONF" <<EOF
+
+# Waiting Game Native Integration
+bind = \$mainMod SHIFT, G, togglespecialworkspace, waiting
+bind = \$mainMod SHIFT, P, exec, $BIN_DEST/waiting-game pin
+windowrule = workspace special:waiting silent, match:class ^(waiting-game-bin)$
+windowrule = float true, match:class ^(waiting-game-bin)$
+windowrule = size 80% 80%, match:class ^(waiting-game-bin)$
+windowrule = center true, match:class ^(waiting-game-bin)$
+windowrule = noblur true, match:class ^(waiting-game-bin)$
+windowrule = suppressevent maximize fullscreen, match:class ^(waiting-game-bin)$
+EOF
+            hyprctl reload >/dev/null 2>&1 || true
+            echo "✅ Automatically bound Super+Shift+G and applied window rules!"
+        fi
+    fi
 else
     echo "⚠️  Could not find release binary for installation."
 fi
