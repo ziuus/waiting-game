@@ -184,8 +184,6 @@ windowrule = workspace special:waiting silent, match:class ^(waiting-game-bin)$
 windowrule = float true, match:class ^(waiting-game-bin)$
 windowrule = size 80% 80%, match:class ^(waiting-game-bin)$
 windowrule = center true, match:class ^(waiting-game-bin)$
-windowrule = noblur true, match:class ^(waiting-game-bin)$
-windowrule = suppressevent maximize fullscreen, match:class ^(waiting-game-bin)$
 EOF
             hyprctl reload >/dev/null 2>&1 || true
             echo "✅ Automatically bound Super+Shift+G and applied window rules!"
