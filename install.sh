@@ -110,6 +110,8 @@ case "\$1" in
             echo "🎮 Starting Waiting Game in background..."
             nohup "$BIN_DEST/waiting-game-bin" >/dev/null 2>&1 &
             disown
+            # Auto-resize to fullscreen after compositor maps the window
+            (sleep 2 && ADDR=\$(hyprctl clients -j | python3 -c "import sys,json;ws=[c['address'] for c in json.load(sys.stdin) if 'waiting' in c.get('class','')]; print(ws[0] if ws else '')" 2>/dev/null) && [ -n "\$ADDR" ] && hyprctl dispatch resizewindowpixel "exact 100% 100%,address:\$ADDR") &
         fi
         ;;
     stop)
@@ -182,7 +184,7 @@ bind = \$mainMod SHIFT, G, togglespecialworkspace, waiting
 bind = \$mainMod SHIFT, P, exec, $BIN_DEST/waiting-game pin
 windowrule = workspace special:waiting silent, match:class ^(waiting-game-bin)$
 windowrule = float true, match:class ^(waiting-game-bin)$
-windowrule = size 80% 80%, match:class ^(waiting-game-bin)$
+windowrule = size 100% 100%, match:class ^(waiting-game-bin)$
 windowrule = center true, match:class ^(waiting-game-bin)$
 EOF
             hyprctl reload >/dev/null 2>&1 || true
