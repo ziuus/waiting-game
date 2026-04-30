@@ -147,17 +147,18 @@ case "\$1" in
                 WS_NAME=$(echo "$DATA" | cut -d'|' -f3)
                 
                 if [ -n "$ADDR" ]; then
-                    CUR_WS=$(hyprctl activeworkspace -j | python3 -c "import sys,json; print(json.load(sys.stdin)['name'])" 2>/dev/null)
+                    CUR_WS=$(hyprctl activeworkspace -j | jq -r '.name')
+                    # Standardize pinned state to lowercase
+                    PINNED=$(echo "$PINNED" | tr '[:upper:]' '[:lower:]')
                     
                     if [[ "$WS_NAME" == special:* ]]; then
                         # State: Hidden -> Sticky
-                        # Must turn OFF fullscreen to allow pinning
                         hyprctl dispatch fullscreen 0 class:waiting-game-bin
                         hyprctl dispatch movetoworkspacesilent "$CUR_WS",class:waiting-game-bin
                         hyprctl dispatch focuswindow class:waiting-game-bin
                         hyprctl dispatch pin
                         echo "📌 Sticky Mode ON (Following user)."
-                    elif [ "$PINNED" = "True" ]; then
+                    elif [ "$PINNED" = "true" ]; then
                         # State: Sticky -> Local
                         hyprctl dispatch focuswindow class:waiting-game-bin
                         hyprctl dispatch pin
