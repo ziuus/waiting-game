@@ -1,6 +1,5 @@
 use tauri::{Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState, Code, Modifiers};
 
 #[tauri::command]
 fn hide_window(window: tauri::Window) {
@@ -13,47 +12,11 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
         .invoke_handler(tauri::generate_handler![hide_window])
-        .plugin(tauri_plugin_global_shortcut::Builder::new().with_handler(|app, shortcut, event| {
-            if event.state() == ShortcutState::Pressed {
-                if shortcut.matches(Modifiers::SUPER | Modifiers::SHIFT, Code::KeyG) {
-                    println!("Shortcut triggered: SUPER+SHIFT+G");
-                    if let Some(window) = app.get_webview_window("main") {
-                        let is_visible = window.is_visible().unwrap_or(false);
-                        if is_visible {
-                            let _ = window.hide();
-                        } else {
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        }
-                    }
-                } else if shortcut.matches(Modifiers::SUPER | Modifiers::SHIFT, Code::KeyP) {
-                    println!("Shortcut triggered: SUPER+SHIFT+P");
-                    if let Some(window) = app.get_webview_window("main") {
-                        let is_top = window.is_always_on_top().unwrap_or(false);
-                        let _ = window.set_always_on_top(!is_top);
-                    }
-                }
-            }
-        }).build())
         .setup(move |app| {
             let app_handle = app.handle().clone();
             
-            // Smart Compositor Detection
-            let is_hyprland = std::env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok();
-            
-            if !is_hyprland {
-                // Universal Wayland/X11/Mac/Windows background handling
-                let hide_handle = app_handle.clone();
-                std::thread::spawn(move || {
-                    std::thread::sleep(std::time::Duration::from_millis(150));
-                    if let Some(window) = hide_handle.get_webview_window("main") {
-                        let _ = window.hide();
-                    }
-                });
-            } else {
-            }
-            
-            let app_handle_1 = app_handle.clone();
+            // Background control loop
+            let app_handle_loop = app_handle.clone();
             std::thread::spawn(move || {
                 let temp_dir = std::env::temp_dir();
                 let toggle_path = temp_dir.join("waiting-game-toggle");
@@ -62,27 +25,21 @@ pub fn run() {
                 loop {
                     if toggle_path.exists() {
                         let _ = std::fs::remove_file(&toggle_path);
-                        if let Some(window) = app_handle_1.get_webview_window("main") {
+                        if let Some(window) = app_handle_loop.get_webview_window("main") {
                             let is_visible = window.is_visible().unwrap_or(false);
                             if is_visible {
                                 let _ = window.hide();
                             } else {
                                 let _ = window.show();
                                 let _ = window.set_focus();
-                                // Ensure fullscreen on show for all platforms (except Hyprland which is module-managed)
-                                if !is_hyprland {
-                                    let _ = window.set_fullscreen(true);
-                                }
+                                // Force fullscreen internally for maximum immersion
+                                let _ = window.set_fullscreen(true);
                             }
                         }
                     }
                     
                     if pin_path.exists() {
                         let _ = std::fs::remove_file(&pin_path);
-                        if let Some(window) = app_handle_1.get_webview_window("main") {
-                            let is_top = window.is_always_on_top().unwrap_or(false);
-                            let _ = window.set_always_on_top(!is_top);
-                        }
                     }
                     
                     std::thread::sleep(std::time::Duration::from_millis(50));
@@ -91,17 +48,6 @@ pub fn run() {
 
             // Enable autostart
             let _ = app.handle().autolaunch().enable();
-
-            // Register shortcuts explicitly with error handling check
-            let toggle_shortcut = tauri_plugin_global_shortcut::Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyG);
-            let sticky_shortcut = tauri_plugin_global_shortcut::Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyP);
-            
-            if let Err(e) = app.global_shortcut().register(toggle_shortcut) {
-                println!("Failed to register toggle shortcut: {}", e);
-            }
-            if let Err(e) = app.global_shortcut().register(sticky_shortcut) {
-                println!("Failed to register sticky shortcut: {}", e);
-            }
 
             // Create Tray Menu
             let quit_i = MenuItem::with_id(app, "quit", "Quit Waiting Game", true, None::<&str>)?;
