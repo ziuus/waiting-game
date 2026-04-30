@@ -34,8 +34,26 @@ case "$1" in
         ;;
     toggle)
         if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
-            hyprctl dispatch togglespecialworkspace waiting
-            echo "🔄 Toggled Waiting Game visibility."
+            ADDR=$(hyprctl clients -j | jq -r '.[] | select(.class == "waiting-game-bin") | .address' | head -n1)
+            if [ -n "$ADDR" ]; then
+                CLIENT_INFO=$(hyprctl clients -j | jq -r ".[] | select(.address == \"$ADDR\")")
+                IS_SPECIAL=$(echo "$CLIENT_INFO" | jq -r '.workspace.name' | grep -c "special:" || true)
+                IS_PINNED=$(echo "$CLIENT_INFO" | jq -r '.pinned')
+                
+                if [ "$IS_SPECIAL" -eq 0 ] || [ "$IS_PINNED" = "true" ]; then
+                    # Window is visible on a normal workspace -> HIDE IT
+                    hyprctl dispatch movetoworkspacesilent special:waiting,address:"$ADDR"
+                    # If special workspace was open, close it too
+                    hyprctl dispatch togglespecialworkspace waiting
+                    echo "🌑 Hidden Mode ON (Quick Hide)."
+                else
+                    # Window is in scratchpad -> SHOW IT
+                    hyprctl dispatch togglespecialworkspace waiting
+                    echo "🔄 Revealed Waiting Game."
+                fi
+            else
+                hyprctl dispatch togglespecialworkspace waiting
+            fi
         else
             echo "💡 Daemon not running. Starting it now..."
             nohup "$BIN_DEST/waiting-game-bin" >/dev/null 2>&1 &
@@ -77,7 +95,7 @@ case "$1" in
         ;;
     -y|--yes|--default)
         echo "⚙️ Waiting Game - Initial Configuration"
-        echo "🔨 Building production binary (this may take a minute)..."
+        echo "🔨 Building production binary..."
         pnpm tauri build --no-bundle
         mkdir -p "$BIN_DEST"
         killall -9 waiting-game-bin 2>/dev/null || true
