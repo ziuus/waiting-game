@@ -170,6 +170,7 @@ EOF
     if command -v hyprctl >/dev/null 2>&1; then
         echo "💙 Hyprland detected! Applying native integration..."
         HYPR_CONF="$HOME/.config/hypr/userprefs.conf"
+        if [ -f "$HYPR_CONF" ]; then
             # Copy dedicated config for plugin-style integration
             cp "waiting-game.conf" "$HOME/.config/hypr/waiting-game.conf"
             

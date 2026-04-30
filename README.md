@@ -31,6 +31,15 @@ Waiting Game is a minimalist, cinematic overlay built with **Tauri and Rust**. I
 curl -sSL https://raw.githubusercontent.com/ziuus/waiting-game/master/install.sh | bash
 ```
 
+## 🧩 Hyprland Plugin Mode
+
+Waiting Game is designed to act as a native Hyprland module. The installer automatically creates a dedicated configuration file at `~/.config/hypr/waiting-game.conf` and sources it in your `userprefs.conf`.
+
+To manually integrate it, add this to your `hyprland.conf`:
+```hyprlang
+source = ~/.config/hypr/waiting-game.conf
+```
+
 ## 🕹️ CLI Commands
 
 - **`waiting-game run`**: Start the game in the background.
