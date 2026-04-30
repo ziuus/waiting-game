@@ -139,8 +139,19 @@ case "\$1" in
         ;;
     pin)
         if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
-            touch /tmp/waiting-game-pin
-            echo "📌 Toggled pin status."
+            if command -v hyprctl >/dev/null 2>&1; then
+                # On Hyprland, use native pinning for true 'sticky' behavior
+                ADDR=$(hyprctl clients -j | python3 -c "import sys,json;ws=[c['address'] for c in json.load(sys.stdin) if 'waiting' in c.get('class','')]; print(ws[0] if ws else '')" 2>/dev/null)
+                if [ -n "$ADDR" ]; then
+                    hyprctl dispatch pin "address:$ADDR"
+                    echo "📌 Toggled native Hyprland pin."
+                else
+                    touch /tmp/waiting-game-pin
+                fi
+            else
+                touch /tmp/waiting-game-pin
+                echo "📌 Toggled pin status (IPC)."
+            fi
         fi
         ;;
     *)
