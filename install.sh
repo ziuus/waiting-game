@@ -140,34 +140,30 @@ case "\$1" in
     pin)
         if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
             if command -v hyprctl >/dev/null 2>&1; then
-                # 3-State Cycle: Hidden (Special) -> Sticky (Pinned) -> Local (Individual) -> Hidden
-                DATA=$(hyprctl clients -j | python3 -c "import sys,json;ws=[(c['address'], c.get('pinned', False), c.get('workspace', {}).get('name', '')) for c in json.load(sys.stdin) if 'waiting' in c.get('class','')]; print(f'{ws[0][0]}|{ws[0][1]}|{ws[0][2]}' if ws else '')" 2>/dev/null)
-                ADDR=$(echo "$DATA" | cut -d'|' -f1)
-                PINNED=$(echo "$DATA" | cut -d'|' -f2)
-                WS_NAME=$(echo "$DATA" | cut -d'|' -f3)
+                # Use jq for reliable state detection
+                ADDR=$(hyprctl clients -j | jq -r '.[] | select(.class == "waiting-game-bin") | .address' | head -n1)
                 
                 if [ -n "$ADDR" ]; then
+                    IS_SPECIAL=$(hyprctl clients -j | jq -r '.[] | select(.class == "waiting-game-bin") | .workspace.name' | grep -c "special:" || true)
+                    IS_PINNED=$(hyprctl clients -j | jq -r '.[] | select(.class == "waiting-game-bin") | .pinned')
                     CUR_WS=$(hyprctl activeworkspace -j | jq -r '.name')
-                    # Standardize pinned state to lowercase
-                    PINNED=$(echo "$PINNED" | tr '[:upper:]' '[:lower:]')
                     
-                    if [[ "$WS_NAME" == special:* ]]; then
-                        # State: Hidden -> Sticky
-                        hyprctl dispatch fullscreen 0 class:waiting-game-bin
-                        hyprctl dispatch movetoworkspacesilent "$CUR_WS",class:waiting-game-bin
-                        hyprctl dispatch focuswindow class:waiting-game-bin
+                    if [ "$IS_SPECIAL" -eq 1 ]; then
+                        # State: Hidden (Special) -> Sticky (Pinned)
+                        hyprctl dispatch movetoworkspacesilent "$CUR_WS",address:"$ADDR"
+                        hyprctl dispatch focuswindow address:"$ADDR"
                         hyprctl dispatch pin
+                        # Ensure fullscreen is restored after move
+                        hyprctl dispatch fullscreen 2 address:"$ADDR"
                         echo "📌 Sticky Mode ON (Following user)."
-                    elif [ "$PINNED" = "true" ]; then
-                        # State: Sticky -> Local
-                        hyprctl dispatch focuswindow class:waiting-game-bin
+                    elif [ "$IS_PINNED" = "true" ]; then
+                        # State: Sticky (Pinned) -> Local (Fixed)
+                        hyprctl dispatch focuswindow address:"$ADDR"
                         hyprctl dispatch pin
-                        echo "📍 Local Mode ON (Fixed to $WS_NAME)."
+                        echo "📍 Local Mode ON (Fixed to $CUR_WS)."
                     else
-                        # State: Local -> Hidden
-                        hyprctl dispatch movetoworkspacesilent special:waiting,class:waiting-game-bin
-                        # Restore immersive fullscreen
-                        hyprctl dispatch fullscreen 2 class:waiting-game-bin
+                        # State: Local (Fixed) -> Hidden (Special)
+                        hyprctl dispatch movetoworkspacesilent special:waiting,address:"$ADDR"
                         echo "🌑 Hidden Mode ON (Back to scratchpad)."
                     fi
                 else
