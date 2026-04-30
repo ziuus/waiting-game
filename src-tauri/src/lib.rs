@@ -51,15 +51,6 @@ pub fn run() {
                     }
                 });
             } else {
-                // Hyprland: window maps into special:waiting via windowrule.
-                // Then force fullscreen so the compositor disables blur on transparent areas.
-                let fs_handle = app_handle.clone();
-                std::thread::spawn(move || {
-                    std::thread::sleep(std::time::Duration::from_millis(600));
-                    if let Some(window) = fs_handle.get_webview_window("main") {
-                        let _ = window.set_fullscreen(true);
-                    }
-                });
             }
             
             let app_handle_1 = app_handle.clone();
@@ -78,8 +69,10 @@ pub fn run() {
                             } else {
                                 let _ = window.show();
                                 let _ = window.set_focus();
-                                // Ensure fullscreen on show for all platforms to keep it an overlay
-                                let _ = window.set_fullscreen(true);
+                                // Ensure fullscreen on show for all platforms (except Hyprland which is module-managed)
+                                if !is_hyprland {
+                                    let _ = window.set_fullscreen(true);
+                                }
                             }
                         }
                     }
