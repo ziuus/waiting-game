@@ -172,11 +172,14 @@ EOF
         HYPR_CONF="$HOME/.config/hypr/userprefs.conf"
         if [ -f "$HYPR_CONF" ]; then
             # Copy dedicated config for plugin-style integration
-            cp "waiting-game.conf" "$HOME/.config/hypr/waiting-game.conf"
+            mkdir -p "$HOME/.config/hypr"
+            sed "s|__BIN_PATH__|$BIN_DEST/waiting-game|g" "waiting-game.conf" > "$HOME/.config/hypr/waiting-game.conf"
             
             # Remove direct entries if they exist and suggest sourcing
             sed -i '/Waiting Game Native Integration/,/EOF/d' "$HYPR_CONF"
             if ! grep -q "source = ~/.config/hypr/waiting-game.conf" "$HYPR_CONF"; then
+                echo "" >> "$HYPR_CONF"
+                echo "# Waiting Game Hyprland Module" >> "$HYPR_CONF"
                 echo "source = ~/.config/hypr/waiting-game.conf" >> "$HYPR_CONF"
             fi
             
