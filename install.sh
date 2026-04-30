@@ -149,25 +149,25 @@ case "\$1" in
                     CUR_WS=$(hyprctl activeworkspace -j | jq -r '.name')
                     
                     if [ "$IS_SPECIAL" -eq 1 ]; then
-                        # State: Hidden (Special) -> Sticky (Pinned)
-                        hyprctl dispatch movetoworkspacesilent "$CUR_WS",address:"$ADDR"
-                        hyprctl dispatch focuswindow address:"$ADDR"
+                        # State: Hidden -> Sticky
+                        hyprctl dispatch movetoworkspacesilent "$CUR_WS",class:waiting-game-bin
+                        hyprctl dispatch focuswindow class:waiting-game-bin
                         sleep 0.1
                         hyprctl dispatch fullscreen 0
                         hyprctl dispatch pin
-                        hyprctl dispatch fullscreen 2
+                        hyprctl dispatch fullscreen 1
                         echo "📌 Sticky Mode ON (Following user)."
                     elif [ "$IS_PINNED" = "true" ]; then
-                        # State: Sticky (Pinned) -> Local (Fixed)
-                        hyprctl dispatch focuswindow address:"$ADDR"
+                        # State: Sticky -> Local
+                        hyprctl dispatch focuswindow class:waiting-game-bin
                         sleep 0.1
                         hyprctl dispatch fullscreen 0
                         hyprctl dispatch pin
-                        hyprctl dispatch fullscreen 2
+                        hyprctl dispatch fullscreen 1
                         echo "📍 Local Mode ON (Fixed to $CUR_WS)."
                     else
-                        # State: Local (Fixed) -> Hidden (Special)
-                        hyprctl dispatch movetoworkspacesilent special:waiting,address:"$ADDR"
+                        # State: Local -> Hidden
+                        hyprctl dispatch movetoworkspacesilent special:waiting,class:waiting-game-bin
                         echo "🌑 Hidden Mode ON (Back to scratchpad)."
                     fi
                 else
