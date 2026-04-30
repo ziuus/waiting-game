@@ -182,6 +182,8 @@ bind = \$mainMod SHIFT, G, togglespecialworkspace, waiting
 bind = \$mainMod SHIFT, P, exec, $BIN_DEST/waiting-game pin
 windowrule = workspace special:waiting silent, match:class ^(waiting-game-bin)$
 windowrule = float true, match:class ^(waiting-game-bin)$
+windowrule = no_blur true, match:class ^(waiting-game-bin)$
+windowrule = no_shadow true, match:class ^(waiting-game-bin)$
 EOF
             hyprctl reload >/dev/null 2>&1 || true
             echo "✅ Automatically bound Super+Shift+G and applied window rules!"
