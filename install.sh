@@ -151,6 +151,8 @@ case "\$1" in
                     
                     if [[ "$WS_NAME" == special:* ]]; then
                         # State: Hidden -> Sticky
+                        # Must turn OFF fullscreen to allow pinning
+                        hyprctl dispatch fullscreen 0 class:waiting-game-bin
                         hyprctl dispatch movetoworkspacesilent "$CUR_WS",class:waiting-game-bin
                         hyprctl dispatch focuswindow class:waiting-game-bin
                         hyprctl dispatch pin
@@ -163,6 +165,8 @@ case "\$1" in
                     else
                         # State: Local -> Hidden
                         hyprctl dispatch movetoworkspacesilent special:waiting,class:waiting-game-bin
+                        # Restore immersive fullscreen
+                        hyprctl dispatch fullscreen 2 class:waiting-game-bin
                         echo "🌑 Hidden Mode ON (Back to scratchpad)."
                     fi
                 else
