@@ -1,6 +1,5 @@
 #!/bin/bash
 # Waiting Game - Hyprland Module Installer & Controller
-# This script handles building, installing, and managing the game's state.
 
 BIN_NAME="waiting-game"
 BIN_DEST="$HOME/.local/bin"
@@ -66,14 +65,14 @@ case "$1" in
                         hyprctl dispatch focuswindow address:"$ADDR"
                         sleep 0.1
                         hyprctl dispatch pin address:"$ADDR"
-                        hyprctl dispatch fullscreen 2 address:"$ADDR"
+                        hyprctl dispatch fullscreen 1 address:"$ADDR"
                         echo "📌 Sticky Mode ON (Following user)."
                     elif [ "$IS_PINNED" = "true" ]; then
                         # State: Sticky -> Local
                         hyprctl dispatch focuswindow address:"$ADDR"
                         sleep 0.1
                         hyprctl dispatch pin address:"$ADDR"
-                        hyprctl dispatch fullscreen 2 address:"$ADDR"
+                        hyprctl dispatch fullscreen 1 address:"$ADDR"
                         echo "📍 Local Mode ON (Fixed to $CUR_WS)."
                     else
                         # State: Local -> Hidden
@@ -88,76 +87,50 @@ case "$1" in
         ;;
     -y|--yes|--default)
         echo "⚙️ Waiting Game - Initial Configuration"
-        echo "⏩ Using default configuration (--default passed)"
-        echo "💾 Saving configuration..."
-        
         # Build binary
-        echo "🔨 Building production binary with new configuration (this may take a minute)..."
+        echo "🔨 Building production binary (this may take a minute)..."
         pnpm tauri build --no-bundle
-        
         # Install binary
         mkdir -p "$BIN_DEST"
         killall -9 waiting-game-bin 2>/dev/null || true
         sleep 1
         cp "$TAURI_BIN" "$BIN_DEST/waiting-game-bin"
-        
         # Create wrapper
         cat << EOF > "$BIN_DEST/waiting-game"
 #!/bin/bash
 "$(realpath "$0")" "\$@"
 EOF
         chmod +x "$BIN_DEST/waiting-game"
-        
         # Install Assets
         mkdir -p "$ICON_DEST"
         cp ./src-tauri/icons/icon.png "$ICON_DEST/waiting-game.png"
-        
         # Desktop Entry
         mkdir -p "$DESKTOP_DEST"
         cat << EOF > "$DESKTOP_DEST/waiting-game.desktop"
 [Desktop Entry]
 Name=Waiting Game
-Comment=Dino game overlay for long waits
+Comment=Dino game overlay
 Exec=$BIN_DEST/waiting-game run
 Icon=waiting-game
 Terminal=false
 Type=Application
 Categories=Game;Utility;
 EOF
-
         # Hyprland Integration
         if command -v hyprctl >/dev/null 2>&1; then
             echo "💙 Hyprland detected! Applying native integration..."
             mkdir -p "$CONF_DEST"
-            
-            # Clean up old source lines
             sed -i '/waiting-game.conf/d' "$CONF_DEST/hyprland.conf" 2>/dev/null
             sed -i '/waiting-game.conf/d' "$CONF_DEST/userprefs.conf" 2>/dev/null
-            
-            # Use current path in config
             sed "s|__BIN_PATH__|$BIN_DEST/waiting-game|g" ./waiting-game.conf > "$CONF_DEST/waiting-game.conf"
-            
-            # Sourcing the config
             if [ -f "$CONF_DEST/userprefs.conf" ]; then
                 echo "source = $CONF_DEST/waiting-game.conf" >> "$CONF_DEST/userprefs.conf"
-                echo "✅ Integrated as a Hyprland module! Sourced in userprefs.conf"
             else
                 echo "source = $CONF_DEST/waiting-game.conf" >> "$CONF_DEST/hyprland.conf"
-                echo "✅ Integrated as a Hyprland module! Sourced in hyprland.conf"
             fi
         fi
-
         echo "🚀 Installation Complete!"
-        echo "✅ Binary and command wrapper installed to $BIN_DEST/waiting-game"
-        if [[ ":$PATH:" != *":$BIN_DEST:"* ]]; then
-            echo "⚠️  Note: $BIN_DEST is not in your PATH."
-        fi
-        
-        echo "🎮 Starting Waiting Game in background..."
         "$BIN_DEST/waiting-game" run >/dev/null 2>&1 &
-        
-        echo "✨ All set! The app will automatically register to autostart."
-        echo "Commands: 'waiting-game run' to start, 'waiting-game stop' to quit."
         echo "Press Super+Shift+G anywhere to summon the Dino."
         ;;
     *)
