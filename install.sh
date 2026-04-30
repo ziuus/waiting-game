@@ -22,11 +22,8 @@ case "$1" in
         fi
         ;;
     stop)
-        if pkill -9 -f "\.local/bin/waiting-game-bin"; then
-            echo "🛑 Waiting Game stopped."
-        else
-            echo "💡 Waiting Game is not running."
-        fi
+        killall -9 waiting-game-bin 2>/dev/null || true
+        echo "🛑 Waiting Game stopped."
         ;;
     status)
         if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
@@ -38,11 +35,6 @@ case "$1" in
     toggle)
         if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
             hyprctl dispatch togglespecialworkspace waiting
-            sleep 0.1
-            ADDR=$(hyprctl clients -j | jq -r '.[] | select(.class == "waiting-game-bin") | .address' | head -n1)
-            if [ -n "$ADDR" ]; then
-                hyprctl dispatch fullscreen 1 address:"$ADDR"
-            fi
             echo "🔄 Toggled Waiting Game visibility."
         else
             echo "💡 Daemon not running. Starting it now..."
@@ -62,19 +54,20 @@ case "$1" in
                     CUR_WS=$(hyprctl activeworkspace -j | jq -r '.name')
                     
                     if [ "$IS_SPECIAL" -eq 1 ]; then
+                        # Hidden -> Sticky
                         hyprctl dispatch movetoworkspacesilent "$CUR_WS",address:"$ADDR"
                         hyprctl dispatch focuswindow address:"$ADDR"
                         sleep 0.1
                         hyprctl dispatch pin address:"$ADDR"
-                        hyprctl dispatch fullscreen 1 address:"$ADDR"
                         echo "📌 Sticky Mode ON (Following user)."
                     elif [ "$IS_PINNED" = "true" ]; then
+                        # Sticky -> Local
                         hyprctl dispatch focuswindow address:"$ADDR"
                         sleep 0.1
                         hyprctl dispatch pin address:"$ADDR"
-                        hyprctl dispatch fullscreen 1 address:"$ADDR"
                         echo "📍 Local Mode ON (Fixed to $CUR_WS)."
                     else
+                        # Local -> Hidden
                         hyprctl dispatch movetoworkspacesilent special:waiting,address:"$ADDR"
                         echo "🌑 Hidden Mode ON (Back to scratchpad)."
                     fi
