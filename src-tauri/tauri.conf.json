@@ -12,9 +12,9 @@
       {
         "label": "main",
         "title": "waiting-game",
-        "width": 1280,
-        "height": 720,
-        "fullscreen": false,
+        "width": 1920,
+        "height": 1080,
+        "fullscreen": true,
         "decorations": false,
         "transparent": true,
         "backgroundColor": [0, 0, 0, 0],
