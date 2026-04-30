@@ -170,23 +170,17 @@ EOF
     if command -v hyprctl >/dev/null 2>&1; then
         echo "💙 Hyprland detected! Applying native integration..."
         HYPR_CONF="$HOME/.config/hypr/userprefs.conf"
-        if [ -f "$HYPR_CONF" ]; then
-            # Remove ALL previous waiting-game entries (any syntax variant) to prevent duplicates
-            sed -i '/waiting-game\|Waiting Game\|waiting_game\|togglespecialworkspace, waiting\|special:waiting/d' "$HYPR_CONF"
+            # Copy dedicated config for plugin-style integration
+            cp "waiting-game.conf" "$HOME/.config/hypr/waiting-game.conf"
             
-            # Append clean rules
-            cat >> "$HYPR_CONF" <<EOF
-
-# Waiting Game Native Integration
-bind = \$mainMod SHIFT, G, togglespecialworkspace, waiting
-bind = \$mainMod SHIFT, P, exec, $BIN_DEST/waiting-game pin
-windowrule = workspace special:waiting silent, match:class ^(waiting-game-bin)$
-windowrule = float true, match:class ^(waiting-game-bin)$
-windowrule = no_blur true, match:class ^(waiting-game-bin)$
-windowrule = no_shadow true, match:class ^(waiting-game-bin)$
-EOF
+            # Remove direct entries if they exist and suggest sourcing
+            sed -i '/Waiting Game Native Integration/,/EOF/d' "$HYPR_CONF"
+            if ! grep -q "source = ~/.config/hypr/waiting-game.conf" "$HYPR_CONF"; then
+                echo "source = ~/.config/hypr/waiting-game.conf" >> "$HYPR_CONF"
+            fi
+            
             hyprctl reload >/dev/null 2>&1 || true
-            echo "✅ Automatically bound Super+Shift+G and applied window rules!"
+            echo "✅ Integrated as a Hyprland module! Sourced in userprefs.conf"
         fi
     fi
 else
