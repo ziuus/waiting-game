@@ -151,6 +151,8 @@ case "\$1" in
                     
                     if [[ "$WS_NAME" == special:* ]]; then
                         # State: Hidden -> Sticky
+                        # Must turn OFF fullscreen to allow pinning
+                        hyprctl dispatch fullscreen 0 "address:$ADDR"
                         hyprctl dispatch movetoworkspacesilent "$CUR_WS","address:$ADDR"
                         hyprctl dispatch pin "address:$ADDR"
                         echo "📌 Sticky Mode ON (Following user)."
@@ -161,6 +163,8 @@ case "\$1" in
                     else
                         # State: Local -> Hidden
                         hyprctl dispatch movetoworkspacesilent special:waiting,"address:$ADDR"
+                        # Restore fullscreen for the immersive look
+                        hyprctl dispatch fullscreen 2 "address:$ADDR"
                         echo "🌑 Hidden Mode ON (Back to scratchpad)."
                     fi
                 else
