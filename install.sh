@@ -37,30 +37,31 @@ case "$1" in
         ;;
     toggle)
         if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
-            touch /tmp/waiting-game-toggle
+            hyprctl dispatch togglespecialworkspace waiting
+            sleep 0.1
+            ADDR=$(hyprctl clients -j | jq -r '.[] | select(.class == "waiting-game-bin") | .address' | head -n1)
+            if [ -n "$ADDR" ]; then
+                hyprctl dispatch fullscreen 1 address:"$ADDR"
+            fi
             echo "🔄 Toggled Waiting Game visibility."
         else
             echo "💡 Daemon not running. Starting it now..."
             nohup "$BIN_DEST/waiting-game-bin" >/dev/null 2>&1 &
             disown
-            (sleep 1 && touch /tmp/waiting-game-toggle) &
+            (sleep 1 && "$BIN_DEST/waiting-game" toggle) &
         fi
         ;;
     pin)
         if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
             if command -v hyprctl >/dev/null 2>&1; then
-                # Use jq for reliable state detection
                 ADDR=$(hyprctl clients -j | jq -r '.[] | select(.class == "waiting-game-bin") | .address' | head -n1)
-                
                 if [ -n "$ADDR" ]; then
-                    # Get state for THIS specific address
                     CLIENT_INFO=$(hyprctl clients -j | jq -r ".[] | select(.address == \"$ADDR\")")
                     IS_SPECIAL=$(echo "$CLIENT_INFO" | jq -r '.workspace.name' | grep -c "special:" || true)
                     IS_PINNED=$(echo "$CLIENT_INFO" | jq -r '.pinned')
                     CUR_WS=$(hyprctl activeworkspace -j | jq -r '.name')
                     
                     if [ "$IS_SPECIAL" -eq 1 ]; then
-                        # State: Hidden -> Sticky
                         hyprctl dispatch movetoworkspacesilent "$CUR_WS",address:"$ADDR"
                         hyprctl dispatch focuswindow address:"$ADDR"
                         sleep 0.1
@@ -68,43 +69,34 @@ case "$1" in
                         hyprctl dispatch fullscreen 1 address:"$ADDR"
                         echo "📌 Sticky Mode ON (Following user)."
                     elif [ "$IS_PINNED" = "true" ]; then
-                        # State: Sticky -> Local
                         hyprctl dispatch focuswindow address:"$ADDR"
                         sleep 0.1
                         hyprctl dispatch pin address:"$ADDR"
                         hyprctl dispatch fullscreen 1 address:"$ADDR"
                         echo "📍 Local Mode ON (Fixed to $CUR_WS)."
                     else
-                        # State: Local -> Hidden
                         hyprctl dispatch movetoworkspacesilent special:waiting,address:"$ADDR"
                         echo "🌑 Hidden Mode ON (Back to scratchpad)."
                     fi
-                else
-                    touch /tmp/waiting-game-pin
                 fi
             fi
         fi
         ;;
     -y|--yes|--default)
         echo "⚙️ Waiting Game - Initial Configuration"
-        # Build binary
         echo "🔨 Building production binary (this may take a minute)..."
         pnpm tauri build --no-bundle
-        # Install binary
         mkdir -p "$BIN_DEST"
         killall -9 waiting-game-bin 2>/dev/null || true
         sleep 1
         cp "$TAURI_BIN" "$BIN_DEST/waiting-game-bin"
-        # Create wrapper
         cat << EOF > "$BIN_DEST/waiting-game"
 #!/bin/bash
 "$(realpath "$0")" "\$@"
 EOF
         chmod +x "$BIN_DEST/waiting-game"
-        # Install Assets
         mkdir -p "$ICON_DEST"
         cp ./src-tauri/icons/icon.png "$ICON_DEST/waiting-game.png"
-        # Desktop Entry
         mkdir -p "$DESKTOP_DEST"
         cat << EOF > "$DESKTOP_DEST/waiting-game.desktop"
 [Desktop Entry]
@@ -116,7 +108,6 @@ Terminal=false
 Type=Application
 Categories=Game;Utility;
 EOF
-        # Hyprland Integration
         if command -v hyprctl >/dev/null 2>&1; then
             echo "💙 Hyprland detected! Applying native integration..."
             mkdir -p "$CONF_DEST"
