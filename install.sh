@@ -140,11 +140,23 @@ case "\$1" in
     pin)
         if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
             if command -v hyprctl >/dev/null 2>&1; then
-                # On Hyprland, use native pinning for true 'sticky' behavior
-                ADDR=$(hyprctl clients -j | python3 -c "import sys,json;ws=[c['address'] for c in json.load(sys.stdin) if 'waiting' in c.get('class','')]; print(ws[0] if ws else '')" 2>/dev/null)
+                # On Hyprland, we must move the window out of the special workspace to pin it successfully
+                DATA=$(hyprctl clients -j | python3 -c "import sys,json;ws=[(c['address'], c.get('pinned', False)) for c in json.load(sys.stdin) if 'waiting' in c.get('class','')]; print(f'{ws[0][0]} {ws[0][1]}' if ws else '')" 2>/dev/null)
+                ADDR=$(echo "$DATA" | cut -d' ' -f1)
+                PINNED=$(echo "$DATA" | cut -d' ' -f2)
+                
                 if [ -n "$ADDR" ]; then
-                    hyprctl dispatch pin "address:$ADDR"
-                    echo "📌 Toggled native Hyprland pin."
+                    if [ "$PINNED" = "True" ]; then
+                        hyprctl dispatch pin "address:$ADDR"
+                        hyprctl dispatch movetoworkspacesilent special:waiting,"address:$ADDR"
+                        echo "📌 Unpinned and moved back to special workspace."
+                    else
+                        # Move to current active workspace and pin
+                        CUR_WS=$(hyprctl activeworkspace -j | python3 -c "import sys,json; print(json.load(sys.stdin)['name'])" 2>/dev/null)
+                        hyprctl dispatch movetoworkspacesilent "$CUR_WS","address:$ADDR"
+                        hyprctl dispatch pin "address:$ADDR"
+                        echo "📌 Pinned to workspace $CUR_WS (Sticky Mode ON)."
+                    fi
                 else
                     touch /tmp/waiting-game-pin
                 fi
