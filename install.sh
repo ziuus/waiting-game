@@ -152,14 +152,18 @@ case "\$1" in
                         # State: Hidden (Special) -> Sticky (Pinned)
                         hyprctl dispatch movetoworkspacesilent "$CUR_WS",address:"$ADDR"
                         hyprctl dispatch focuswindow address:"$ADDR"
+                        sleep 0.1
+                        hyprctl dispatch fullscreen 0
                         hyprctl dispatch pin
-                        # Ensure fullscreen is restored after move
-                        hyprctl dispatch fullscreen 2 address:"$ADDR"
+                        hyprctl dispatch fullscreen 2
                         echo "📌 Sticky Mode ON (Following user)."
                     elif [ "$IS_PINNED" = "true" ]; then
                         # State: Sticky (Pinned) -> Local (Fixed)
                         hyprctl dispatch focuswindow address:"$ADDR"
+                        sleep 0.1
+                        hyprctl dispatch fullscreen 0
                         hyprctl dispatch pin
+                        hyprctl dispatch fullscreen 2
                         echo "📍 Local Mode ON (Fixed to $CUR_WS)."
                     else
                         # State: Local (Fixed) -> Hidden (Special)
