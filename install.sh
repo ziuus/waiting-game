@@ -140,22 +140,28 @@ case "\$1" in
     pin)
         if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
             if command -v hyprctl >/dev/null 2>&1; then
-                # On Hyprland, we must move the window out of the special workspace to pin it successfully
-                DATA=$(hyprctl clients -j | python3 -c "import sys,json;ws=[(c['address'], c.get('pinned', False)) for c in json.load(sys.stdin) if 'waiting' in c.get('class','')]; print(f'{ws[0][0]} {ws[0][1]}' if ws else '')" 2>/dev/null)
-                ADDR=$(echo "$DATA" | cut -d' ' -f1)
-                PINNED=$(echo "$DATA" | cut -d' ' -f2)
+                # 3-State Cycle: Hidden (Special) -> Sticky (Pinned) -> Local (Individual) -> Hidden
+                DATA=$(hyprctl clients -j | python3 -c "import sys,json;ws=[(c['address'], c.get('pinned', False), c.get('workspace', {}).get('name', '')) for c in json.load(sys.stdin) if 'waiting' in c.get('class','')]; print(f'{ws[0][0]}|{ws[0][1]}|{ws[0][2]}' if ws else '')" 2>/dev/null)
+                ADDR=$(echo "$DATA" | cut -d'|' -f1)
+                PINNED=$(echo "$DATA" | cut -d'|' -f2)
+                WS_NAME=$(echo "$DATA" | cut -d'|' -f3)
                 
                 if [ -n "$ADDR" ]; then
-                    if [ "$PINNED" = "True" ]; then
-                        hyprctl dispatch pin "address:$ADDR"
-                        hyprctl dispatch movetoworkspacesilent special:waiting,"address:$ADDR"
-                        echo "📌 Unpinned and moved back to special workspace."
-                    else
-                        # Move to current active workspace and pin
-                        CUR_WS=$(hyprctl activeworkspace -j | python3 -c "import sys,json; print(json.load(sys.stdin)['name'])" 2>/dev/null)
+                    CUR_WS=$(hyprctl activeworkspace -j | python3 -c "import sys,json; print(json.load(sys.stdin)['name'])" 2>/dev/null)
+                    
+                    if [[ "$WS_NAME" == special:* ]]; then
+                        # State: Hidden -> Sticky
                         hyprctl dispatch movetoworkspacesilent "$CUR_WS","address:$ADDR"
                         hyprctl dispatch pin "address:$ADDR"
-                        echo "📌 Pinned to workspace $CUR_WS (Sticky Mode ON)."
+                        echo "📌 Sticky Mode ON (Following user)."
+                    elif [ "$PINNED" = "True" ]; then
+                        # State: Sticky -> Local
+                        hyprctl dispatch pin "address:$ADDR"
+                        echo "📍 Local Mode ON (Fixed to $WS_NAME)."
+                    else
+                        # State: Local -> Hidden
+                        hyprctl dispatch movetoworkspacesilent special:waiting,"address:$ADDR"
+                        echo "🌑 Hidden Mode ON (Back to scratchpad)."
                     fi
                 else
                     touch /tmp/waiting-game-pin
