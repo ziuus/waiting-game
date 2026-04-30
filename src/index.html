@@ -20,7 +20,7 @@
       #game-container {
         width: 100vw;
         height: 100vh;
-        background: transparent !important;
+        background: transparent;
         display: flex;
         align-items: flex-end;
         justify-content: center;
@@ -97,8 +97,8 @@
         transition: background 0.5s ease;
       }
       #game-over-layer.terminated {
-        background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%);
-        backdrop-filter: blur(4px);
+        background: transparent;
+        backdrop-filter: none;
       }      .go-title {
         font-family: 'Space Grotesk', sans-serif;
         font-size: 48px;
