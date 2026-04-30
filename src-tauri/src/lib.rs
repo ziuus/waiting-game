@@ -1,16 +1,81 @@
 use tauri::{Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use std::io::Write;
+use std::process::Command;
 
 #[tauri::command]
 fn hide_window(window: tauri::Window) {
     let _ = window.hide();
 }
 
+// OS-Aware Teleportation Logic
+fn teleport_window(app: &tauri::AppHandle, action: &str) {
+    let window = match app.get_webview_window("main") {
+        Some(w) => w,
+        None => return,
+    };
+
+    // Detect Environment
+    let is_hyprland = std::env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok();
+    
+    if is_hyprland {
+        // High-Speed Native Hyprland Controller
+        let output = Command::new("hyprctl").args(["clients", "-j"]).output().ok();
+        if let Some(o) = output {
+            let json: serde_json::Value = serde_json::from_slice(&o.stdout).unwrap_or(serde_json::json!([]));
+            let client = json.as_array().and_then(|arr| {
+                arr.iter().find(|c| c["class"] == "waiting-game-bin")
+            });
+
+            if let Some(c) = client {
+                let addr = c["address"].as_str().unwrap_or("");
+                let is_special = c["workspace"]["name"].as_str().map(|n| n.contains("special:")).unwrap_or(false);
+                let is_pinned = c["pinned"].as_bool().unwrap_or(false);
+                let cur_ws = Command::new("hyprctl").args(["activeworkspace", "-j"]).output().ok()
+                    .and_then(|o| serde_json::from_slice::<serde_json::Value>(&o.stdout).ok())
+                    .and_then(|j| j["name"].as_str().map(|s| s.to_string()))
+                    .unwrap_or_else(|| "1".to_string());
+
+                match action {
+                    "toggle" => {
+                        if is_special {
+                            let _ = Command::new("hyprctl").args(["dispatch", "movetoworkspace", &format!("{},address:{}", cur_ws, addr)]).status();
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                        } else {
+                            let _ = Command::new("hyprctl").args(["dispatch", "movetoworkspacesilent", &format!("special:waiting,address:{}", addr)]).status();
+                            let _ = window.hide();
+                        }
+                    },
+                    "pin" => {
+                        if is_special {
+                            let _ = Command::new("hyprctl").args(["dispatch", "movetoworkspace", &format!("{},address:{}", cur_ws, addr)]).status();
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                            std::thread::sleep(std::time::Duration::from_millis(50));
+                            let _ = Command::new("hyprctl").args(["dispatch", "pin", &format!("address:{}", addr)]).status();
+                        } else if is_pinned {
+                            let _ = Command::new("hyprctl").args(["dispatch", "pin", &format!("address:{}", addr)]).status();
+                        } else {
+                            let _ = Command::new("hyprctl").args(["dispatch", "movetoworkspacesilent", &format!("special:waiting,address:{}", addr)]).status();
+                            let _ = window.hide();
+                        }
+                    },
+                    _ => {}
+                }
+            }
+        }
+    } else {
+        // Fallback for KDE/GNOME/macOS/Windows
+        let is_visible = window.is_visible().unwrap_or(false);
+        if is_visible { let _ = window.hide(); } else { let _ = window.show(); let _ = window.set_focus(); }
+    }
+}
+
 pub fn run() {
     let args: Vec<String> = std::env::args().collect();
     
-    // Pure CLI Signal (Communicates with running instance via temp files for simplicity)
+    // Command-line signal handling
     if args.len() > 1 {
         let action = &args[1];
         if action == "toggle" || action == "pin" {
@@ -28,23 +93,15 @@ pub fn run() {
         .setup(move |app| {
             let app_handle = app.handle().clone();
             
-            // Listen for signals from the CLI binary
+            // Background control loop
             std::thread::spawn(move || {
                 let temp_dir = std::env::temp_dir();
                 loop {
-                    // We only handle the INTERNAL toggle here. 
-                    // The WORKSPACE movement is handled by the shell/plugin.
-                    let path = temp_dir.join("waiting-game-toggle");
-                    if path.exists() {
-                        let _ = std::fs::remove_file(&path);
-                        if let Some(window) = app_handle.get_webview_window("main") {
-                            let is_visible = window.is_visible().unwrap_or(false);
-                            if is_visible {
-                                let _ = window.hide();
-                            } else {
-                                let _ = window.show();
-                                let _ = window.set_focus();
-                            }
+                    for action in &["toggle", "pin"] {
+                        let path = temp_dir.join(format!("waiting-game-{}", action));
+                        if path.exists() {
+                            let _ = std::fs::remove_file(&path);
+                            teleport_window(&app_handle, action);
                         }
                     }
                     std::thread::sleep(std::time::Duration::from_millis(50));
