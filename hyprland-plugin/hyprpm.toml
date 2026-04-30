@@ -1,0 +1,9 @@
+[repository]
+name = "waiting-game"
+authors = ["ziuus"]
+
+[waiting-game]
+description = "Immersive Cinematic Dino Overlay Game"
+authors = ["ziuus"]
+output = "waiting-game.so"
+build = [ "make all" ]
