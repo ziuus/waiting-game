@@ -1,111 +1,21 @@
 #!/bin/bash
-set -e
+# Waiting Game - Hyprland Module Installer & Controller
+# This script handles building, installing, and managing the game's state.
 
-echo "⚙️ Waiting Game - Initial Configuration"
-
-# Check if we are in the project root; if not, try to find it
-if [ ! -f "package.json" ] || [ ! -d "src-tauri" ]; then
-    PROJECT_DIR="$HOME/Projects/waiting-game"
-    if [ -d "$PROJECT_DIR" ]; then
-        cd "$PROJECT_DIR"
-    else
-        echo "📂 Searching for project root..."
-        if [ -d "waiting-game" ]; then
-            cd "waiting-game"
-        fi
-    fi
-fi
-
-USE_DEFAULTS=false
-for arg in "$@"; do
-    if [ "$arg" = "--default" ] || [ "$arg" = "-y" ] || [ "$arg" = "-d" ]; then
-        USE_DEFAULTS=true
-        break
-    fi
-done
-
-if [ "$USE_DEFAULTS" = true ]; then
-    echo "⏩ Using default configuration (--default passed)"
-    CONF_GAME="dino"
-    CONF_SPEED=8
-    SCORE_BOOL="true"
-    PIN_RULE=""
-else
-    # --- Default Game ---
-    printf "🎮 Default Game [dino/flappy] (default: dino): "
-    read -r CONF_GAME < /dev/tty
-    CONF_GAME=${CONF_GAME:-dino}
-
-    # --- Initial Speed ---
-    printf "⚡ Initial Speed (default: 8): "
-    read -r CONF_SPEED < /dev/tty
-    CONF_SPEED=${CONF_SPEED:-8}
-
-    # --- Scoreboard ---
-    printf "📊 Show Scoreboard? [Y/n] (default: Y): "
-    read -r CONF_SCORE < /dev/tty
-    CONF_SCORE=${CONF_SCORE:-Y}
-    case "$CONF_SCORE" in
-        [Nn]*) SCORE_BOOL="false" ;;
-        *)     SCORE_BOOL="true"  ;;
-    esac
-
-    # --- Sticky Mode ---
-    printf "📌 Enable Sticky Mode by default? [y/N] (default: N): "
-    read -r CONF_STICKY < /dev/tty
-    CONF_STICKY=${CONF_STICKY:-N}
-    case "$CONF_STICKY" in
-        [Yy]*) PIN_RULE="windowrulev2 = pin, class:^(waiting-game)$" ;;
-        *)     PIN_RULE=""            ;;
-    esac
-fi
-
-echo "💾 Saving configuration..."
-if command -v jq >/dev/null; then
-    mkdir -p src
-    jq ".activeGame = \"$CONF_GAME\" | .difficulty.initialSpeed = $CONF_SPEED | .showScore = $SCORE_BOOL | .background.opacity = 0 | .background.color = \"0, 0, 0\"" src/config.json > src/config.tmp.json && mv src/config.tmp.json src/config.json
-else
-    echo "⚠️ jq not installed. Default config.json will be used."
-fi
-
-echo "🔨 Building production binary with new configuration (this may take a minute)..."
-BUILD_CMD="pnpm tauri build --no-bundle"
-if ! command -v pnpm >/dev/null; then
-    BUILD_CMD="npm run tauri build --no-bundle"
-fi
-
-if ! $BUILD_CMD; then
-    echo "❌ Build failed. Please check the logs above."
-    exit 1
-fi
-
-echo "🦖 Initializing Waiting Game - Universal Installation Protocol..."
-
-    echo "✅ Universal setup: No compositor-specific rules applied."
-
-echo "🚀 Installation Complete!"
-
-# --- 2. System Integration ---
+BIN_NAME="waiting-game"
 BIN_DEST="$HOME/.local/bin"
-mkdir -p "$BIN_DEST"
-SOURCE_BIN="./src-tauri/target/release/waiting-game"
+CONF_DEST="$HOME/.config/hypr"
+ICON_DEST="$HOME/.local/share/icons"
+DESKTOP_DEST="$HOME/.local/share/applications"
 
-if [ -f "$SOURCE_BIN" ]; then
-    # Kill existing process and strictly unlink the old file to prevent "Text file busy"
-    pkill -9 -f "\.local/bin/waiting-game-bin" 2>/dev/null || true
-    rm -f "$BIN_DEST/waiting-game-bin"
-    
-    # Install the actual binary as waiting-game-bin
-    cp "$SOURCE_BIN" "$BIN_DEST/waiting-game-bin"
-    chmod +x "$BIN_DEST/waiting-game-bin"
-    
-    # Create the wrapper script
-    cat > "$BIN_DEST/waiting-game" <<EOF
-#!/bin/bash
-case "\$1" in
+# Default paths
+BINARY_PATH="$BIN_DEST/waiting-game"
+TAURI_BIN="./src-tauri/target/release/waiting-game"
+
+case "$1" in
     run)
         if pgrep -f "\.local/bin/waiting-game-bin" > /dev/null; then
-            echo "✅ Waiting Game daemon is already running."
+            echo "✅ Waiting Game daemon is already running"
         else
             echo "🎮 Starting Waiting Game in background..."
             nohup "$BIN_DEST/waiting-game-bin" >/dev/null 2>&1 &
@@ -144,91 +54,114 @@ case "\$1" in
                 ADDR=$(hyprctl clients -j | jq -r '.[] | select(.class == "waiting-game-bin") | .address' | head -n1)
                 
                 if [ -n "$ADDR" ]; then
-                    IS_SPECIAL=$(hyprctl clients -j | jq -r '.[] | select(.class == "waiting-game-bin") | .workspace.name' | grep -c "special:" || true)
-                    IS_PINNED=$(hyprctl clients -j | jq -r '.[] | select(.class == "waiting-game-bin") | .pinned')
+                    # Get state for THIS specific address
+                    CLIENT_INFO=$(hyprctl clients -j | jq -r ".[] | select(.address == \"$ADDR\")")
+                    IS_SPECIAL=$(echo "$CLIENT_INFO" | jq -r '.workspace.name' | grep -c "special:" || true)
+                    IS_PINNED=$(echo "$CLIENT_INFO" | jq -r '.pinned')
                     CUR_WS=$(hyprctl activeworkspace -j | jq -r '.name')
                     
                     if [ "$IS_SPECIAL" -eq 1 ]; then
                         # State: Hidden -> Sticky
-                        hyprctl dispatch movetoworkspacesilent "$CUR_WS",class:waiting-game-bin
-                        hyprctl dispatch focuswindow class:waiting-game-bin
+                        hyprctl dispatch movetoworkspacesilent "$CUR_WS",address:"$ADDR"
+                        hyprctl dispatch focuswindow address:"$ADDR"
                         sleep 0.1
-                        hyprctl dispatch pin
-                        hyprctl dispatch fullscreen 1
+                        hyprctl dispatch pin address:"$ADDR"
+                        hyprctl dispatch fullscreen 2 address:"$ADDR"
                         echo "📌 Sticky Mode ON (Following user)."
                     elif [ "$IS_PINNED" = "true" ]; then
                         # State: Sticky -> Local
-                        hyprctl dispatch focuswindow class:waiting-game-bin
+                        hyprctl dispatch focuswindow address:"$ADDR"
                         sleep 0.1
-                        hyprctl dispatch pin
-                        hyprctl dispatch fullscreen 1
+                        hyprctl dispatch pin address:"$ADDR"
+                        hyprctl dispatch fullscreen 2 address:"$ADDR"
                         echo "📍 Local Mode ON (Fixed to $CUR_WS)."
                     else
                         # State: Local -> Hidden
-                        hyprctl dispatch movetoworkspacesilent special:waiting,class:waiting-game-bin
+                        hyprctl dispatch movetoworkspacesilent special:waiting,address:"$ADDR"
                         echo "🌑 Hidden Mode ON (Back to scratchpad)."
                     fi
                 else
                     touch /tmp/waiting-game-pin
                 fi
-            else
-                touch /tmp/waiting-game-pin
-                echo "📌 Toggled pin status (IPC)."
             fi
         fi
+        ;;
+    -y|--yes|--default)
+        echo "⚙️ Waiting Game - Initial Configuration"
+        echo "⏩ Using default configuration (--default passed)"
+        echo "💾 Saving configuration..."
+        
+        # Build binary
+        echo "🔨 Building production binary with new configuration (this may take a minute)..."
+        pnpm tauri build --no-bundle
+        
+        # Install binary
+        mkdir -p "$BIN_DEST"
+        killall -9 waiting-game-bin 2>/dev/null || true
+        sleep 1
+        cp "$TAURI_BIN" "$BIN_DEST/waiting-game-bin"
+        
+        # Create wrapper
+        cat << EOF > "$BIN_DEST/waiting-game"
+#!/bin/bash
+"$BIN_DEST/waiting-game-bin" "\$@"
+EOF
+        chmod +x "$BIN_DEST/waiting-game"
+        
+        # Install Assets
+        mkdir -p "$ICON_DEST"
+        cp ./src-tauri/icons/icon.png "$ICON_DEST/waiting-game.png"
+        
+        # Desktop Entry
+        mkdir -p "$DESKTOP_DEST"
+        cat << EOF > "$DESKTOP_DEST/waiting-game.desktop"
+[Desktop Entry]
+Name=Waiting Game
+Comment=Dino game overlay for long waits
+Exec=$BIN_DEST/waiting-game run
+Icon=waiting-game
+Terminal=false
+Type=Application
+Categories=Game;Utility;
+EOF
+
+        # Hyprland Integration
+        if command -v hyprctl >/dev/null 2>&1; then
+            echo "💙 Hyprland detected! Applying native integration..."
+            mkdir -p "$CONF_DEST"
+            
+            # Clean up old source lines
+            sed -i '/waiting-game.conf/d' "$CONF_DEST/hyprland.conf" 2>/dev/null
+            sed -i '/waiting-game.conf/d' "$CONF_DEST/userprefs.conf" 2>/dev/null
+            
+            # Use current path in config
+            sed "s|__BIN_PATH__|$BIN_DEST/waiting-game|g" ./waiting-game.conf > "$CONF_DEST/waiting-game.conf"
+            
+            # Sourcing the config
+            if [ -f "$CONF_DEST/userprefs.conf" ]; then
+                echo "source = $CONF_DEST/waiting-game.conf" >> "$CONF_DEST/userprefs.conf"
+                echo "✅ Integrated as a Hyprland module! Sourced in userprefs.conf"
+            else
+                echo "source = $CONF_DEST/waiting-game.conf" >> "$CONF_DEST/hyprland.conf"
+                echo "✅ Integrated as a Hyprland module! Sourced in hyprland.conf"
+            fi
+        fi
+
+        echo "🚀 Installation Complete!"
+        echo "✅ Binary and command wrapper installed to $BIN_DEST/waiting-game"
+        if [[ ":$PATH:" != *":$BIN_DEST:"* ]]; then
+            echo "⚠️  Note: $BIN_DEST is not in your PATH."
+        fi
+        
+        echo "🎮 Starting Waiting Game..."
+        "$BIN_DEST/waiting-game" run
+        
+        echo "✨ All set! The app will automatically register to autostart."
+        echo "Commands: 'waiting-game run' to start, 'waiting-game stop' to quit."
+        echo "Press Super+Shift+G anywhere to summon the Dino."
         ;;
     *)
         echo "Usage: waiting-game {run|stop|status|toggle|pin}"
+        exit 1
         ;;
 esac
-EOF
-    chmod +x "$BIN_DEST/waiting-game"
-    echo "✅ Binary and command wrapper installed to $BIN_DEST/waiting-game"
-    
-    if [[ ":$PATH:" != *":$BIN_DEST:"* ]]; then
-        echo "⚠️  Note: $BIN_DEST is not in your PATH."
-    fi
-
-    # Desktop Integration
-    echo "🖥️  Integrating with desktop environment..."
-    DESKTOP_DIR="$HOME/.local/share/applications"
-    ICON_DIR="$HOME/.local/share/icons"
-    mkdir -p "$DESKTOP_DIR" "$ICON_DIR"
-    
-    # Update desktop file to use 'run' command
-    sed 's/Exec=waiting-game/Exec=waiting-game run/' "./src-tauri/main.desktop" > "$DESKTOP_DIR/waiting-game.desktop"
-    cp "./src-tauri/icons/icon.png" "$ICON_DIR/waiting-game.png"
-    echo "✅ Desktop entry and icon installed."
-
-    # Hyprland Integration
-    if command -v hyprctl >/dev/null 2>&1; then
-        echo "💙 Hyprland detected! Applying native integration..."
-        HYPR_CONF="$HOME/.config/hypr/userprefs.conf"
-        if [ -f "$HYPR_CONF" ]; then
-            # Copy dedicated config for plugin-style integration
-            mkdir -p "$HOME/.config/hypr"
-            sed "s|__BIN_PATH__|$BIN_DEST/waiting-game|g" "waiting-game.conf" > "$HOME/.config/hypr/waiting-game.conf"
-            
-            # Remove direct entries if they exist and suggest sourcing
-            sed -i '/Waiting Game Native Integration/,/EOF/d' "$HYPR_CONF"
-            if ! grep -q "source = ~/.config/hypr/waiting-game.conf" "$HYPR_CONF"; then
-                echo "" >> "$HYPR_CONF"
-                echo "# Waiting Game Hyprland Module" >> "$HYPR_CONF"
-                echo "source = ~/.config/hypr/waiting-game.conf" >> "$HYPR_CONF"
-            fi
-            
-            hyprctl reload >/dev/null 2>&1 || true
-            echo "✅ Integrated as a Hyprland module! Sourced in userprefs.conf"
-        fi
-    fi
-else
-    echo "⚠️  Could not find release binary for installation."
-fi
-
-# --- 3. Immediate Launch ---
-echo "🎮 Starting Waiting Game..."
-"$BIN_DEST/waiting-game" run
-
-echo "✨ All set! The app will automatically register to autostart."
-echo "Commands: 'waiting-game run' to start, 'waiting-game stop' to quit."
-echo "Press Super+Shift+G anywhere to summon the Dino."
