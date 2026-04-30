@@ -153,7 +153,6 @@ case "\$1" in
                         hyprctl dispatch movetoworkspacesilent "$CUR_WS",class:waiting-game-bin
                         hyprctl dispatch focuswindow class:waiting-game-bin
                         sleep 0.1
-                        hyprctl dispatch fullscreen 0
                         hyprctl dispatch pin
                         hyprctl dispatch fullscreen 1
                         echo "📌 Sticky Mode ON (Following user)."
@@ -161,7 +160,6 @@ case "\$1" in
                         # State: Sticky -> Local
                         hyprctl dispatch focuswindow class:waiting-game-bin
                         sleep 0.1
-                        hyprctl dispatch fullscreen 0
                         hyprctl dispatch pin
                         hyprctl dispatch fullscreen 1
                         echo "📍 Local Mode ON (Fixed to $CUR_WS)."
