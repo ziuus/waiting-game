@@ -104,7 +104,7 @@ case "$1" in
         # Create wrapper
         cat << EOF > "$BIN_DEST/waiting-game"
 #!/bin/bash
-"$BIN_DEST/waiting-game-bin" "\$@"
+"$(realpath "$0")" "\$@"
 EOF
         chmod +x "$BIN_DEST/waiting-game"
         
@@ -153,8 +153,8 @@ EOF
             echo "⚠️  Note: $BIN_DEST is not in your PATH."
         fi
         
-        echo "🎮 Starting Waiting Game..."
-        "$BIN_DEST/waiting-game" run
+        echo "🎮 Starting Waiting Game in background..."
+        "$BIN_DEST/waiting-game" run >/dev/null 2>&1 &
         
         echo "✨ All set! The app will automatically register to autostart."
         echo "Commands: 'waiting-game run' to start, 'waiting-game stop' to quit."
