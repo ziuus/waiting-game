@@ -64,36 +64,37 @@ pub fn run() {
             
             let app_handle_1 = app_handle.clone();
             std::thread::spawn(move || {
+                let temp_dir = std::env::temp_dir();
+                let toggle_path = temp_dir.join("waiting-game-toggle");
+                let pin_path = temp_dir.join("waiting-game-pin");
+
                 loop {
-                    if std::path::Path::new("/tmp/waiting-game-toggle").exists() {
-                        let _ = std::fs::remove_file("/tmp/waiting-game-toggle");
+                    if toggle_path.exists() {
+                        let _ = std::fs::remove_file(&toggle_path);
                         if let Some(window) = app_handle_1.get_webview_window("main") {
-                            // On Hyprland, the toggle IPC is bypassed in favor of native scratchpads
-                            if !is_hyprland {
-                                let is_visible = window.is_visible().unwrap_or(false);
-                                if is_visible {
-                                    let _ = window.hide();
-                                } else {
-                                    let _ = window.show();
-                                    std::thread::sleep(std::time::Duration::from_millis(100));
-                                    let _ = window.set_fullscreen(true);
-                                    let _ = window.set_focus();
-                                }
+                            let is_visible = window.is_visible().unwrap_or(false);
+                            if is_visible {
+                                let _ = window.hide();
+                            } else {
+                                let _ = window.show();
+                                let _ = window.set_focus();
+                                // Ensure fullscreen on show for all platforms to keep it an overlay
+                                let _ = window.set_fullscreen(true);
                             }
                         }
                     }
                     
-                    if std::path::Path::new("/tmp/waiting-game-pin").exists() {
-                        let _ = std::fs::remove_file("/tmp/waiting-game-pin");
-                            if let Some(window) = app_handle_1.get_webview_window("main") {
-                                let is_top = window.is_always_on_top().unwrap_or(false);
-                                let _ = window.set_always_on_top(!is_top);
-                            }
+                    if pin_path.exists() {
+                        let _ = std::fs::remove_file(&pin_path);
+                        if let Some(window) = app_handle_1.get_webview_window("main") {
+                            let is_top = window.is_always_on_top().unwrap_or(false);
+                            let _ = window.set_always_on_top(!is_top);
                         }
-                        
-                        std::thread::sleep(std::time::Duration::from_millis(50));
                     }
-                });
+                    
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                }
+            });
 
             // Enable autostart
             let _ = app.handle().autolaunch().enable();
