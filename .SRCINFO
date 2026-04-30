@@ -1,0 +1,21 @@
+pkgbase = waiting-game-git
+	pkgdesc = Cinematic kinetic overlay game for developers, optimized for Hyprland.
+	pkgver = 0.3.5
+	pkgrel = 1
+	url = https://github.com/ziuus/waiting-game
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	makedepends = cargo
+	makedepends = npm
+	makedepends = pnpm
+	makedepends = git
+	depends = hyprland
+	depends = jq
+	depends = python
+	provides = waiting-game
+	conflicts = waiting-game
+	source = git+https://github.com/ziuus/waiting-game.git
+	sha256sums = SKIP
+
+pkgname = waiting-game-git
