@@ -1,8 +1,10 @@
 #include <hyprland/src/plugins/PluginAPI.hpp>
 #include <hyprland/src/Compositor.hpp>
-#include <hyprland/src/desktop/Window.hpp>
+#include <hyprland/src/desktop/view/Window.hpp>
 #include <hyprland/src/config/ConfigManager.hpp>
 #include <hyprland/src/render/Renderer.hpp>
+#include <hyprland/src/helpers/Color.hpp>
+#include <hyprgraphics/color/Color.hpp>
 
 #include <iostream>
 #include <string>
@@ -12,8 +14,8 @@ HANDLE PHANDLE = nullptr;
 
 // Find the Waiting Game window
 PHLWINDOW findDinoWindow() {
-    for (auto& w : g_pCompositor->m_vWindows) {
-        if (w->m_szClass == "waiting-game-bin") {
+    for (auto& w : g_pCompositor->m_windows) {
+        if (w && w->m_class == "waiting-game-bin") {
             return w;
         }
     }
@@ -24,26 +26,24 @@ PHLWINDOW findDinoWindow() {
 void toggleDino(std::string args) {
     auto pWindow = findDinoWindow();
     if (!pWindow) {
-        // Try to start it if not running
         system("waiting-game run &");
         return;
     }
 
-    const auto PWORKSPACE = pWindow->m_pWorkspace;
+    const auto PWORKSPACE = pWindow->m_workspace;
     if (!PWORKSPACE) return;
 
-    if (PWORKSPACE->m_szName.find("special:") != std::string::npos) {
-        // Hidden -> Summon to current
-        const auto PACTIVEWS = g_pCompositor->m_pLastMonitor->activeWorkspace;
-        if (PACTIVEWS) {
-            g_pCompositor->moveWindowToWorkspace(pWindow, PACTIVEWS);
-            g_pCompositor->focusWindow(pWindow);
+    if (PWORKSPACE->m_name.find("special:") != std::string::npos) {
+        // Hidden -> Summon to current monitor's active workspace
+        const auto PMONITOR = g_pCompositor->getMonitorFromCursor();
+        if (PMONITOR && PMONITOR->m_activeWorkspace) {
+            pWindow->moveToWorkspace(PMONITOR->m_activeWorkspace);
         }
     } else {
         // Visible -> Hide to scratchpad
         const auto PSPECIAL = g_pCompositor->getWorkspaceByName("special:waiting");
         if (PSPECIAL) {
-            g_pCompositor->moveWindowToWorkspace(pWindow, PSPECIAL);
+            pWindow->moveToWorkspace(PSPECIAL);
         }
     }
 }
@@ -53,51 +53,48 @@ void pinDino(std::string args) {
     auto pWindow = findDinoWindow();
     if (!pWindow) return;
 
-    const auto PWORKSPACE = pWindow->m_pWorkspace;
+    const auto PWORKSPACE = pWindow->m_workspace;
     if (!PWORKSPACE) return;
 
-    if (PWORKSPACE->m_szName.find("special:") != std::string::npos) {
+    if (PWORKSPACE->m_name.find("special:") != std::string::npos) {
         // Hidden -> Sticky
-        const auto PACTIVEWS = g_pCompositor->m_pLastMonitor->activeWorkspace;
-        if (PACTIVEWS) {
-            g_pCompositor->moveWindowToWorkspace(pWindow, PACTIVEWS);
-            pWindow->m_bPinned = true;
-            g_pCompositor->focusWindow(pWindow);
+        const auto PMONITOR = g_pCompositor->getMonitorFromCursor();
+        if (PMONITOR && PMONITOR->m_activeWorkspace) {
+            pWindow->moveToWorkspace(PMONITOR->m_activeWorkspace);
+            pWindow->m_pinned = true;
         }
-    } else if (pWindow->m_bPinned) {
+    } else if (pWindow->m_pinned) {
         // Sticky -> Local
-        pWindow->m_bPinned = false;
+        pWindow->m_pinned = false;
     } else {
         // Local -> Hidden
         const auto PSPECIAL = g_pCompositor->getWorkspaceByName("special:waiting");
         if (PSPECIAL) {
-            g_pCompositor->moveWindowToWorkspace(pWindow, PSPECIAL);
+            pWindow->moveToWorkspace(PSPECIAL);
         }
     }
 }
 
 APICALL EXPORT PLUGIN_DESCRIPTION_INFO pluginInfo() {
-    return {"Waiting Game", "Native cinematic Dino overlay integration", "ziuus", "0.4.0"};
+    return {"Waiting Game", "Native cinematic Dino overlay integration", "ziuus", "0.4.6"};
 }
 
-APICALL EXPORT PLUGIN_API_VERSION() {
+APICALL EXPORT const char* pluginAPIVersion() {
     return HYPRLAND_API_VERSION;
 }
 
-APICALL EXPORT PLUGIN_INIT(HANDLE handle) {
+APICALL EXPORT PLUGIN_DESCRIPTION_INFO pluginInit(HANDLE handle) {
     PHANDLE = handle;
 
     HyprlandAPI::addDispatcher(PHANDLE, "waiting-game:toggle", toggleDino);
     HyprlandAPI::addDispatcher(PHANDLE, "waiting-game:pin", pinDino);
 
-    HyprlandAPI::addConfigValue(PHANDLE, "plugin:waiting-game:autostart", Hyprlang::INT{1});
+    // Notify user safely
+    HyprlandAPI::addNotification(PHANDLE, "Waiting Game Plugin Loaded!", CHyprColor(0.2f, 0.8f, 0.2f, 1.0f), 5000);
 
-    // Notify user
-    HyprlandAPI::addNotification(PHANDLE, "Waiting Game Plugin Loaded!", CColor(0.2f, 0.8f, 0.2f, 1.0f), 5000);
-
-    return {.name = "Waiting Game"};
+    return pluginInfo();
 }
 
-APICALL EXPORT PLUGIN_EXIT() {
-    // Cleanup if needed
+APICALL EXPORT void pluginExit() {
+    // Cleanup
 }

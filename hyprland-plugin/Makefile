@@ -4,7 +4,7 @@ PLUGIN_NAME = waiting-game.so
 SOURCE = src/main.cpp
 
 CXX = g++
-CXXFLAGS = -shared -fPIC --optimize-speed -std=c++23
+CXXFLAGS = -shared -fPIC -O3 -std=c++2b
 CXXFLAGS += `pkg-config --cflags hyprland pixman-1 libdrm pangocairo`
 LDFLAGS = `pkg-config --libs hyprland pixman-1 libdrm pangocairo`
 
