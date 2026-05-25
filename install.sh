@@ -114,10 +114,6 @@ EOF
             sed -i '/waiting-game.conf/d' "$CONF_DEST/hyprland.conf" 2>/dev/null
             sed -i '/waiting-game.conf/d' "$CONF_DEST/userprefs.conf" 2>/dev/null
             sed "s|__BIN_PATH__|$BIN_DEST/waiting-game|g" ./waiting-game.conf > "$CONF_DEST/waiting-game.conf"
-            # Force syntax update for modern Hyprland
-            sed -i 's/windowrule = /windowrulev2 = /g' "$CONF_DEST/waiting-game.conf"
-            sed -i 's/match:class /class:/g' "$CONF_DEST/waiting-game.conf"
-            sed -i 's/\^(waiting-game-bin)\$/waiting-game-bin/g' "$CONF_DEST/waiting-game.conf"
             if [ -f "$CONF_DEST/userprefs.conf" ]; then
                 echo "source = $CONF_DEST/waiting-game.conf" >> "$CONF_DEST/userprefs.conf"
             else

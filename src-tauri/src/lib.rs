@@ -3,27 +3,7 @@ use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use std::io::Write;
 use std::process::Command;
 
-#[tauri::command]
-fn hide_window(window: tauri::Window) {
-    let _ = window.hide();
-}
-
-#[tauri::command]
-fn get_config() -> serde_json::Value {
-    let config_path = dirs::config_dir()
-        .map(|p| p.join("waiting-game/config.json"));
-    
-    if let Some(path) = config_path {
-        if path.exists() {
-            if let Ok(content) = std::fs::read_to_string(path) {
-                if let Ok(json) = serde_json::from_str(&content) {
-                    return json;
-                }
-            }
-        }
-    }
-    
-    // Fallback to a hardcoded default or empty if file missing
+fn default_config() -> serde_json::Value {
     serde_json::json!({
         "showScore": true,
         "activeGame": "dino",
@@ -33,8 +13,54 @@ fn get_config() -> serde_json::Value {
             "obstacleColor": "#ff4b2b",
             "scoreColor": "rgba(104, 186, 127, 0.8)"
         },
-        "difficulty": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15 }
+        "difficulty": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15 },
+        "games": [
+            { "id": "dino", "name": "Dino Runner", "enabled": true },
+            { "id": "flappy", "name": "Flappy Bird", "enabled": true }
+        ]
     })
+}
+
+fn merge_json(defaults: &mut serde_json::Value, user: &serde_json::Value) {
+    match (defaults, user) {
+        (serde_json::Value::Object(default_obj), serde_json::Value::Object(user_obj)) => {
+            for (k, v) in user_obj {
+                if let Some(existing) = default_obj.get_mut(k) {
+                    merge_json(existing, v);
+                } else {
+                    default_obj.insert(k.clone(), v.clone());
+                }
+            }
+        }
+        (default_slot, user_value) => {
+            *default_slot = user_value.clone();
+        }
+    }
+}
+
+#[tauri::command]
+fn hide_window(window: tauri::Window) {
+    let _ = window.hide();
+}
+
+#[tauri::command]
+fn get_config() -> serde_json::Value {
+    let config_path = dirs::config_dir()
+        .map(|p| p.join("waiting-game/config.json"));
+
+    let mut merged = default_config();
+
+    if let Some(path) = config_path {
+        if path.exists() {
+            if let Ok(content) = std::fs::read_to_string(path) {
+                if let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) {
+                    merge_json(&mut merged, &json);
+                }
+            }
+        }
+    }
+
+    merged
 }
 
 // OS-Aware Teleportation Logic
@@ -120,26 +146,22 @@ pub fn run() {
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
         .invoke_handler(tauri::generate_handler![hide_window, get_config])
         .setup(move |app| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_always_on_top(true);
+                if let Ok(Some(monitor)) = window.current_monitor() {
+                    let size = monitor.size();
+                    let pos = monitor.position();
+                    let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::new(pos.x, pos.y)));
+                    let _ = window.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(size.width, size.height)));
+                }
+            }
+
             // Ensure config directory exists
             if let Some(config_dir) = dirs::config_dir().map(|p| p.join("waiting-game")) {
                 let _ = std::fs::create_dir_all(&config_dir);
                 let config_file = config_dir.join("config.json");
                 if !config_file.exists() {
-                    let default_config = serde_json::json!({
-                        "showScore": true,
-                        "activeGame": "dino",
-                        "background": { "opacity": 0, "color": "0, 0, 0" },
-                        "theme": {
-                            "dinoColor": "#68BA7F",
-                            "obstacleColor": "#ff4b2b",
-                            "scoreColor": "rgba(104, 186, 127, 0.8)"
-                        },
-                        "difficulty": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15 },
-                        "games": [
-                            { "id": "dino", "name": "Dino Runner", "enabled": true },
-                            { "id": "flappy", "name": "Flappy Bird", "enabled": true }
-                        ]
-                    });
+                    let default_config = default_config();
                     if let Ok(content) = serde_json::to_string_pretty(&default_config) {
                         let _ = std::fs::write(config_file, content);
                     }
