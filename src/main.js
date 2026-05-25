@@ -47,8 +47,8 @@ function updateScoreDisplay() {
 
 async function init() {
     try {
-        const response = await fetch('config.json');
-        config = await response.json();
+        // Load config from Rust (supports external ~/.config/waiting-game/config.json)
+        config = await window.__TAURI__.core.invoke('get_config');
         
         // Apply configurable background — default fully transparent
         const bg = config.background || { opacity: 0, color: '0, 0, 0' };

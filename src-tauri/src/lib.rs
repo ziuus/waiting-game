@@ -8,6 +8,35 @@ fn hide_window(window: tauri::Window) {
     let _ = window.hide();
 }
 
+#[tauri::command]
+fn get_config() -> serde_json::Value {
+    let config_path = dirs::config_dir()
+        .map(|p| p.join("waiting-game/config.json"));
+    
+    if let Some(path) = config_path {
+        if path.exists() {
+            if let Ok(content) = std::fs::read_to_string(path) {
+                if let Ok(json) = serde_json::from_str(&content) {
+                    return json;
+                }
+            }
+        }
+    }
+    
+    // Fallback to a hardcoded default or empty if file missing
+    serde_json::json!({
+        "showScore": true,
+        "activeGame": "dino",
+        "background": { "opacity": 0, "color": "0, 0, 0" },
+        "theme": {
+            "dinoColor": "#68BA7F",
+            "obstacleColor": "#ff4b2b",
+            "scoreColor": "rgba(104, 186, 127, 0.8)"
+        },
+        "difficulty": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15 }
+    })
+}
+
 // OS-Aware Teleportation Logic
 fn teleport_window(app: &tauri::AppHandle, action: &str) {
     let window = match app.get_webview_window("main") {
@@ -89,8 +118,34 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
-        .invoke_handler(tauri::generate_handler![hide_window])
+        .invoke_handler(tauri::generate_handler![hide_window, get_config])
         .setup(move |app| {
+            // Ensure config directory exists
+            if let Some(config_dir) = dirs::config_dir().map(|p| p.join("waiting-game")) {
+                let _ = std::fs::create_dir_all(&config_dir);
+                let config_file = config_dir.join("config.json");
+                if !config_file.exists() {
+                    let default_config = serde_json::json!({
+                        "showScore": true,
+                        "activeGame": "dino",
+                        "background": { "opacity": 0, "color": "0, 0, 0" },
+                        "theme": {
+                            "dinoColor": "#68BA7F",
+                            "obstacleColor": "#ff4b2b",
+                            "scoreColor": "rgba(104, 186, 127, 0.8)"
+                        },
+                        "difficulty": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15 },
+                        "games": [
+                            { "id": "dino", "name": "Dino Runner", "enabled": true },
+                            { "id": "flappy", "name": "Flappy Bird", "enabled": true }
+                        ]
+                    });
+                    if let Ok(content) = serde_json::to_string_pretty(&default_config) {
+                        let _ = std::fs::write(config_file, content);
+                    }
+                }
+            }
+
             let app_handle = app.handle().clone();
             
             // Background control loop

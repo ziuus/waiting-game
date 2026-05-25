@@ -4512,6 +4512,7 @@ dependencies = [
 name = "waiting-game"
 version = "0.3.5"
 dependencies = [
+ "dirs 6.0.0",
  "serde",
  "serde_json",
  "tauri",
