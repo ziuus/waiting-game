@@ -136,11 +136,18 @@
         <div class="go-title">TERMINATED</div>
         <div class="go-subtitle">
             SPACE TO INITIALIZE<br><br>
-            <select id="difficulty-select" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 5px;">
-                <option value="easy">Easy</option>
-                <option value="normal" selected>Normal</option>
-                <option value="hard">Hard</option>
-            </select>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <select id="game-select" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 5px; font-family: inherit;">
+                    <option value="dino">Dino Runner</option>
+                    <option value="flappy">Flappy Bird</option>
+                    <option value="gravity">Gravity Runner</option>
+                </select>
+                <select id="difficulty-select" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 5px; font-family: inherit;">
+                    <option value="easy">Easy</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
         </div>
       </div>
       <canvas id="gameCanvas"></canvas>

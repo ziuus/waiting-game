@@ -13,12 +13,14 @@ export default class FlappyGame {
         this.bird = {
             x: 150,
             y: window.innerHeight / 2,
-            width: 30,
-            height: 45,
+            width: 46,
+            height: 34,
             dy: 0,
             jump: -this.config.difficulty.jumpForce / 2, // Map jumpForce to bird jump
             gravity: this.config.difficulty.gravity / 2, // Map gravity
-            color: this.config.activeTheme.player
+            color: this.config.activeTheme.player,
+            rotation: 0,
+            wingPhase: 0
         };
         this.frame = 0;
         this.obstacleGap = this.config.difficulty.obstacleGap;
@@ -29,6 +31,8 @@ export default class FlappyGame {
 
         this.bird.dy += this.bird.gravity;
         this.bird.y += this.bird.dy;
+        this.bird.rotation = Math.max(-0.45, Math.min(0.7, this.bird.dy / 14));
+        this.bird.wingPhase += 0.28;
 
         // Collision with floor/ceiling
         if (this.bird.y + this.bird.height > window.innerHeight || this.bird.y < 0) {
@@ -44,13 +48,13 @@ export default class FlappyGame {
                 x: window.innerWidth,
                 top: height,
                 bottom: window.innerHeight - height - gap,
-                width: 60,
+                width: 42,
                 passed: false
             });
         }
 
         this.pipes.forEach((pipe, index) => {
-            pipe.x -= 5;
+            pipe.x -= this.config.difficulty.initialSpeed || 4;
 
             // Collision
             if (this.bird.x < pipe.x + pipe.width &&
@@ -75,41 +79,115 @@ export default class FlappyGame {
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw Pipes
+        // Draw Pipes — slimmer neon rounded gates instead of giant flat bars
         this.pipes.forEach(pipe => {
-            this.ctx.shadowBlur = 15;
-            this.ctx.shadowColor = this.config.activeTheme.obstacle;
-            this.ctx.fillStyle = this.config.activeTheme.obstacle;
-            
-            // Top pipe
-            this.ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
-            // Bottom pipe
-            this.ctx.fillRect(pipe.x, window.innerHeight - pipe.bottom, pipe.width, pipe.bottom);
+            this.drawPipe(pipe.x, 0, pipe.width, pipe.top, true);
+            this.drawPipe(pipe.x, window.innerHeight - pipe.bottom, pipe.width, pipe.bottom, false);
         });
 
-        // Draw Bird
-        this.ctx.shadowBlur = 20;
-        this.ctx.shadowColor = this.bird.color;
-        this.ctx.fillStyle = this.bird.color;
-        this.ctx.fillRect(this.bird.x, this.bird.y, this.bird.width, this.bird.height);
+        this.drawBird();
         
         this.ctx.shadowBlur = 0;
     }
 
-    drawFlyingDino(x, y) {
-        this.ctx.fillStyle = this.bird.color;
+    roundedRect(x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + r, y);
+        this.ctx.lineTo(x + width - r, y);
+        this.ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+        this.ctx.lineTo(x + width, y + height - r);
+        this.ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        this.ctx.lineTo(x + r, y + height);
+        this.ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+        this.ctx.lineTo(x, y + r);
+        this.ctx.quadraticCurveTo(x, y, x + r, y);
+        this.ctx.closePath();
+    }
+
+    drawPipe(x, y, width, height, isTop) {
+        if (height <= 0) return;
+
+        const color = this.config.activeTheme.obstacle;
+        const capHeight = 18;
+        const bodyInset = 8;
+
+        this.ctx.save();
+        this.ctx.shadowBlur = 18;
+        this.ctx.shadowColor = color;
+        this.ctx.fillStyle = 'rgba(76, 175, 80, 0.72)';
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+        this.ctx.lineWidth = 1;
+
+        this.roundedRect(x + bodyInset, y, width - bodyInset * 2, height, 10);
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        const capY = isTop ? y + height - capHeight : y;
+        this.ctx.fillStyle = 'rgba(104, 186, 127, 0.86)';
+        this.roundedRect(x - 4, capY, width + 8, capHeight, 8);
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        this.ctx.restore();
+    }
+
+    drawBird() {
+        const x = this.bird.x;
+        const y = this.bird.y;
+        const w = this.bird.width;
+        const h = this.bird.height;
+        const wing = Math.sin(this.bird.wingPhase) * 7;
+
+        this.ctx.save();
+        this.ctx.translate(x + w / 2, y + h / 2);
+        this.ctx.rotate(this.bird.rotation);
+        this.ctx.translate(-w / 2, -h / 2);
+
+        this.ctx.shadowBlur = 20;
+        this.ctx.shadowColor = this.bird.color;
+
+        // Tail feathers
+        this.ctx.fillStyle = '#ff9800';
+        this.ctx.beginPath();
+        this.ctx.moveTo(4, h / 2);
+        this.ctx.lineTo(-12, h / 2 - 9);
+        this.ctx.lineTo(-9, h / 2 + 7);
+        this.ctx.closePath();
+        this.ctx.fill();
+
         // Body
-        this.ctx.fillRect(x, y + 10, 30, 25);
-        // Head
-        this.ctx.fillRect(x + 15, y, 18, 15);
-        // Eye
-        this.ctx.fillStyle = '#000';
-        this.ctx.fillRect(x + 26, y + 4, 3, 3);
-        
-        // Wing Animation
         this.ctx.fillStyle = this.bird.color;
-        const wingPos = Math.sin(Date.now() / 100) * 10;
-        this.ctx.fillRect(x - 5, y + 15 + wingPos, 15, 8);
+        this.ctx.beginPath();
+        this.ctx.ellipse(w / 2, h / 2, w / 2, h / 2.15, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Wing
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+        this.ctx.beginPath();
+        this.ctx.ellipse(w * 0.38, h * 0.58 + wing * 0.25, 13, 7 + Math.abs(wing * 0.25), -0.35, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Beak
+        this.ctx.fillStyle = '#ff7043';
+        this.ctx.beginPath();
+        this.ctx.moveTo(w - 2, h * 0.48);
+        this.ctx.lineTo(w + 14, h * 0.38);
+        this.ctx.lineTo(w + 10, h * 0.62);
+        this.ctx.closePath();
+        this.ctx.fill();
+
+        // Eye
+        this.ctx.fillStyle = '#fff';
+        this.ctx.beginPath();
+        this.ctx.arc(w * 0.72, h * 0.34, 5, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.fillStyle = '#111';
+        this.ctx.beginPath();
+        this.ctx.arc(w * 0.75, h * 0.34, 2.2, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        this.ctx.restore();
     }
 
     onInput(code) {

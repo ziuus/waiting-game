@@ -22,6 +22,9 @@ let animationId;
 const scoreElement = document.getElementById('score');
 const highScoreElement = document.getElementById('highScore');
 const uiLayer = document.getElementById('ui-layer');
+const getGameSelect = () => document.getElementById('game-select');
+const getDiffSelect = () => document.getElementById('difficulty-select');
+const getSubtitle = () => document.querySelector('.go-subtitle');
 
 function updateScoreDisplay() {
     if (currentGame) {
@@ -45,6 +48,119 @@ function updateScoreDisplay() {
     highScoreElement.textContent = highScore.toString().padStart(5, '0');
 }
 
+function getEnabledGames() {
+    return (config.games || []).filter((game) => game.enabled !== false);
+}
+
+function normalizeGameId(gameId) {
+    const enabled = getEnabledGames();
+    return enabled.some((game) => game.id === gameId) ? gameId : (enabled[0]?.id || 'dino');
+}
+
+function applyGameSettings() {
+    config.activeGame = normalizeGameId(config.activeGame || 'dino');
+    config.activeDifficulty = config.activeDifficulty || 'normal';
+
+    if (config.difficultyModes?.[config.activeDifficulty]?.[config.activeGame]) {
+        config.difficulty = config.difficultyModes[config.activeDifficulty][config.activeGame];
+    } else if (config.difficulty?.[config.activeGame]) {
+        config.difficulty = config.difficulty[config.activeGame];
+    }
+
+    config.activeTheme = config.themes?.[config.activeGame] || {
+        player: '#68BA7F',
+        obstacle: '#ff4b2b',
+        score: 'rgba(104, 186, 127, 0.8)'
+    };
+
+    uiLayer.style.color = config.activeTheme.score;
+    scoreElement.style.color = config.activeTheme.score;
+    scoreElement.style.textShadow = `0 0 10px ${config.activeTheme.score}`;
+
+    if (currentGame) currentGame.config = config;
+}
+
+function populateGameSelector() {
+    const gameSelect = getGameSelect();
+    if (!gameSelect) return;
+    gameSelect.innerHTML = '';
+    for (const game of getEnabledGames()) {
+        const option = document.createElement('option');
+        option.value = game.id;
+        option.textContent = game.name;
+        gameSelect.appendChild(option);
+    }
+    gameSelect.value = config.activeGame;
+}
+
+function bindMenuControls() {
+    const gameSelect = getGameSelect();
+    const diffSelect = getDiffSelect();
+
+    if (gameSelect) {
+        populateGameSelector();
+        gameSelect.onchange = async (e) => {
+            config.activeGame = e.target.value;
+            await loadActiveGame({ persist: true });
+        };
+    }
+
+    if (diffSelect) {
+        diffSelect.value = config.activeDifficulty;
+        diffSelect.onchange = async (e) => {
+            config.activeDifficulty = e.target.value;
+            await loadActiveGame({ persist: true });
+        };
+    }
+}
+
+function renderMenuSubtitle(message = 'SPACE TO INITIALIZE') {
+    const subtitle = getSubtitle();
+    if (!subtitle) return;
+
+    subtitle.innerHTML = `
+        ${message}<br><br>
+        <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: center;">
+            <select id="game-select" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 5px; font-family: inherit;"></select>
+            <select id="difficulty-select" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 5px; font-family: inherit;">
+                <option value="easy">Easy</option>
+                <option value="normal">Normal</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
+    `;
+    bindMenuControls();
+}
+
+async function persistPreferences() {
+    try {
+        await window.__TAURI__.core.invoke('save_preferences', {
+            activeGame: config.activeGame,
+            activeDifficulty: config.activeDifficulty
+        });
+    } catch (error) {
+        console.warn('Failed to save preferences:', error);
+    }
+}
+
+async function loadActiveGame({ persist = false } = {}) {
+    if (animationId) cancelAnimationFrame(animationId);
+
+    applyGameSettings();
+    highScore = Number(localStorage.getItem(`${config.activeGame}-high-score`) || 0);
+
+    const GameModule = await import(`./games/${config.activeGame}.js`);
+    const GameClass = GameModule.default;
+    currentGame = new GameClass(canvas, ctx, config);
+
+    scoreElement.textContent = '00000';
+    highScoreElement.textContent = highScore.toString().padStart(5, '0');
+    resetGameOver();
+
+    if (persist) await persistPreferences();
+    if (isRunning) gameLoop();
+}
+
 async function init() {
     try {
         // Load config from Rust (supports external ~/.config/waiting-game/config.json)
@@ -54,42 +170,17 @@ async function init() {
         const bg = config.background || { opacity: 0, color: '0, 0, 0' };
         const container = document.getElementById('game-container');
         container.style.background = `rgba(${bg.color}, ${bg.opacity})`;
-        
-        // Setup Difficulty Selector
-        const diffSelect = document.getElementById('difficulty-select');
-        diffSelect.value = config.activeDifficulty || 'normal';
-        
-        function updateDifficulty(mode) {
-            config.activeDifficulty = mode;
-            // Set game-specific difficulty
-            if (config.difficultyModes && config.difficultyModes[mode]) {
-                config.difficulty = config.difficultyModes[mode][config.activeGame];
-            }
-            // Set game-specific theme
-            if (config.themes && config.themes[config.activeGame]) {
-                config.activeTheme = config.themes[config.activeGame];
-            }
-            if (currentGame) currentGame.config = config;
-        }
 
-        updateDifficulty(diffSelect.value);
+        config.activeGame = normalizeGameId(config.activeGame || 'dino');
+        config.activeDifficulty = config.activeDifficulty || 'normal';
 
-        diffSelect.addEventListener('change', (e) => {
-            updateDifficulty(e.target.value);
-        });
+        bindMenuControls();
 
-        const GameModule = await import(`./games/${config.activeGame}.js`);
-        const GameClass = GameModule.default;
-        
-        highScore = localStorage.getItem(`${config.activeGame}-high-score`) || 0;
-        
-        currentGame = new GameClass(canvas, ctx, config);
-        uiLayer.style.color = config.activeTheme.score;
         if (config.showScore === false) {
             uiLayer.style.display = 'none';
         }
-        
-        gameLoop();
+
+        await loadActiveGame();
     } catch (e) {
         console.error("Failed to initialize game engine:", e);
     }
@@ -143,7 +234,7 @@ function drawGameOver() {
         gameOverLayer.style.display = 'flex';
         gameOverLayer.style.pointerEvents = 'auto';
         gameOverLayer.querySelector('.go-title').textContent = 'TERMINATED';
-        gameOverLayer.querySelector('.go-subtitle').textContent = 'SPACE TO INITIALIZE';
+        renderMenuSubtitle('SPACE TO INITIALIZE');
         gsap.to(gameOverLayer, { opacity: 1, duration: 0.8, ease: "power2.out" });
         gsap.fromTo('.go-title', 
             { y: -50, scale: 0.8, opacity: 0 }, 

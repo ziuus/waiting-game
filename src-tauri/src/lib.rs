@@ -1,6 +1,7 @@
 use tauri::{Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use std::io::Write;
+use std::path::PathBuf;
 
 fn default_config() -> serde_json::Value {
     serde_json::json!({
@@ -18,29 +19,39 @@ fn default_config() -> serde_json::Value {
                 "player": "#FFC107",
                 "obstacle": "#4CAF50",
                 "score": "rgba(255, 193, 7, 0.8)"
+            },
+            "gravity": {
+                "player": "#00E5FF",
+                "obstacle": "#FF00FF",
+                "score": "rgba(0, 229, 255, 0.8)"
             }
         },
         "difficulty": {
             "dino": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15, "obstacleGap": 160 },
-            "flappy": { "initialSpeed": 4, "gravity": 0.3, "jumpForce": 10, "obstacleGap": 250 }
+            "flappy": { "initialSpeed": 4, "gravity": 0.3, "jumpForce": 10, "obstacleGap": 250 },
+            "gravity": { "initialSpeed": 10, "gravity": 1.2, "jumpForce": 0, "obstacleGap": 300 }
         },
         "difficultyModes": {
             "easy": {
                 "dino": { "initialSpeed": 5, "gravity": 0.5, "jumpForce": 12, "obstacleGap": 200 },
-                "flappy": { "initialSpeed": 3, "gravity": 0.2, "jumpForce": 8, "obstacleGap": 300 }
+                "flappy": { "initialSpeed": 3, "gravity": 0.2, "jumpForce": 8, "obstacleGap": 300 },
+                "gravity": { "initialSpeed": 7, "gravity": 0.8, "jumpForce": 0, "obstacleGap": 400 }
             },
             "normal": {
                 "dino": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15, "obstacleGap": 160 },
-                "flappy": { "initialSpeed": 4, "gravity": 0.3, "jumpForce": 10, "obstacleGap": 250 }
+                "flappy": { "initialSpeed": 4, "gravity": 0.3, "jumpForce": 10, "obstacleGap": 250 },
+                "gravity": { "initialSpeed": 10, "gravity": 1.2, "jumpForce": 0, "obstacleGap": 300 }
             },
             "hard": {
                 "dino": { "initialSpeed": 12, "gravity": 1.0, "jumpForce": 18, "obstacleGap": 120 },
-                "flappy": { "initialSpeed": 6, "gravity": 0.5, "jumpForce": 12, "obstacleGap": 180 }
+                "flappy": { "initialSpeed": 6, "gravity": 0.5, "jumpForce": 12, "obstacleGap": 180 },
+                "gravity": { "initialSpeed": 15, "gravity": 1.8, "jumpForce": 0, "obstacleGap": 200 }
             }
         },
         "games": [
             { "id": "dino", "name": "Dino Runner", "enabled": true },
-            { "id": "flappy", "name": "Flappy Bird", "enabled": true }
+            { "id": "flappy", "name": "Flappy Bird", "enabled": true },
+            { "id": "gravity", "name": "Gravity Runner", "enabled": true }
         ]
     })
 }
@@ -48,7 +59,7 @@ fn default_config() -> serde_json::Value {
 // Strict validation to prevent crashes
 fn validate_config(config: &mut serde_json::Value) {
     if let Some(diff) = config.get_mut("difficulty").and_then(|v| v.as_object_mut()) {
-        for game in ["dino", "flappy"] {
+        for game in ["dino", "flappy", "gravity"] {
             if let Some(game_diff) = diff.get_mut(game).and_then(|v| v.as_object_mut()) {
                 if let Some(speed) = game_diff.get("initialSpeed").and_then(|v| v.as_f64()) {
                     game_diff.insert("initialSpeed".to_string(), serde_json::json!(speed.clamp(1.0, 50.0)));
@@ -57,11 +68,54 @@ fn validate_config(config: &mut serde_json::Value) {
                     game_diff.insert("gravity".to_string(), serde_json::json!(gravity.clamp(0.1, 5.0)));
                 }
                 if let Some(jump) = game_diff.get("jumpForce").and_then(|v| v.as_f64()) {
-                    game_diff.insert("jumpForce".to_string(), serde_json::json!(jump.clamp(1.0, 50.0)));
+                    let min_jump = if game == "gravity" { 0.0 } else { 1.0 };
+                    game_diff.insert("jumpForce".to_string(), serde_json::json!(jump.clamp(min_jump, 50.0)));
                 }
                 if let Some(gap) = game_diff.get("obstacleGap").and_then(|v| v.as_f64()) {
                     game_diff.insert("obstacleGap".to_string(), serde_json::json!(gap.clamp(50.0, 500.0)));
                 }
+            }
+        }
+    }
+
+    let allowed_games = ["dino", "flappy", "gravity"];
+    if !config
+        .get("activeGame")
+        .and_then(|v| v.as_str())
+        .map(|game| allowed_games.contains(&game))
+        .unwrap_or(false)
+    {
+        config["activeGame"] = serde_json::json!("dino");
+    }
+
+    let allowed_difficulties = ["easy", "normal", "hard"];
+    if !config
+        .get("activeDifficulty")
+        .and_then(|v| v.as_str())
+        .map(|difficulty| allowed_difficulties.contains(&difficulty))
+        .unwrap_or(false)
+    {
+        config["activeDifficulty"] = serde_json::json!("normal");
+    }
+
+    let builtin_games = [
+        serde_json::json!({ "id": "dino", "name": "Dino Runner", "enabled": true }),
+        serde_json::json!({ "id": "flappy", "name": "Flappy Bird", "enabled": true }),
+        serde_json::json!({ "id": "gravity", "name": "Gravity Runner", "enabled": true }),
+    ];
+
+    if !config.get("games").map(|v| v.is_array()).unwrap_or(false) {
+        config["games"] = serde_json::json!([]);
+    }
+
+    if let Some(games) = config.get_mut("games").and_then(|v| v.as_array_mut()) {
+        for game in builtin_games {
+            let id = game.get("id").and_then(|v| v.as_str()).unwrap_or_default();
+            let exists = games
+                .iter()
+                .any(|existing| existing.get("id").and_then(|v| v.as_str()) == Some(id));
+            if !exists {
+                games.push(game);
             }
         }
     }
@@ -84,6 +138,10 @@ fn merge_json(defaults: &mut serde_json::Value, user: &serde_json::Value) {
     }
 }
 
+fn config_file_path() -> Option<PathBuf> {
+    dirs::config_dir().map(|p| p.join("waiting-game/config.json"))
+}
+
 #[tauri::command]
 fn hide_window(window: tauri::Window) {
     let _ = window.hide();
@@ -91,8 +149,7 @@ fn hide_window(window: tauri::Window) {
 
 #[tauri::command]
 fn get_config() -> serde_json::Value {
-    let config_path = dirs::config_dir()
-        .map(|p| p.join("waiting-game/config.json"));
+    let config_path = config_file_path();
 
     let mut merged = default_config();
 
@@ -108,6 +165,45 @@ fn get_config() -> serde_json::Value {
 
     validate_config(&mut merged);
     merged
+}
+
+#[tauri::command]
+fn save_preferences(active_game: String, active_difficulty: String) -> Result<(), String> {
+    const ALLOWED_GAMES: [&str; 3] = ["dino", "flappy", "gravity"];
+    const ALLOWED_DIFFICULTIES: [&str; 3] = ["easy", "normal", "hard"];
+
+    if !ALLOWED_GAMES.contains(&active_game.as_str()) {
+        return Err(format!("Unsupported game: {}", active_game));
+    }
+
+    if !ALLOWED_DIFFICULTIES.contains(&active_difficulty.as_str()) {
+        return Err(format!("Unsupported difficulty: {}", active_difficulty));
+    }
+
+    let mut merged = default_config();
+
+    if let Some(path) = config_file_path() {
+        if path.exists() {
+            if let Ok(content) = std::fs::read_to_string(&path) {
+                if let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) {
+                    merge_json(&mut merged, &json);
+                }
+            }
+        }
+
+        merged["activeGame"] = serde_json::json!(active_game);
+        merged["activeDifficulty"] = serde_json::json!(active_difficulty);
+        validate_config(&mut merged);
+
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+
+        let content = serde_json::to_string_pretty(&merged).map_err(|e| e.to_string())?;
+        std::fs::write(path, content).map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
 }
 
 // OS-Aware Teleportation Logic
@@ -155,7 +251,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec!["--minimized"])))
-        .invoke_handler(tauri::generate_handler![hide_window, get_config])
+        .invoke_handler(tauri::generate_handler![hide_window, get_config, save_preferences])
         .setup(move |app| {
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.set_always_on_top(true);
