@@ -34,6 +34,11 @@ fn default_config() -> serde_json::Value {
                 "player": "#7C4DFF",
                 "obstacle": "#00E5FF",
                 "score": "rgba(124, 77, 255, 0.85)"
+            },
+            "defender": {
+                "player": "#00F5FF",
+                "obstacle": "#FF3B81",
+                "score": "rgba(0, 245, 255, 0.85)"
             }
         },
         "difficulty": {
@@ -41,7 +46,8 @@ fn default_config() -> serde_json::Value {
             "flappy": { "initialSpeed": 4, "gravity": 0.3, "jumpForce": 10, "obstacleGap": 250 },
             "gravity": { "initialSpeed": 10, "gravity": 1.2, "jumpForce": 0, "obstacleGap": 300 },
             "snake": { "initialSpeed": 7, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 260 },
-            "breakout": { "initialSpeed": 7, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 8 }
+            "breakout": { "initialSpeed": 7, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 8 },
+            "defender": { "initialSpeed": 6, "gravity": 0.14, "jumpForce": 8, "obstacleGap": 54 }
         },
         "difficultyModes": {
             "easy": {
@@ -49,21 +55,24 @@ fn default_config() -> serde_json::Value {
                 "flappy": { "initialSpeed": 3, "gravity": 0.2, "jumpForce": 8, "obstacleGap": 300 },
                 "gravity": { "initialSpeed": 7, "gravity": 0.8, "jumpForce": 0, "obstacleGap": 400 },
                 "snake": { "initialSpeed": 5, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 320 },
-                "breakout": { "initialSpeed": 5, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 7 }
+                "breakout": { "initialSpeed": 5, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 7 },
+                "defender": { "initialSpeed": 4, "gravity": 0.1, "jumpForce": 7, "obstacleGap": 70 }
             },
             "normal": {
                 "dino": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15, "obstacleGap": 160 },
                 "flappy": { "initialSpeed": 4, "gravity": 0.3, "jumpForce": 10, "obstacleGap": 250 },
                 "gravity": { "initialSpeed": 10, "gravity": 1.2, "jumpForce": 0, "obstacleGap": 300 },
                 "snake": { "initialSpeed": 7, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 260 },
-                "breakout": { "initialSpeed": 7, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 8 }
+                "breakout": { "initialSpeed": 7, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 8 },
+                "defender": { "initialSpeed": 6, "gravity": 0.14, "jumpForce": 8, "obstacleGap": 54 }
             },
             "hard": {
                 "dino": { "initialSpeed": 12, "gravity": 1.0, "jumpForce": 18, "obstacleGap": 120 },
                 "flappy": { "initialSpeed": 6, "gravity": 0.5, "jumpForce": 12, "obstacleGap": 180 },
                 "gravity": { "initialSpeed": 15, "gravity": 1.8, "jumpForce": 0, "obstacleGap": 200 },
                 "snake": { "initialSpeed": 10, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 210 },
-                "breakout": { "initialSpeed": 9, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 9 }
+                "breakout": { "initialSpeed": 9, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 9 },
+                "defender": { "initialSpeed": 8, "gravity": 0.18, "jumpForce": 10, "obstacleGap": 42 }
             }
         },
         "games": [
@@ -71,7 +80,8 @@ fn default_config() -> serde_json::Value {
             { "id": "flappy", "name": "Flappy Bird", "enabled": true },
             { "id": "gravity", "name": "Gravity Runner", "enabled": true },
             { "id": "snake", "name": "Cyber Snake", "enabled": true },
-            { "id": "breakout", "name": "Neon Breakout", "enabled": true }
+            { "id": "breakout", "name": "Neon Breakout", "enabled": true },
+            { "id": "defender", "name": "Defender", "enabled": true }
         ]
     })
 }
@@ -79,7 +89,7 @@ fn default_config() -> serde_json::Value {
 // Strict validation to prevent crashes
 fn validate_config(config: &mut serde_json::Value) {
     if let Some(diff) = config.get_mut("difficulty").and_then(|v| v.as_object_mut()) {
-        for game in ["dino", "flappy", "gravity", "snake", "breakout"] {
+        for game in ["dino", "flappy", "gravity", "snake", "breakout", "defender"] {
             if let Some(game_diff) = diff.get_mut(game).and_then(|v| v.as_object_mut()) {
                 if let Some(speed) = game_diff.get("initialSpeed").and_then(|v| v.as_f64()) {
                     game_diff.insert("initialSpeed".to_string(), serde_json::json!(speed.clamp(1.0, 50.0)));
@@ -98,7 +108,7 @@ fn validate_config(config: &mut serde_json::Value) {
         }
     }
 
-    let allowed_games = ["dino", "flappy", "gravity", "snake", "breakout"];
+    let allowed_games = ["dino", "flappy", "gravity", "snake", "breakout", "defender"];
     if !config
         .get("activeGame")
         .and_then(|v| v.as_str())
@@ -124,6 +134,7 @@ fn validate_config(config: &mut serde_json::Value) {
         serde_json::json!({ "id": "gravity", "name": "Gravity Runner", "enabled": true }),
         serde_json::json!({ "id": "snake", "name": "Cyber Snake", "enabled": true }),
         serde_json::json!({ "id": "breakout", "name": "Neon Breakout", "enabled": true }),
+        serde_json::json!({ "id": "defender", "name": "Defender", "enabled": true }),
     ];
 
     if !config.get("games").map(|v| v.is_array()).unwrap_or(false) {
@@ -191,7 +202,7 @@ fn get_config() -> serde_json::Value {
 
 #[tauri::command]
 fn save_preferences(active_game: String, active_difficulty: String) -> Result<(), String> {
-    const ALLOWED_GAMES: [&str; 5] = ["dino", "flappy", "gravity", "snake", "breakout"];
+    const ALLOWED_GAMES: [&str; 6] = ["dino", "flappy", "gravity", "snake", "breakout", "defender"];
     const ALLOWED_DIFFICULTIES: [&str; 3] = ["easy", "normal", "hard"];
 
     if !ALLOWED_GAMES.contains(&active_game.as_str()) {

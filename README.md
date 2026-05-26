@@ -11,12 +11,16 @@
 
 Waiting Game is a minimalist, cinematic overlay built with **Tauri and Rust**. It sits invisibly in the background of your desktop environment and only appears when summoned, providing a frictionless kinetic experience during idle time without impacting system resources.
 
+Current release: **v0.3.11** — includes Dino Runner, Flappy Bird, Gravity Runner, Cyber Snake, Neon Breakout, and Defender.
+
 ## ⚡ Core Features
 
 - **Invisible Protocol**: Starts completely hidden; zero UI footprint until triggered.
-- **Pure Transparency**: Advanced compositing ensures only the kinetic Dino and obstacles are visible.
+- **Pure Transparency**: Advanced compositing keeps the overlay lightweight and visually clean.
 - **Cross-Platform Performance**: Near-zero CPU/RAM overhead when inactive, leveraging Rust's memory safety and speed.
-- **Dynamic Difficulty**: Multiple game modes (Easy, Normal, Hard) with custom gravity and speed parameters.
+- **Multiple Game Modes**: Dino Runner, Flappy Bird, Gravity Runner, Cyber Snake, Neon Breakout, and Defender.
+- **Dynamic Difficulty**: Easy, Normal, and Hard presets with per-game speed, physics, and spacing parameters.
+- **Customizable Roster**: Enable, disable, rename, and theme games through the config file.
 
 ## 📸 Interface
 
@@ -29,17 +33,44 @@ Waiting Game is a minimalist, cinematic overlay built with **Tauri and Rust**. I
 
 Waiting Game is cross-platform and provides multiple ways to install.
 
+### ✅ Recommended Install
+
+Download the latest native build from the [Releases Page](https://github.com/ziuus/waiting-game/releases/latest).
+
+#### Linux AppImage
+
+```bash
+curl -L -o waiting-game.AppImage \
+  https://github.com/ziuus/waiting-game/releases/download/v0.3.11/waiting-game_0.3.11_amd64.AppImage
+chmod +x waiting-game.AppImage
+./waiting-game.AppImage
+```
+
+On this development system, the latest AppImage is installed at:
+
+```bash
+~/Applications/waiting-game-0.3.10.AppImage
+```
+
+and symlinked as:
+
+```bash
+~/bin/waiting-game
+```
+
 ### 📦 Package Managers
+
+Package-manager manifests exist in `packaging/`, but they are **not published to public registries yet**. Until publishing is complete, use the GitHub Releases install method above.
 
 | OS | Method | Command |
 | :--- | :--- | :--- |
-| **Linux (Arch)** | **AUR** | `yay -S waiting-game-bin` |
-| **Windows** | **WinGet** | `winget install ziuus.WaitingGame` |
-| **Universal** | **npm** | `npx waiting-game` |
+| **Linux (Arch)** | **AUR** | Planned: `waiting-game-bin` |
+| **Windows** | **WinGet** | Planned: `ziuus.WaitingGame` |
+| **Universal** | **npm** | Planned: `npx waiting-game` |
 
 ### ⬇️ Native Downloads
 
-Download the latest release in your preferred format from the [Releases Page](https://github.com/ziuus/waiting-game/releases).
+Download the latest release in your preferred format from the [Releases Page](https://github.com/ziuus/waiting-game/releases/latest).
 
 #### Linux
 - **AppImage**: Universal Linux binary.
@@ -63,6 +94,15 @@ This sets up dedicated window rules and autostart configuration at `~/.config/hy
 
 ## 🕹️ Configuration & Difficulty
 
+### Game Modes
+
+- **Dino Runner**: Classic kinetic runner.
+- **Flappy Bird**: Polished bird, neon pipes, and momentum-based flight.
+- **Gravity Runner**: Cyber gravity-flip runner with neon spikes.
+- **Cyber Snake**: Grid-based snake with glowing food, obstacles, and particle effects.
+- **Neon Breakout**: Paddle, glowing ball, brick waves, and trail effects.
+- **Defender**: Side-scrolling neon space defense with movement, shooting, shields, enemies, and enemy fire.
+
 ### Difficulty Modes
 You can switch between difficulty modes via the in-game UI:
 - **Easy**: Relaxed speed and higher jump force.
@@ -75,9 +115,11 @@ Advanced users can modify the game parameters directly at:
 
 Supported parameters include:
 - `initialSpeed`: Movement speed of obstacles.
-- `gravity`: How fast the Dino falls.
-- `jumpForce`: Vertical thrust when jumping.
-- `obstacleGap`: Minimum distance between obstacles.
+- `gravity`: Game-specific vertical physics where applicable.
+- `jumpForce`: Vertical thrust or action intensity where applicable.
+- `obstacleGap`: Game-specific spacing, rows, or density tuning.
+- `themes`: Per-game player, obstacle, and score colors.
+- `games`: Enable/disable games and customize display names.
 
 ## 🕹️ CLI Commands
 
