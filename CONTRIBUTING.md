@@ -6,7 +6,7 @@ First off, thank you for considering contributing to Waiting Game! It's people l
 
 ### Reporting Bugs
 * Check the GitHub Issues for existing reports.
-* If you find a new bug, please open a new issue with a clear description, steps to reproduce, and your system environment (especially if you are using Hyprland).
+* If you find a new bug, please open a new issue with a clear description, steps to reproduce, and your system environment (OS, Desktop Environment/Compositor, and version).
 
 ### Suggesting Enhancements
 * Open an issue to discuss your idea.
