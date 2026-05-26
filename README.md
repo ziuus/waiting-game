@@ -49,7 +49,7 @@ chmod +x waiting-game.AppImage
 On this development system, the latest AppImage is installed at:
 
 ```bash
-~/Applications/waiting-game-0.3.10.AppImage
+~/Applications/waiting-game-0.3.11.AppImage
 ```
 
 and symlinked as:
