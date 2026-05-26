@@ -26,6 +26,11 @@
       "player": "#39FF14",
       "obstacle": "#FF2D55",
       "score": "rgba(57, 255, 20, 0.8)"
+    },
+    "breakout": {
+      "player": "#7C4DFF",
+      "obstacle": "#00E5FF",
+      "score": "rgba(124, 77, 255, 0.85)"
     }
   },
   "difficultyModes": {
@@ -33,25 +38,29 @@
       "dino": { "initialSpeed": 5, "gravity": 0.5, "jumpForce": 12, "obstacleGap": 200 },
       "flappy": { "initialSpeed": 3, "gravity": 0.2, "jumpForce": 8, "obstacleGap": 300 },
       "gravity": { "initialSpeed": 7, "gravity": 0.8, "jumpForce": 0, "obstacleGap": 400 },
-      "snake": { "initialSpeed": 5, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 320 }
+      "snake": { "initialSpeed": 5, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 320 },
+      "breakout": { "initialSpeed": 5, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 7 }
     },
     "normal": {
       "dino": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15, "obstacleGap": 160 },
       "flappy": { "initialSpeed": 4, "gravity": 0.3, "jumpForce": 10, "obstacleGap": 250 },
       "gravity": { "initialSpeed": 10, "gravity": 1.2, "jumpForce": 0, "obstacleGap": 300 },
-      "snake": { "initialSpeed": 7, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 260 }
+      "snake": { "initialSpeed": 7, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 260 },
+      "breakout": { "initialSpeed": 7, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 8 }
     },
     "hard": {
       "dino": { "initialSpeed": 12, "gravity": 1.0, "jumpForce": 18, "obstacleGap": 120 },
       "flappy": { "initialSpeed": 6, "gravity": 0.5, "jumpForce": 12, "obstacleGap": 180 },
       "gravity": { "initialSpeed": 15, "gravity": 1.8, "jumpForce": 0, "obstacleGap": 200 },
-      "snake": { "initialSpeed": 10, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 210 }
+      "snake": { "initialSpeed": 10, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 210 },
+      "breakout": { "initialSpeed": 9, "gravity": 0.1, "jumpForce": 1, "obstacleGap": 9 }
     }
   },
   "games": [
     { "id": "dino", "name": "Dino Runner", "enabled": true },
     { "id": "flappy", "name": "Flappy Bird", "enabled": true },
     { "id": "gravity", "name": "Gravity Runner", "enabled": true },
-    { "id": "snake", "name": "Cyber Snake", "enabled": true }
+    { "id": "snake", "name": "Cyber Snake", "enabled": true },
+    { "id": "breakout", "name": "Neon Breakout", "enabled": true }
   ]
 }
