@@ -1,6 +1,6 @@
 {
   "name": "waiting-game",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Autonomous kinetic overlay game",
   "main": "bin.js",
   "bin": {
