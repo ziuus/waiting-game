@@ -433,18 +433,6 @@ export default class DefenderGame {
     }
 
     colorWithAlpha(color, alpha) {
-        if (!color) return `rgba(255, 255, 255, ${alpha})`;
-        if (color.startsWith('rgba(')) return color.replace(/rgba\(([^)]+),\s*[\d.]+\)/, `rgba($1, ${alpha})`);
-        if (color.startsWith('rgb(')) return color.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`);
-        if (color.startsWith('#')) {
-            const hex = color.slice(1);
-            const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex;
-            const n = parseInt(full, 16);
-            const r = (n >> 16) & 255;
-            const g = (n >> 8) & 255;
-            const b = n & 255;
-            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-        }
-        return color;
+        return window.colorWithAlpha(color, alpha);
     }
 }

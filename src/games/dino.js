@@ -27,26 +27,6 @@ export default class DinoGame {
         };
     }
 
-    reset() {
-        this.score = 0;
-        this.gameSpeed = this.config.difficulty.initialSpeed;
-        this.isGameOver = false;
-        this.obstacles = [];
-        this.dino = {
-            targetX: window.innerWidth * 0.25,
-            x: -50,
-            y: window.innerHeight - this.GROUND_OFFSET - 60,
-            width: 30,
-            height: 60,
-            dy: 0,
-            jumpForce: this.config.difficulty.jumpForce,
-            gravity: this.config.difficulty.gravity,
-            grounded: false,
-            color: this.config.activeTheme.player,
-            isIntro: true
-        };
-    }
-
     update() {
         if (this.isGameOver) return;
 

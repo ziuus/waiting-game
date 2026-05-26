@@ -22,6 +22,32 @@ let animationId;
 const scoreElement = document.getElementById('score');
 const highScoreElement = document.getElementById('highScore');
 const uiLayer = document.getElementById('ui-layer');
+
+/**
+ * Shared utility for color manipulation
+ * Fixes greedy regex bugs and provides a consistent implementation
+ */
+window.colorWithAlpha = function(color, alpha) {
+    if (!color) return `rgba(255, 255, 255, ${alpha})`;
+    if (color.startsWith('rgba(')) {
+        // Precise regex: match components before the last comma
+        return color.replace(/rgba\((.*),\s*[\d.]+\)/i, `rgba($1, ${alpha})`);
+    }
+    if (color.startsWith('rgb(')) {
+        return color.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`);
+    }
+    if (color.startsWith('#')) {
+        const hex = color.slice(1);
+        const normalized = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex;
+        const value = parseInt(normalized, 16);
+        const r = (value >> 16) & 255;
+        const g = (value >> 8) & 255;
+        const b = value & 255;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    return color;
+};
+
 const getGameSelect = () => document.getElementById('game-select');
 const getDiffSelect = () => document.getElementById('difficulty-select');
 const getSubtitle = () => document.querySelector('.go-subtitle');
@@ -45,7 +71,11 @@ function updateScoreDisplay() {
             localStorage.setItem(`${config.activeGame}-high-score`, highScore);
         }
     }
-    highScoreElement.textContent = highScore.toString().padStart(5, '0');
+    
+    const newHighScoreText = highScore.toString().padStart(5, '0');
+    if (highScoreElement.textContent !== newHighScoreText) {
+        highScoreElement.textContent = newHighScoreText;
+    }
 }
 
 function getEnabledGames() {
@@ -252,13 +282,13 @@ function resetGameOver() {
         gameOverShown = false;
         const gameOverLayer = document.getElementById('game-over-layer');
         gameOverLayer.style.pointerEvents = 'none';
+        gameOverLayer.classList.remove('terminated'); // Remove blur immediately
         gsap.to(gameOverLayer, { 
             opacity: 0, 
             duration: 0.3, 
             onComplete: () => {
                 if (!gameOverShown && !pausedShown) {
                     gameOverLayer.style.display = 'none';
-                    gameOverLayer.classList.remove('terminated');
                 }
             }
         });
