@@ -1,12 +1,12 @@
 use tauri::{Manager, menu::{Menu, MenuItem}, tray::TrayIconBuilder};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use std::io::Write;
-use std::process::Command;
 
 fn default_config() -> serde_json::Value {
     serde_json::json!({
         "showScore": true,
         "activeGame": "dino",
+        "activeDifficulty": "normal",
         "background": { "opacity": 0, "color": "0, 0, 0" },
         "theme": {
             "dinoColor": "#68BA7F",
@@ -14,15 +14,22 @@ fn default_config() -> serde_json::Value {
             "scoreColor": "rgba(104, 186, 127, 0.8)"
         },
         "difficulty": {
-            "initialSpeed": 8,
-            "gravity": 0.7,
-            "jumpForce": 15,
-            "obstacleGap": 160
+            "dino": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15, "obstacleGap": 160 },
+            "flappy": { "initialSpeed": 4, "gravity": 0.3, "jumpForce": 10, "obstacleGap": 250 }
         },
         "difficultyModes": {
-            "easy": { "initialSpeed": 5, "gravity": 0.5, "jumpForce": 12, "obstacleGap": 200 },
-            "normal": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15, "obstacleGap": 160 },
-            "hard": { "initialSpeed": 12, "gravity": 1.0, "jumpForce": 18, "obstacleGap": 120 }
+            "easy": {
+                "dino": { "initialSpeed": 5, "gravity": 0.5, "jumpForce": 12, "obstacleGap": 200 },
+                "flappy": { "initialSpeed": 3, "gravity": 0.2, "jumpForce": 8, "obstacleGap": 300 }
+            },
+            "normal": {
+                "dino": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15, "obstacleGap": 160 },
+                "flappy": { "initialSpeed": 4, "gravity": 0.3, "jumpForce": 10, "obstacleGap": 250 }
+            },
+            "hard": {
+                "dino": { "initialSpeed": 12, "gravity": 1.0, "jumpForce": 18, "obstacleGap": 120 },
+                "flappy": { "initialSpeed": 6, "gravity": 0.5, "jumpForce": 12, "obstacleGap": 180 }
+            }
         },
         "games": [
             { "id": "dino", "name": "Dino Runner", "enabled": true },
@@ -34,17 +41,21 @@ fn default_config() -> serde_json::Value {
 // Strict validation to prevent crashes
 fn validate_config(config: &mut serde_json::Value) {
     if let Some(diff) = config.get_mut("difficulty").and_then(|v| v.as_object_mut()) {
-        if let Some(speed) = diff.get_mut("initialSpeed").and_then(|v| v.as_f64()) {
-            *diff.insert("initialSpeed".to_string(), serde_json::json!(speed.clamp(1.0, 50.0))) = serde_json::json!(speed.clamp(1.0, 50.0));
-        }
-        if let Some(gravity) = diff.get_mut("gravity").and_then(|v| v.as_f64()) {
-            *diff.insert("gravity".to_string(), serde_json::json!(gravity.clamp(0.1, 5.0))) = serde_json::json!(gravity.clamp(0.1, 5.0));
-        }
-        if let Some(jump) = diff.get_mut("jumpForce").and_then(|v| v.as_f64()) {
-            *diff.insert("jumpForce".to_string(), serde_json::json!(jump.clamp(1.0, 50.0))) = serde_json::json!(jump.clamp(1.0, 50.0));
-        }
-        if let Some(gap) = diff.get_mut("obstacleGap").and_then(|v| v.as_f64()) {
-            *diff.insert("obstacleGap".to_string(), serde_json::json!(gap.clamp(50.0, 500.0))) = serde_json::json!(gap.clamp(50.0, 500.0));
+        for game in ["dino", "flappy"] {
+            if let Some(game_diff) = diff.get_mut(game).and_then(|v| v.as_object_mut()) {
+                if let Some(speed) = game_diff.get("initialSpeed").and_then(|v| v.as_f64()) {
+                    game_diff.insert("initialSpeed".to_string(), serde_json::json!(speed.clamp(1.0, 50.0)));
+                }
+                if let Some(gravity) = game_diff.get("gravity").and_then(|v| v.as_f64()) {
+                    game_diff.insert("gravity".to_string(), serde_json::json!(gravity.clamp(0.1, 5.0)));
+                }
+                if let Some(jump) = game_diff.get("jumpForce").and_then(|v| v.as_f64()) {
+                    game_diff.insert("jumpForce".to_string(), serde_json::json!(jump.clamp(1.0, 50.0)));
+                }
+                if let Some(gap) = game_diff.get("obstacleGap").and_then(|v| v.as_f64()) {
+                    game_diff.insert("obstacleGap".to_string(), serde_json::json!(gap.clamp(50.0, 500.0)));
+                }
+            }
         }
     }
 }

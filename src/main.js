@@ -58,12 +58,20 @@ async function init() {
         // Setup Difficulty Selector
         const diffSelect = document.getElementById('difficulty-select');
         diffSelect.value = config.activeDifficulty || 'normal';
-        diffSelect.addEventListener('change', (e) => {
-            const mode = e.target.value;
+        
+        function updateDifficulty(mode) {
             config.activeDifficulty = mode;
-            config.difficulty = config.difficultyModes[mode];
-            // Persist locally if needed (optional for now, game handles it)
+            // Set game-specific difficulty
+            if (config.difficultyModes && config.difficultyModes[mode]) {
+                config.difficulty = config.difficultyModes[mode][config.activeGame];
+            }
             if (currentGame) currentGame.config = config;
+        }
+
+        updateDifficulty(diffSelect.value);
+
+        diffSelect.addEventListener('change', (e) => {
+            updateDifficulty(e.target.value);
         });
 
         const GameModule = await import(`./games/${config.activeGame}.js`);
