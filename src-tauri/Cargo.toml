@@ -1,6 +1,6 @@
 [package]
 name = "waiting-game"
-version = "0.3.5"
+version = "0.3.8"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -26,4 +26,3 @@ tauri-plugin-global-shortcut = "2"
 tauri-plugin-autostart = "2"
 tokio = { version = "1", features = ["time", "signal"] }
 dirs = "6"
-

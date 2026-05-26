@@ -3,7 +3,7 @@
 const { execSync } = require('child_process');
 const os = require('os');
 
-const version = '0.3.7';
+const version = '0.3.8';
 const baseUrl = `https://github.com/ziuus/waiting-game/releases/download/v${version}`;
 
 function getDownloadUrl() {
@@ -13,9 +13,9 @@ function getDownloadUrl() {
     if (platform === 'win32') {
         return `${baseUrl}/waiting-game_${version}_x64-setup.exe`;
     } else if (platform === 'darwin') {
-        return `${baseUrl}/waiting-game_0.3.7_aarch64.dmg`;
+        return `${baseUrl}/waiting-game_${version}_aarch64.dmg`;
     } else if (platform === 'linux') {
-        return `${baseUrl}/waiting-game_0.3.7_amd64.AppImage`;
+        return `${baseUrl}/waiting-game_${version}_amd64.AppImage`;
     }
     return null;
 }
