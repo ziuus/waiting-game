@@ -13,12 +13,40 @@ fn default_config() -> serde_json::Value {
             "obstacleColor": "#ff4b2b",
             "scoreColor": "rgba(104, 186, 127, 0.8)"
         },
-        "difficulty": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15 },
+        "difficulty": {
+            "initialSpeed": 8,
+            "gravity": 0.7,
+            "jumpForce": 15,
+            "obstacleGap": 160
+        },
+        "difficultyModes": {
+            "easy": { "initialSpeed": 5, "gravity": 0.5, "jumpForce": 12, "obstacleGap": 200 },
+            "normal": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15, "obstacleGap": 160 },
+            "hard": { "initialSpeed": 12, "gravity": 1.0, "jumpForce": 18, "obstacleGap": 120 }
+        },
         "games": [
             { "id": "dino", "name": "Dino Runner", "enabled": true },
             { "id": "flappy", "name": "Flappy Bird", "enabled": true }
         ]
     })
+}
+
+// Strict validation to prevent crashes
+fn validate_config(config: &mut serde_json::Value) {
+    if let Some(diff) = config.get_mut("difficulty").and_then(|v| v.as_object_mut()) {
+        if let Some(speed) = diff.get_mut("initialSpeed").and_then(|v| v.as_f64()) {
+            *diff.insert("initialSpeed".to_string(), serde_json::json!(speed.clamp(1.0, 50.0))) = serde_json::json!(speed.clamp(1.0, 50.0));
+        }
+        if let Some(gravity) = diff.get_mut("gravity").and_then(|v| v.as_f64()) {
+            *diff.insert("gravity".to_string(), serde_json::json!(gravity.clamp(0.1, 5.0))) = serde_json::json!(gravity.clamp(0.1, 5.0));
+        }
+        if let Some(jump) = diff.get_mut("jumpForce").and_then(|v| v.as_f64()) {
+            *diff.insert("jumpForce".to_string(), serde_json::json!(jump.clamp(1.0, 50.0))) = serde_json::json!(jump.clamp(1.0, 50.0));
+        }
+        if let Some(gap) = diff.get_mut("obstacleGap").and_then(|v| v.as_f64()) {
+            *diff.insert("obstacleGap".to_string(), serde_json::json!(gap.clamp(50.0, 500.0))) = serde_json::json!(gap.clamp(50.0, 500.0));
+        }
+    }
 }
 
 fn merge_json(defaults: &mut serde_json::Value, user: &serde_json::Value) {
@@ -60,6 +88,7 @@ fn get_config() -> serde_json::Value {
         }
     }
 
+    validate_config(&mut merged);
     merged
 }
 
@@ -70,60 +99,24 @@ fn teleport_window(app: &tauri::AppHandle, action: &str) {
         None => return,
     };
 
-    // Detect Environment
-    let is_hyprland = std::env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok();
-    
-    if is_hyprland {
-        // High-Speed Native Hyprland Controller
-        let output = Command::new("hyprctl").args(["clients", "-j"]).output().ok();
-        if let Some(o) = output {
-            let json: serde_json::Value = serde_json::from_slice(&o.stdout).unwrap_or(serde_json::json!([]));
-            let client = json.as_array().and_then(|arr| {
-                arr.iter().find(|c| c["class"] == "waiting-game-bin")
-            });
-
-            if let Some(c) = client {
-                let addr = c["address"].as_str().unwrap_or("");
-                let is_special = c["workspace"]["name"].as_str().map(|n| n.contains("special:")).unwrap_or(false);
-                let is_pinned = c["pinned"].as_bool().unwrap_or(false);
-                let cur_ws = Command::new("hyprctl").args(["activeworkspace", "-j"]).output().ok()
-                    .and_then(|o| serde_json::from_slice::<serde_json::Value>(&o.stdout).ok())
-                    .and_then(|j| j["name"].as_str().map(|s| s.to_string()))
-                    .unwrap_or_else(|| "1".to_string());
-
-                match action {
-                    "toggle" => {
-                        if is_special {
-                            let _ = Command::new("hyprctl").args(["dispatch", "movetoworkspace", &format!("{},address:{}", cur_ws, addr)]).status();
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        } else {
-                            let _ = Command::new("hyprctl").args(["dispatch", "movetoworkspacesilent", &format!("special:waiting,address:{}", addr)]).status();
-                            let _ = window.hide();
-                        }
-                    },
-                    "pin" => {
-                        if is_special {
-                            let _ = Command::new("hyprctl").args(["dispatch", "movetoworkspace", &format!("{},address:{}", cur_ws, addr)]).status();
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                            std::thread::sleep(std::time::Duration::from_millis(50));
-                            let _ = Command::new("hyprctl").args(["dispatch", "pin", &format!("address:{}", addr)]).status();
-                        } else if is_pinned {
-                            let _ = Command::new("hyprctl").args(["dispatch", "pin", &format!("address:{}", addr)]).status();
-                        } else {
-                            let _ = Command::new("hyprctl").args(["dispatch", "movetoworkspacesilent", &format!("special:waiting,address:{}", addr)]).status();
-                            let _ = window.hide();
-                        }
-                    },
-                    _ => {}
-                }
+    let is_visible = window.is_visible().unwrap_or(false);
+    match action {
+        "toggle" => {
+            if is_visible {
+                let _ = window.hide();
+            } else {
+                let _ = window.show();
+                let _ = window.set_focus();
             }
-        }
-    } else {
-        // Fallback for KDE/GNOME/macOS/Windows
-        let is_visible = window.is_visible().unwrap_or(false);
-        if is_visible { let _ = window.hide(); } else { let _ = window.show(); let _ = window.set_focus(); }
+        },
+        "pin" => {
+            // Pin functionality can just ensure it's visible for now
+            if !is_visible {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+        },
+        _ => {}
     }
 }
 
@@ -148,6 +141,7 @@ pub fn run() {
         .setup(move |app| {
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.set_always_on_top(true);
+                let _ = window.maximize();
                 if let Ok(Some(monitor)) = window.current_monitor() {
                     let size = monitor.size();
                     let pos = monitor.position();

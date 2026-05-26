@@ -55,6 +55,17 @@ async function init() {
         const container = document.getElementById('game-container');
         container.style.background = `rgba(${bg.color}, ${bg.opacity})`;
         
+        // Setup Difficulty Selector
+        const diffSelect = document.getElementById('difficulty-select');
+        diffSelect.value = config.activeDifficulty || 'normal';
+        diffSelect.addEventListener('change', (e) => {
+            const mode = e.target.value;
+            config.activeDifficulty = mode;
+            config.difficulty = config.difficultyModes[mode];
+            // Persist locally if needed (optional for now, game handles it)
+            if (currentGame) currentGame.config = config;
+        });
+
         const GameModule = await import(`./games/${config.activeGame}.js`);
         const GameClass = GameModule.default;
         

@@ -134,7 +134,14 @@
       </div>
       <div id="game-over-layer">
         <div class="go-title">TERMINATED</div>
-        <div class="go-subtitle">SPACE TO INITIALIZE</div>
+        <div class="go-subtitle">
+            SPACE TO INITIALIZE<br><br>
+            <select id="difficulty-select" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 5px;">
+                <option value="easy">Easy</option>
+                <option value="normal" selected>Normal</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
       </div>
       <canvas id="gameCanvas"></canvas>
     </div>

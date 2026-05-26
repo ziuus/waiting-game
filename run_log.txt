@@ -1,0 +1,31 @@
+release (windows-latest)	UNKNOWN STEP	﻿2026-04-27T15:37:10.6438314Z Current runner version: '2.333.1'
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6474462Z ##[group]Runner Image Provisioner
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6475624Z Hosted Compute Agent
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6476414Z Version: 20260213.493
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6477363Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6478430Z Build Date: 2026-02-13T00:28:41Z
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6479544Z Worker ID: {16e72d4f-d310-49c9-8215-b55fc54f5085}
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6480808Z Azure Region: eastus
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6481639Z ##[endgroup]
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6483915Z ##[group]Operating System
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6484850Z Microsoft Windows Server 2025
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6485769Z 10.0.26100
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6486479Z Datacenter
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6487494Z ##[endgroup]
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6488574Z ##[group]Runner Image
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6489541Z Image: windows-2025
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6490389Z Version: 20260413.84.1
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6492736Z Included Software: https://github.com/actions/runn...
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6494996Z Image Release: https://github.com/actions/runner-i...
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6495904Z ##[endgroup]
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6496916Z ##[group]GITHUB_TOKEN Permissions
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6498671Z Contents: write
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6499220Z Metadata: read
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6499713Z ##[endgroup]
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6501683Z Secret source: Actions
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6502366Z Prepare workflow directory
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6927911Z Prepare all required actions
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:10.6966433Z Getting action download info
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:11.0890387Z Download action repository 'actions/checkout@v4' (...
+release (windows-latest)	UNKNOWN STEP	2026-04-27T15:37:11.2169973Z Download action repository 'actions/setup-node@v4'...
+... more runs

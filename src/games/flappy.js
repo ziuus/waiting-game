@@ -16,11 +16,12 @@ export default class FlappyGame {
             width: 30,
             height: 45,
             dy: 0,
-            jump: -7,
-            gravity: 0.35,
+            jump: -this.config.difficulty.jumpForce / 2, // Map jumpForce to bird jump
+            gravity: this.config.difficulty.gravity / 2, // Map gravity
             color: this.config.theme.dinoColor
         };
         this.frame = 0;
+        this.obstacleGap = this.config.difficulty.obstacleGap;
     }
 
     update() {
@@ -36,7 +37,7 @@ export default class FlappyGame {
 
         // Pipes
         if (this.frame % 90 === 0) {
-            const gap = 160;
+            const gap = this.obstacleGap;
             const minHeight = 60;
             const height = Math.random() * (window.innerHeight - gap - 2 * minHeight) + minHeight;
             this.pipes.push({
