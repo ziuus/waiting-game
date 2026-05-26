@@ -155,36 +155,64 @@ export default class FlappyGame {
         this.ctx.lineTo(-9, h / 2 + 7);
         this.ctx.closePath();
         this.ctx.fill();
+        this.ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
 
-        // Body
-        this.ctx.fillStyle = this.bird.color;
+        // Body with Gradient
+        const gradient = this.ctx.createRadialGradient(w * 0.4, h * 0.4, 2, w * 0.5, h * 0.5, w * 0.6);
+        gradient.addColorStop(0, '#FFF59D'); // Highlight
+        gradient.addColorStop(0.4, this.bird.color);
+        gradient.addColorStop(1, '#F57F17'); // Shadow
+        
+        this.ctx.fillStyle = gradient;
         this.ctx.beginPath();
         this.ctx.ellipse(w / 2, h / 2, w / 2, h / 2.15, 0, 0, Math.PI * 2);
         this.ctx.fill();
+        this.ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.stroke();
 
         // Wing
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+        this.ctx.save();
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        this.ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+        this.ctx.lineWidth = 1;
         this.ctx.beginPath();
         this.ctx.ellipse(w * 0.38, h * 0.58 + wing * 0.25, 13, 7 + Math.abs(wing * 0.25), -0.35, 0, Math.PI * 2);
         this.ctx.fill();
+        this.ctx.stroke();
+        this.ctx.restore();
 
-        // Beak
+        // Beak (more detailed)
         this.ctx.fillStyle = '#ff7043';
         this.ctx.beginPath();
-        this.ctx.moveTo(w - 2, h * 0.48);
-        this.ctx.lineTo(w + 14, h * 0.38);
-        this.ctx.lineTo(w + 10, h * 0.62);
+        this.ctx.moveTo(w - 2, h * 0.4);
+        this.ctx.quadraticCurveTo(w + 16, h * 0.45, w + 14, h * 0.5); // Top curve
+        this.ctx.quadraticCurveTo(w + 16, h * 0.55, w - 2, h * 0.6); // Bottom curve
         this.ctx.closePath();
         this.ctx.fill();
+        this.ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+        this.ctx.stroke();
 
-        // Eye
+        // Eye (Detailed)
         this.ctx.fillStyle = '#fff';
         this.ctx.beginPath();
-        this.ctx.arc(w * 0.72, h * 0.34, 5, 0, Math.PI * 2);
+        this.ctx.arc(w * 0.72, h * 0.34, 6, 0, Math.PI * 2);
         this.ctx.fill();
+        this.ctx.strokeStyle = '#000';
+        this.ctx.lineWidth = 0.5;
+        this.ctx.stroke();
+
+        // Pupil + Sparkle
         this.ctx.fillStyle = '#111';
         this.ctx.beginPath();
-        this.ctx.arc(w * 0.75, h * 0.34, 2.2, 0, Math.PI * 2);
+        this.ctx.arc(w * 0.75, h * 0.34, 2.8, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        this.ctx.fillStyle = '#fff';
+        this.ctx.beginPath();
+        this.ctx.arc(w * 0.78, h * 0.3, 1.2, 0, Math.PI * 2); // Eye sparkle
         this.ctx.fill();
 
         this.ctx.restore();
