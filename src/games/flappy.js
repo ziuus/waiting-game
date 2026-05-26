@@ -18,7 +18,7 @@ export default class FlappyGame {
             dy: 0,
             jump: -this.config.difficulty.jumpForce / 2, // Map jumpForce to bird jump
             gravity: this.config.difficulty.gravity / 2, // Map gravity
-            color: this.config.theme.dinoColor
+            color: this.config.activeTheme.player
         };
         this.frame = 0;
         this.obstacleGap = this.config.difficulty.obstacleGap;
@@ -73,22 +73,26 @@ export default class FlappyGame {
     }
 
     draw() {
-        this.ctx.shadowBlur = 0;
-        // Draw Flying Dino
-        this.ctx.shadowBlur = 20;
-        this.ctx.shadowColor = this.bird.color;
-        this.drawFlyingDino(this.bird.x, this.bird.y);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw Pipes (Neon Cacti)
-        this.ctx.shadowBlur = 15;
-        this.ctx.shadowColor = this.config.theme.obstacleColor;
-        this.ctx.fillStyle = this.config.theme.obstacleColor;
+        // Draw Pipes
         this.pipes.forEach(pipe => {
-            // Top Pipe
+            this.ctx.shadowBlur = 15;
+            this.ctx.shadowColor = this.config.activeTheme.obstacle;
+            this.ctx.fillStyle = this.config.activeTheme.obstacle;
+            
+            // Top pipe
             this.ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
-            // Bottom Pipe
+            // Bottom pipe
             this.ctx.fillRect(pipe.x, window.innerHeight - pipe.bottom, pipe.width, pipe.bottom);
         });
+
+        // Draw Bird
+        this.ctx.shadowBlur = 20;
+        this.ctx.shadowColor = this.bird.color;
+        this.ctx.fillStyle = this.bird.color;
+        this.ctx.fillRect(this.bird.x, this.bird.y, this.bird.width, this.bird.height);
+        
         this.ctx.shadowBlur = 0;
     }
 

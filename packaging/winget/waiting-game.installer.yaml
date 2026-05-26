@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.4.0.schema.json
+
+PackageIdentifier: ziuus.WaitingGame
+PackageVersion: 0.3.7
+InstallerLocale: en-US
+MinimumOSVersion: 10.0.0.0
+InstallerType: exe
+Scope: user
+InstallModes:
+  - silent
+  - silentWithProgress
+UpgradeBehavior: install
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/ziuus/waiting-game/releases/download/v0.3.7/waiting-game_0.3.7_x64-setup.exe
+    InstallerSha256: f38d8daceba9ccac8916f542d2c372e7c53f8a8f3405b6ccdac020cebb20051c
+ManifestType: installer
+ManifestVersion: 1.4.0

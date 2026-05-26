@@ -27,18 +27,29 @@ Waiting Game is a minimalist, cinematic overlay built with **Tauri and Rust**. I
 
 ## 🚀 Installation
 
-Waiting Game is cross-platform and provides native installers for all major operating systems.
+Waiting Game is cross-platform and provides multiple ways to install.
 
-### Linux
-Download the latest release in your preferred format:
+### 📦 Package Managers
+
+| OS | Method | Command |
+| :--- | :--- | :--- |
+| **Linux (Arch)** | **AUR** | `yay -S waiting-game-bin` |
+| **Windows** | **WinGet** | `winget install ziuus.WaitingGame` |
+| **Universal** | **npm** | `npx waiting-game` |
+
+### ⬇️ Native Downloads
+
+Download the latest release in your preferred format from the [Releases Page](https://github.com/ziuus/waiting-game/releases).
+
+#### Linux
 - **AppImage**: Universal Linux binary.
 - **.deb**: For Debian/Ubuntu-based distros.
 - **.rpm**: For Fedora/RHEL-based distros.
 
-### Windows
+#### Windows
 - **.exe / .msi**: Native installers for Windows 10/11.
 
-### macOS
+#### macOS
 - **.dmg**: Apple Disk Image for Intel and Apple Silicon.
 
 ---

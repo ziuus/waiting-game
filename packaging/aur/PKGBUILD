@@ -1,0 +1,19 @@
+# Maintainer: Noel <noelyt101@gmail.com>
+pkgname=waiting-game-bin
+pkgver=0.3.7
+pkgrel=1
+pkgdesc="Autonomous kinetic overlay game built with Tauri"
+arch=('x86_64')
+url="https://github.com/ziuus/waiting-game"
+license=('MIT')
+depends=('gtk3' 'webkit2gtk' 'libayatana-appindicator' 'libappindicator-gtk3')
+provides=('waiting-game')
+conflicts=('waiting-game')
+source=("${pkgname}-${pkgver}.deb::https://github.com/ziuus/waiting-game/releases/download/v${pkgver}/waiting-game_${pkgver}_amd64.deb")
+sha256sums=('ead476fba158a6562ac53d6d6a82a81aaee14b444c27a525839c3335c191eb0e')
+
+package() {
+  # Extract the data archive from the debian package
+  bsdtar -xf "${pkgname}-${pkgver}.deb" data.tar.xz
+  bsdtar -xf data.tar.xz -C "${pkgdir}"
+}

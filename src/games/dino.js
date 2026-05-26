@@ -22,7 +22,27 @@ export default class DinoGame {
             jumpForce: this.config.difficulty.jumpForce,
             gravity: this.config.difficulty.gravity,
             grounded: false,
-            color: this.config.theme.dinoColor,
+            color: this.config.activeTheme.player,
+            isIntro: true
+        };
+    }
+
+    reset() {
+        this.score = 0;
+        this.gameSpeed = this.config.difficulty.initialSpeed;
+        this.isGameOver = false;
+        this.obstacles = [];
+        this.dino = {
+            targetX: window.innerWidth * 0.25,
+            x: -50,
+            y: window.innerHeight - this.GROUND_OFFSET - 60,
+            width: 30,
+            height: 60,
+            dy: 0,
+            jumpForce: this.config.difficulty.jumpForce,
+            gravity: this.config.difficulty.gravity,
+            grounded: false,
+            color: this.config.activeTheme.player,
             isIntro: true
         };
     }
@@ -87,7 +107,7 @@ export default class DinoGame {
             y: window.innerHeight - height - this.GROUND_OFFSET,
             width: 30,
             height: height,
-            color: this.config.theme.obstacleColor
+            color: this.config.activeTheme.obstacle
         });
     }
 
@@ -118,7 +138,7 @@ export default class DinoGame {
     }
 
     drawCactus(x, y, w, h) {
-        this.ctx.fillStyle = this.config.theme.obstacleColor;
+        this.ctx.fillStyle = this.config.activeTheme.obstacle;
         this.ctx.fillRect(x + w/4, y, w/2, h);
         this.ctx.fillRect(x, y + h/3, w, h/6);
         this.ctx.fillRect(x, y + h/6, w/6, h/6);

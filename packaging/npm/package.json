@@ -1,0 +1,21 @@
+{
+  "name": "waiting-game",
+  "version": "0.3.7",
+  "description": "Autonomous kinetic overlay game",
+  "main": "bin.js",
+  "bin": {
+    "waiting-game": "bin.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ziuus/waiting-game.git"
+  },
+  "keywords": [
+    "game",
+    "overlay",
+    "kinetic",
+    "tauri"
+  ],
+  "author": "Noel <noelyt101@gmail.com>",
+  "license": "MIT"
+}

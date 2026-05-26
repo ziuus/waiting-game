@@ -65,6 +65,10 @@ async function init() {
             if (config.difficultyModes && config.difficultyModes[mode]) {
                 config.difficulty = config.difficultyModes[mode][config.activeGame];
             }
+            // Set game-specific theme
+            if (config.themes && config.themes[config.activeGame]) {
+                config.activeTheme = config.themes[config.activeGame];
+            }
             if (currentGame) currentGame.config = config;
         }
 
@@ -80,7 +84,7 @@ async function init() {
         highScore = localStorage.getItem(`${config.activeGame}-high-score`) || 0;
         
         currentGame = new GameClass(canvas, ctx, config);
-        uiLayer.style.color = config.theme.scoreColor;
+        uiLayer.style.color = config.activeTheme.score;
         if (config.showScore === false) {
             uiLayer.style.display = 'none';
         }

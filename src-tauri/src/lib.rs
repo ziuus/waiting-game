@@ -8,10 +8,17 @@ fn default_config() -> serde_json::Value {
         "activeGame": "dino",
         "activeDifficulty": "normal",
         "background": { "opacity": 0, "color": "0, 0, 0" },
-        "theme": {
-            "dinoColor": "#68BA7F",
-            "obstacleColor": "#ff4b2b",
-            "scoreColor": "rgba(104, 186, 127, 0.8)"
+        "themes": {
+            "dino": {
+                "player": "#68BA7F",
+                "obstacle": "#ff4b2b",
+                "score": "rgba(104, 186, 127, 0.8)"
+            },
+            "flappy": {
+                "player": "#FFC107",
+                "obstacle": "#4CAF50",
+                "score": "rgba(255, 193, 7, 0.8)"
+            }
         },
         "difficulty": {
             "dino": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15, "obstacleGap": 160 },
