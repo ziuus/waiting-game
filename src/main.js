@@ -69,12 +69,55 @@ function updateScoreDisplay() {
         if (currentGame.score > highScore) {
             highScore = currentGame.score;
             localStorage.setItem(`${config.activeGame}-high-score`, highScore);
+            // Sync to backend if profile exists
+            syncHighScoreToBackend(highScore);
         }
     }
     
     const newHighScoreText = highScore.toString().padStart(5, '0');
     if (highScoreElement.textContent !== newHighScoreText) {
         highScoreElement.textContent = newHighScoreText;
+    }
+}
+
+async function syncHighScoreToBackend(score) {
+    const profile = JSON.parse(localStorage.getItem('player-profile') || 'null');
+    if (!profile || !profile.username) return;
+
+    const FIREBASE_PROJECT_ID = "projects-fff6a";
+    const FIREBASE_API_KEY = "YOUR_API_KEY"; // Waiting for your API Key
+
+    if (FIREBASE_API_KEY === "YOUR_API_KEY") {
+        console.log(`[Offline] Would sync score ${score} for ${profile.username} (API Key missing)`);
+        return;
+    }
+
+    try {
+        const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/wgame_high_scores?key=${FIREBASE_API_KEY}`;
+        
+        const payload = {
+            fields: {
+                username: { stringValue: profile.username },
+                email: { stringValue: profile.email || "" },
+                gameId: { stringValue: config.activeGame },
+                score: { integerValue: score.toString() },
+                timestamp: { timestampValue: new Date().toISOString() }
+            }
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            console.error("Failed to sync score:", await response.text());
+        } else {
+            console.log("Score synced successfully!");
+        }
+    } catch (e) {
+        console.error("Failed to sync high score to backend", e);
     }
 }
 
@@ -126,6 +169,7 @@ function populateGameSelector() {
 function bindMenuControls() {
     const gameSelect = getGameSelect();
     const diffSelect = getDiffSelect();
+    const leaderboardBtn = document.getElementById('leaderboard-btn');
 
     if (gameSelect) {
         populateGameSelector();
@@ -142,7 +186,71 @@ function bindMenuControls() {
             await loadActiveGame({ persist: true });
         };
     }
+
+    if (leaderboardBtn) {
+        leaderboardBtn.onmouseover = () => {
+            leaderboardBtn.style.background = 'rgba(104, 186, 127, 0.2)';
+        };
+        leaderboardBtn.onmouseout = () => {
+            leaderboardBtn.style.background = 'transparent';
+        };
+        leaderboardBtn.onclick = () => {
+            const profile = JSON.parse(localStorage.getItem('player-profile') || 'null');
+            if (!profile || !profile.username) {
+                // Show profile setup modal
+                document.getElementById('profile-layer').style.display = 'flex';
+                document.getElementById('profile-username').focus();
+            } else {
+                openLeaderboard();
+            }
+        };
+    }
 }
+
+function openLeaderboard() {
+    const url = "https://waiting-game.vercel.app/"; 
+    if (window.__TAURI__) {
+        window.__TAURI__.core.invoke('open_url', { url });
+    } else {
+        window.open(url, '_blank');
+    }
+}
+
+function setupProfileModal() {
+    const profileLayer = document.getElementById('profile-layer');
+    const saveBtn = document.getElementById('profile-save');
+    const cancelBtn = document.getElementById('profile-cancel');
+    const usernameInput = document.getElementById('profile-username');
+    const emailInput = document.getElementById('profile-email');
+
+    const closeProfile = () => {
+        profileLayer.style.display = 'none';
+        // Refocus window to capture keyboard events again
+        window.focus();
+    };
+
+    saveBtn.onclick = () => {
+        const username = usernameInput.value.trim();
+        if (username) {
+            const profile = {
+                username: username,
+                email: emailInput.value.trim()
+            };
+            localStorage.setItem('player-profile', JSON.stringify(profile));
+            // Force a sync of the current high score if it exists
+            if (highScore > 0) {
+                syncHighScoreToBackend(highScore);
+            }
+            closeProfile();
+            openLeaderboard();
+        }
+    };
+
+    cancelBtn.onclick = closeProfile;
+}
+
+// Call it once
+setupProfileModal();
 
 function renderMenuSubtitle(message = 'SPACE TO INITIALIZE') {
     const subtitle = getSubtitle();
@@ -157,6 +265,11 @@ function renderMenuSubtitle(message = 'SPACE TO INITIALIZE') {
                 <option value="normal">Normal</option>
                 <option value="hard">Hard</option>
             </select>
+        </div>
+        <div style="margin-top: 20px;">
+            <button id="leaderboard-btn" style="background: transparent; color: #68BA7F; border: 1px solid #68BA7F; padding: 8px 16px; font-family: inherit; font-weight: bold; cursor: pointer; border-radius: 4px; transition: all 0.2s;">
+                🏆 GLOBAL RANKS
+            </button>
         </div>
     `;
     bindMenuControls();
