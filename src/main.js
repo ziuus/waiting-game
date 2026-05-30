@@ -85,7 +85,7 @@ async function syncHighScoreToBackend(score) {
     if (!profile || !profile.username) return;
 
     const FIREBASE_PROJECT_ID = "projects-fff6a";
-    const FIREBASE_API_KEY = "YOUR_API_KEY"; // Waiting for your API Key
+    const FIREBASE_API_KEY = "AIzaSyB7iE6UDk9tT0w6kr7TMjQDG6XqLH41tdo"; 
 
     if (FIREBASE_API_KEY === "YOUR_API_KEY") {
         console.log(`[Offline] Would sync score ${score} for ${profile.username} (API Key missing)`);
