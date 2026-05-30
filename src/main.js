@@ -115,9 +115,76 @@ async function syncHighScoreToBackend(score) {
             console.error("Failed to sync score:", await response.text());
         } else {
             console.log("Score synced successfully!");
+            if (gameOverShown) updateRankDisplay();
         }
     } catch (e) {
         console.error("Failed to sync high score to backend", e);
+    }
+}
+
+async function updateRankDisplay() {
+    const rankDiv = document.getElementById('user-global-rank');
+    if (!rankDiv) return;
+    
+    const profile = JSON.parse(localStorage.getItem('player-profile') || 'null');
+    if (!profile || !profile.username) {
+        rankDiv.innerHTML = `<span style="font-size: 0.8em; opacity: 0.7;">(Unranked - Set Profile to view)</span>`;
+        return;
+    }
+
+    rankDiv.innerHTML = `<span style="font-size: 0.8em; opacity: 0.7;">(Fetching Rank...)</span>`;
+
+    const FIREBASE_PROJECT_ID = "projects-fff6a";
+    const FIREBASE_API_KEY = "AIzaSyB7iE6UDk9tT0w6kr7TMjQDG6XqLH41tdo"; 
+    const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents:runQuery?key=${FIREBASE_API_KEY}`;
+    
+    const payload = {
+        structuredQuery: {
+            from: [{ collectionId: "wgame_high_scores" }],
+            where: {
+                fieldFilter: {
+                    field: { fieldPath: "gameId" },
+                    op: "EQUAL",
+                    value: { stringValue: config.activeGame }
+                }
+            },
+            orderBy: [{ field: { fieldPath: "score" }, direction: "DESCENDING" }],
+            limit: 100
+        }
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        
+        if (data[0] && data[0].error) {
+            rankDiv.innerHTML = `<span style="font-size: 0.8em; opacity: 0.7;">(Rank unavailable - Index building?)</span>`;
+            return;
+        }
+
+        let rank = -1;
+        let i = 0;
+        for (const item of data) {
+            if (item.document) {
+                i++;
+                if (item.document.fields.username && item.document.fields.username.stringValue === profile.username) {
+                    rank = i;
+                    break;
+                }
+            }
+        }
+        
+        if (rank > 0) {
+            rankDiv.innerHTML = `<span style="font-size: 0.9em; color: #FFD700; font-weight: bold; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);">🏆 Global Rank: #${rank}</span>`;
+        } else {
+            rankDiv.innerHTML = `<span style="font-size: 0.8em; opacity: 0.7;">(Not in Top 100)</span>`;
+        }
+    } catch(e) {
+        rankDiv.innerHTML = `<span style="font-size: 0.8em; opacity: 0.7;">(Rank offline)</span>`;
     }
 }
 
@@ -242,6 +309,7 @@ function setupProfileModal() {
                 syncHighScoreToBackend(highScore);
             }
             closeProfile();
+            updateRankDisplay();
             openLeaderboard();
         }
     };
@@ -265,15 +333,17 @@ function renderMenuSubtitle(message = 'SPACE TO INITIALIZE') {
                 <option value="normal">Normal</option>
                 <option value="hard">Hard</option>
             </select>
-        </div>
-        <div style="margin-top: 20px;">
-            <button id="leaderboard-btn" style="background: transparent; color: #68BA7F; border: 1px solid #68BA7F; padding: 8px 16px; font-family: inherit; font-weight: bold; cursor: pointer; border-radius: 4px; transition: all 0.2s;">
-                🏆 GLOBAL RANKS
-            </button>
-        </div>
-    `;
-    bindMenuControls();
-}
+            </div>
+            <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <button id="leaderboard-btn" style="background: transparent; color: #68BA7F; border: 1px solid #68BA7F; padding: 8px 16px; font-family: inherit; font-weight: bold; cursor: pointer; border-radius: 4px; transition: all 0.2s;">
+                    🏆 GLOBAL RANKS
+                </button>
+                <div id="user-global-rank"></div>
+            </div>
+        `;
+        bindMenuControls();
+        updateRankDisplay();
+    }
 
 async function persistPreferences() {
     try {
