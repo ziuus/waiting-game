@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const scoresRef = window.collection(window.db, "wgame_high_scores");
                 const q = window.query(
                     scoresRef, 
-                    window.where("game_mode", "==", gameMode),
+                    window.where("gameId", "==", gameMode),
                     window.orderBy("score", "desc"),
                     window.limit(100)
                 );
