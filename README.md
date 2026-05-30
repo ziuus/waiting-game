@@ -85,6 +85,22 @@ Download the latest release in your preferred format from the [Releases Page](ht
 
 ---
 
+## 🌍 Environment Compatibility
+
+We are actively testing across multiple environments. Want to help? Check out our [Contribution Guidelines](CONTRIBUTING.md).
+
+| OS / Environment | Status | Notes |
+| :--- | :---: | :--- |
+| **Windows 11** | ⏳ Needs Testing | Testing window transparency |
+| **Windows 10 / WSL2** | ⏳ Needs Testing | |
+| **macOS (Apple Silicon)** | ⏳ Needs Testing | Checking input latency |
+| **macOS (Intel)** | ⏳ Needs Testing | |
+| **Ubuntu / Debian** | ⏳ Needs Testing | |
+| **Arch Linux** | ✅ Working | Wayland + Hyprland tested |
+| **Tiling WMs (River, i3)** | ⏳ Needs Testing | Window focus handling |
+
+---
+
 ### 🧩 Premium Hyprland Integration (Linux Only)
 Waiting Game offers specialized integration for the Hyprland compositor. You can use the automated installer:
 ```bash

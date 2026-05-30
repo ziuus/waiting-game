@@ -19,6 +19,21 @@ First off, thank you for considering contributing to Waiting Game! It's people l
 4. Ensure your code follows the existing style.
 5. Submit a pull request.
 
+### 💻 Cross-Platform Contributions
+
+When submitting a pull request or reporting an issue related to a specific operating system, please ensure you include your full environment specs. Tauri handles transparent webviews, input events, and window managers differently depending on the OS.
+
+**When reporting a bug, please include:**
+* **OS & Version:** (e.g., Windows 11, macOS Sonoma 14.2, Arch Linux)
+* **Architecture:** (x86_64, ARM64)
+* **Display Server / WM (Linux only):** (e.g., Wayland, X11, GNOME, Hyprland)
+
+**Key areas to test:**
+* **Path Resolution:** Ensure file paths correctly use OS-agnostic logic.
+* **Keybindings:** Verify that keyboard inputs for the game do not conflict with native OS shortcuts.
+* **Rendering:** Ensure the game canvas scales correctly on High-DPI (Retina) displays and different scaling fractional settings.
+* **Window Transparency:** Ensure the overlay appears completely transparent without ghosting or rendering artifacts.
+
 ## Development Setup
 
 The project is built with [Tauri v2](https://v2.tauri.app/).
