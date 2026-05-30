@@ -208,7 +208,7 @@ function bindMenuControls() {
 }
 
 function openLeaderboard() {
-    const url = "https://waiting-game.vercel.app/"; 
+    const url = "https://ziuus.github.io/waiting-game/"; 
     if (window.__TAURI__) {
         window.__TAURI__.core.invoke('open_url', { url });
     } else {
