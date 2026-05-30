@@ -1,6 +1,6 @@
 cask "waiting-game" do
-  version "0.3.12"
-  sha256 "8e09ff94f2fed836b17684c877dd5cec2ced6af3510a36e18b56c5a120bb1dbf"
+  version "0.4.0"
+  sha256 "c9943f1f4227a8809799144e2e0b87d3f33a52367fe6d1e5853c643f7e67aa3d"
 
   url "https://github.com/ziuus/waiting-game/releases/download/v#{version}/waiting-game_#{version}_aarch64.dmg"
   name "Waiting Game"

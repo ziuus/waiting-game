@@ -3,7 +3,7 @@
 const { execSync } = require('child_process');
 const os = require('os');
 
-const version = '0.3.12';
+const version = '0.4.0';
 const baseUrl = `https://github.com/ziuus/waiting-game/releases/download/v${version}`;
 
 function getDownloadUrl() {
