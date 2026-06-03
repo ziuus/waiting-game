@@ -288,7 +288,6 @@ pub fn run() {
         .setup(move |app| {
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.set_always_on_top(true);
-                let _ = window.maximize();
                 if let Ok(Some(monitor)) = window.current_monitor() {
                     let size = monitor.size();
                     let pos = monitor.position();
