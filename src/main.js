@@ -128,7 +128,16 @@ async function updateRankDisplay() {
     
     const profile = JSON.parse(localStorage.getItem('player-profile') || 'null');
     if (!profile || !profile.username) {
-        rankDiv.innerHTML = `<span style="font-size: 0.8em; opacity: 0.7;">(Unranked - Set Profile to view)</span>`;
+        rankDiv.innerHTML = `
+            <div style="margin-top: 5px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <span style="font-size: 0.8em; opacity: 0.7;">(Unranked)</span>
+                <button id="set-profile-btn" class="menu-btn" style="font-size: 0.75em; padding: 4px 12px; opacity: 0.8;">SET PROFILE</button>
+            </div>
+        `;
+        setTimeout(() => {
+            const setProfileBtn = document.getElementById('set-profile-btn');
+            if (setProfileBtn) setProfileBtn.onclick = () => renderMenuSubtitle('SPACE TO INITIALIZE', 'profile');
+        }, 0);
         return;
     }
 
@@ -178,13 +187,34 @@ async function updateRankDisplay() {
             }
         }
         
+        let rankHtml = "";
         if (rank > 0) {
-            rankDiv.innerHTML = `<span style="font-size: 0.9em; color: #FFD700; font-weight: bold; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);">🏆 Global Rank: #${rank}</span>`;
+            rankHtml = `<div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); color: #FFD700; padding: 4px 12px; border-radius: 12px; font-size: 0.9em; font-weight: bold; text-shadow: 0 0 8px rgba(255, 215, 0, 0.4); display: inline-block; margin-top: 5px;">🏆 Global Rank: #${rank}</div>`;
         } else {
-            rankDiv.innerHTML = `<span style="font-size: 0.8em; opacity: 0.7;">(Not in Top 100)</span>`;
+            rankHtml = `<div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.7); padding: 4px 12px; border-radius: 12px; font-size: 0.8em; display: inline-block; margin-top: 5px;">Not in Top 100</div>`;
         }
+        
+        rankDiv.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                ${rankHtml}
+                <button id="edit-profile-btn" class="menu-btn" style="font-size: 0.7em; padding: 4px 10px; opacity: 0.6;">EDIT PROFILE</button>
+            </div>
+        `;
+        setTimeout(() => {
+            const editProfileBtn = document.getElementById('edit-profile-btn');
+            if (editProfileBtn) editProfileBtn.onclick = () => renderMenuSubtitle('SPACE TO INITIALIZE', 'profile');
+        }, 0);
     } catch(e) {
-        rankDiv.innerHTML = `<span style="font-size: 0.8em; opacity: 0.7;">(Rank offline)</span>`;
+        rankDiv.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <span style="font-size: 0.8em; opacity: 0.7;">(Rank offline)</span>
+                <button id="edit-profile-btn" class="menu-btn" style="font-size: 0.7em; padding: 4px 10px; opacity: 0.6;">EDIT PROFILE</button>
+            </div>
+        `;
+        setTimeout(() => {
+            const editProfileBtn = document.getElementById('edit-profile-btn');
+            if (editProfileBtn) editProfileBtn.onclick = () => renderMenuSubtitle('SPACE TO INITIALIZE', 'profile');
+        }, 0);
     }
 }
 
@@ -255,18 +285,11 @@ function bindMenuControls() {
     }
 
     if (leaderboardBtn) {
-        leaderboardBtn.onmouseover = () => {
-            leaderboardBtn.style.background = 'rgba(104, 186, 127, 0.2)';
-        };
-        leaderboardBtn.onmouseout = () => {
-            leaderboardBtn.style.background = 'transparent';
-        };
         leaderboardBtn.onclick = () => {
             const profile = JSON.parse(localStorage.getItem('player-profile') || 'null');
             if (!profile || !profile.username) {
-                // Show profile setup modal
-                document.getElementById('profile-layer').style.display = 'flex';
-                document.getElementById('profile-username').focus();
+                // Show profile setup view
+                renderMenuSubtitle('SPACE TO INITIALIZE', 'profile');
             } else {
                 openLeaderboard();
             }
@@ -283,59 +306,74 @@ function openLeaderboard() {
     }
 }
 
-function setupProfileModal() {
-    const profileLayer = document.getElementById('profile-layer');
+function bindProfileControls() {
     const saveBtn = document.getElementById('profile-save');
     const cancelBtn = document.getElementById('profile-cancel');
     const usernameInput = document.getElementById('profile-username');
     const emailInput = document.getElementById('profile-email');
 
-    const closeProfile = () => {
-        profileLayer.style.display = 'none';
-        // Refocus window to capture keyboard events again
-        window.focus();
-    };
+    if (usernameInput) usernameInput.focus();
 
-    saveBtn.onclick = () => {
-        const username = usernameInput.value.trim();
-        if (username) {
-            const profile = {
-                username: username,
-                email: emailInput.value.trim()
-            };
-            localStorage.setItem('player-profile', JSON.stringify(profile));
-            // Force a sync of the current high score if it exists
-            if (highScore > 0) {
-                syncHighScoreToBackend(highScore);
+    if (saveBtn) {
+        saveBtn.onclick = () => {
+            const username = usernameInput.value.trim();
+            if (username) {
+                const profile = {
+                    username: username,
+                    email: emailInput ? emailInput.value.trim() : ''
+                };
+                localStorage.setItem('player-profile', JSON.stringify(profile));
+                // Force a sync of the current high score if it exists
+                if (highScore > 0) {
+                    syncHighScoreToBackend(highScore);
+                }
+                renderMenuSubtitle('SPACE TO INITIALIZE', 'default');
+                openLeaderboard();
             }
-            closeProfile();
-            updateRankDisplay();
-            openLeaderboard();
-        }
-    };
+        };
+    }
 
-    cancelBtn.onclick = closeProfile;
+    if (cancelBtn) {
+        cancelBtn.onclick = () => {
+            renderMenuSubtitle('SPACE TO INITIALIZE', 'default');
+        };
+    }
 }
 
-// Call it once
-setupProfileModal();
-
-function renderMenuSubtitle(message = 'SPACE TO INITIALIZE') {
+function renderMenuSubtitle(message = 'SPACE TO INITIALIZE', view = 'default') {
     const subtitle = getSubtitle();
     if (!subtitle) return;
 
-    subtitle.innerHTML = `
-        ${message}<br><br>
-        <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: center;">
-            <select id="game-select" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 5px; font-family: inherit;"></select>
-            <select id="difficulty-select" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 5px; font-family: inherit;">
-                <option value="easy">Easy</option>
-                <option value="normal">Normal</option>
-                <option value="hard">Hard</option>
-            </select>
+    if (view === 'profile') {
+        const profile = JSON.parse(localStorage.getItem('player-profile') || 'null');
+        const currentUsername = profile?.username || '';
+        const currentEmail = profile?.email || '';
+        
+        subtitle.innerHTML = `
+            <div class="profile-section" style="margin-top: 15px;">
+                <div style="margin-bottom: 15px; font-weight: bold; color: #68BA7F;">SET PLAYER PROFILE</div>
+                <input type="text" id="profile-username" class="menu-input" placeholder="Username" value="${currentUsername}">
+                <input type="email" id="profile-email" class="menu-input" placeholder="Email (optional)" value="${currentEmail}">
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="profile-cancel" class="menu-btn" style="flex: 1;">CANCEL</button>
+                    <button id="profile-save" class="menu-btn primary" style="flex: 1;">SAVE</button>
+                </div>
+            </div>
+        `;
+        bindProfileControls();
+    } else {
+        subtitle.innerHTML = `
+            ${message}<br><br>
+            <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: center;">
+                <select id="game-select" class="menu-select"></select>
+                <select id="difficulty-select" class="menu-select">
+                    <option value="easy">Easy</option>
+                    <option value="normal">Normal</option>
+                    <option value="hard">Hard</option>
+                </select>
             </div>
             <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                <button id="leaderboard-btn" style="background: transparent; color: #68BA7F; border: 1px solid #68BA7F; padding: 8px 16px; font-family: inherit; font-weight: bold; cursor: pointer; border-radius: 4px; transition: all 0.2s;">
+                <button id="leaderboard-btn" class="menu-btn">
                     🏆 GLOBAL RANKS
                 </button>
                 <div id="user-global-rank"></div>
@@ -344,6 +382,7 @@ function renderMenuSubtitle(message = 'SPACE TO INITIALIZE') {
         bindMenuControls();
         updateRankDisplay();
     }
+}
 
 async function persistPreferences() {
     try {

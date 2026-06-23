@@ -1,0 +1,437 @@
+{
+  "/home/zius/Projects/waiting-game/package.json": {
+    "mtime": 1780141697.1665318,
+    "ast_hash": "d09876d9430bce9804c64c93d558a9c5",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/install.sh": {
+    "mtime": 1779728714.498017,
+    "ast_hash": "5cb95c7309b426e07e4018e2e89bf0c9",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/.vscode/extensions.json": {
+    "mtime": 1776398715.6684308,
+    "ast_hash": "a4038619f5414c01f04abbbdd4730820",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/leaderboard-web/vercel.json": {
+    "mtime": 1780134199.9342353,
+    "ast_hash": "e40d54c8a3ba5315451c451f1cd7ab73",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/leaderboard-web/app.js": {
+    "mtime": 1780141281.8031147,
+    "ast_hash": "f6b1f693facff1b08a2764ad679716b3",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/settings.js": {
+    "mtime": 1776963951.3818069,
+    "ast_hash": "b43b9d4df2aae44fdda412a4d9204c2d",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/config.json": {
+    "mtime": 1779810259.8082407,
+    "ast_hash": "e5096737840ba2b6e4a6384fcc5bfda4",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/main.js": {
+    "mtime": 1780141317.808052,
+    "ast_hash": "76b9441edd3853360af08eb5a847a529",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/games/breakout.js": {
+    "mtime": 1779815273.1259732,
+    "ast_hash": "f8cad399db32ee389392cef13becea1d",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/games/flappy.js": {
+    "mtime": 1779798437.0106118,
+    "ast_hash": "d33145eeb27b8b28622bfa13b01f2a8c",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/games/snake.js": {
+    "mtime": 1779815259.3249257,
+    "ast_hash": "dfe5f2937f9cbfa9958ccb198c9e5414",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/games/defender.js": {
+    "mtime": 1779815266.7359512,
+    "ast_hash": "d227e54c5fa7c89a4ea2e687051139be",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/games/dino.js": {
+    "mtime": 1779815281.2100012,
+    "ast_hash": "7703a8ef13eb2769205c095117efd0b6",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/games/gravity.js": {
+    "mtime": 1779794812.093968,
+    "ast_hash": "a6fcb60bc0136009ba92dca9a8435025",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/render-premium-v2.sh": {
+    "mtime": 1780211867.6035702,
+    "ast_hash": "9e5bfce67fcac39d2c0c030f5d0a7d26",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/render-v3-launch.sh": {
+    "mtime": 1780212804.1202183,
+    "ast_hash": "de2901acd8ab0a0d082e15fb7fb4e3a6",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/render-teaser.sh": {
+    "mtime": 1780208396.683326,
+    "ast_hash": "7460a5853ce471e5e1e2d468b3a638b2",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/build.rs": {
+    "mtime": 1776398715.66535,
+    "ast_hash": "1be34a5c61c2c35365de3dab14298f0b",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/tauri.conf.json": {
+    "mtime": 1780144627.0913346,
+    "ast_hash": "497ac7ece6277fd7247d883530f8c9e3",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/gen/schemas/capabilities.json": {
+    "mtime": 1777053066.5189035,
+    "ast_hash": "dab4fcee48c8f26533122d4ecde38134",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/gen/schemas/desktop-schema.json": {
+    "mtime": 1777053066.5186381,
+    "ast_hash": "fb33a76b4a53ac89ffc87232f6a41fc0",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/gen/schemas/acl-manifests.json": {
+    "mtime": 1777053066.5079036,
+    "ast_hash": "53135c9b797eb754ea3a45136f84bf3d",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/gen/schemas/linux-schema.json": {
+    "mtime": 1777053066.5179036,
+    "ast_hash": "fb33a76b4a53ac89ffc87232f6a41fc0",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/capabilities/default.json": {
+    "mtime": 1777025817.2947235,
+    "ast_hash": "cd1924d212c616c0f3287455a36b5ed7",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/src/main.rs": {
+    "mtime": 1776398715.6684308,
+    "ast_hash": "65dc39c9fbf12dfa9fb83ad500846a86",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/src/lib.rs": {
+    "mtime": 1779810281.9651978,
+    "ast_hash": "eab218193dc41d800887aa0851b8af7c",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/packaging/npm/package.json": {
+    "mtime": 1780141697.1671994,
+    "ast_hash": "1b74c2442075a6618124e0189d203b43",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/packaging/npm/bin.js": {
+    "mtime": 1780141966.4982233,
+    "ast_hash": "cb8003bd4f6eb51ec0c7ef6acea62bcb",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/packaging/homebrew/waiting-game.rb": {
+    "mtime": 1780145409.1733642,
+    "ast_hash": "760a4f446583d5d0437baddffb0ce456",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/CONTRIBUTING.md": {
+    "mtime": 1780133918.692259,
+    "ast_hash": "ccadaaa2dcbe4abb2077edba5f6ab089",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/actual_diff.txt": {
+    "mtime": 1779813295.7145967,
+    "ast_hash": "994acfb069251e51f2775f956f643053",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/diff_main.txt": {
+    "mtime": 1779813275.3346884,
+    "ast_hash": "994acfb069251e51f2775f956f643053",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/run_log.txt": {
+    "mtime": 1779779256.0710573,
+    "ast_hash": "688cb5aa5c72bd5a1d03208c19f0e225",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/real_diff.txt": {
+    "mtime": 1779813304.8428645,
+    "ast_hash": "994acfb069251e51f2775f956f643053",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/README.md": {
+    "mtime": 1780133901.206245,
+    "ast_hash": "f163d0b538c28e68ec9ab2655a961c80",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/CODE_OF_CONDUCT.md": {
+    "mtime": 1779779614.2927504,
+    "ast_hash": "4c52373280ebc1b851aabfdfeab1b89d",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/.github/workflows/release.yml": {
+    "mtime": 1779800902.6443756,
+    "ast_hash": "4be3ead4f9b65358d3a6143f53cc3952",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/.github/ISSUE_TEMPLATE/bug_report.md": {
+    "mtime": 1777359033.5000412,
+    "ast_hash": "ee75cb538518771f6227101736d7c299",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/.github/ISSUE_TEMPLATE/feature_request.md": {
+    "mtime": 1777359038.3580122,
+    "ast_hash": "183208d06fb1a5f6d80de9b22521b578",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/leaderboard-web/index.html": {
+    "mtime": 1780140717.5502002,
+    "ast_hash": "95fd448a058e1d5d0738479b2bcfe654",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/.opencode/memory/project.md": {
+    "mtime": 1777308576.3019407,
+    "ast_hash": "bc064defc4070338e269c66c654bbba2",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/settings.html": {
+    "mtime": 1776963951.3818069,
+    "ast_hash": "767f39acab6ab27c46c6e64fd015a4f4",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src/index.html": {
+    "mtime": 1780134267.4721744,
+    "ast_hash": "c02ac8096299dd763be704fccdd66403",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/STORYBOARD-v3.md": {
+    "mtime": 1780212655.1314347,
+    "ast_hash": "9012cd38a78ffb26b366f130cb16b39c",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/DESIGN-v3.md": {
+    "mtime": 1780212663.6104207,
+    "ast_hash": "fc6bccf3f29d61fb0954355f7029cf9f",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/SCRIPT-v3.md": {
+    "mtime": 1780212643.202455,
+    "ast_hash": "8b446f63b33ebec066030eed950837e7",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/SCRIPT.md": {
+    "mtime": 1780208219.884716,
+    "ast_hash": "cebfb1a3efdf8ddd797ea81b7aa23b7e",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/DESIGN.md": {
+    "mtime": 1780208209.8627808,
+    "ast_hash": "d2beb6e268451947c94df156e6c25dea",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/STORYBOARD.md": {
+    "mtime": 1780208236.4549937,
+    "ast_hash": "63977f0753f9cf7b49e56e0f820e54ee",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/hyperframes-manual/index.html": {
+    "mtime": 1780208622.1056917,
+    "ast_hash": "57f04268fb746d2aae882358e0d67b84",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/hyperframes-manual/README.md": {
+    "mtime": 1780208572.3283334,
+    "ast_hash": "7200bb745485f83d53ab4826b1972e3a",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/packaging/winget/waiting-game.installer.yaml": {
+    "mtime": 1780145421.2653182,
+    "ast_hash": "b29dca1b48a5d5baf4fd38936d79684a",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/3.png": {
+    "mtime": 1776676058.9070542,
+    "ast_hash": "4662433c37100ec0269ee8d9aa58e0fe",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/demo_flappy.gif": {
+    "mtime": 1779779256.0448666,
+    "ast_hash": "66eea25c95cb67eb17b3315ca463b986",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/5.png": {
+    "mtime": 1776867586.6080039,
+    "ast_hash": "513a1dce7180f65ebd93c9ad7a8b5350",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/6.png": {
+    "mtime": 1776867599.0559385,
+    "ast_hash": "23178b5552bfb9b8fb41ecd150535780",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/2.png": {
+    "mtime": 1776676048.790002,
+    "ast_hash": "d286f90a9eb1f8ebdc050032bedbe5e7",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/1.png": {
+    "mtime": 1776676041.7526572,
+    "ast_hash": "8c9cf7ccea410a82f900f5f43f7bbae9",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/4.png": {
+    "mtime": 1776676064.7403562,
+    "ast_hash": "5331394e7104a02fadfff59df81cfdd1",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/demo_workflow.gif": {
+    "mtime": 1779779256.065866,
+    "ast_hash": "c8adf875b43bc3af702c671c43afa4b0",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/7.png": {
+    "mtime": 1776867605.0149074,
+    "ast_hash": "b20d1018ee73df676103cfe12d6aedda",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/demo_gameplay.gif": {
+    "mtime": 1779779256.0518663,
+    "ast_hash": "1cc6b49915c21e385e242541dd34c8aa",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/Square30x30Logo.png": {
+    "mtime": 1779786209.697013,
+    "ast_hash": "95b8aa0a10ac64dda138805298667ed0",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/Square150x150Logo.png": {
+    "mtime": 1779786209.7180126,
+    "ast_hash": "c1fb42193529981d6fec7a04558a4695",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/128x128@2x.png": {
+    "mtime": 1779786209.7495325,
+    "ast_hash": "94715e39e2f1607e11d7e05449613950",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/Square89x89Logo.png": {
+    "mtime": 1779786209.7650123,
+    "ast_hash": "d2eb5375bee24f86234bffa18efa9ff0",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/Square71x71Logo.png": {
+    "mtime": 1779786209.780188,
+    "ast_hash": "c9e91a47da5cce97ed81f2c8be04e25a",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/128x128.png": {
+    "mtime": 1779786209.7950122,
+    "ast_hash": "2f3b2cd3e8a9d67e2133c71bb76d9323",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/32x32.png": {
+    "mtime": 1779786209.8051293,
+    "ast_hash": "a9227f13ba6393d439f74eb06ade6a51",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/Square310x310Logo.png": {
+    "mtime": 1779786209.8342314,
+    "ast_hash": "bcebba96c7d3fa1398509200019d6930",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/Square142x142Logo.png": {
+    "mtime": 1779786209.8520117,
+    "ast_hash": "2d743c423165b0af044aca5023b149c4",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/Square44x44Logo.png": {
+    "mtime": 1779786209.8650103,
+    "ast_hash": "fb763fc4b53d819957cc9e97330faa28",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/Square284x284Logo.png": {
+    "mtime": 1779786209.8950114,
+    "ast_hash": "2441bcacbaff3b79a36f2f3a6b5dc710",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/Square107x107Logo.png": {
+    "mtime": 1779786209.9100113,
+    "ast_hash": "08bbbecb08085e000ddc88813d9a3e6d",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/StoreLogo.png": {
+    "mtime": 1779786209.9230113,
+    "ast_hash": "84689edc4aa72d288d82be96166a2cc4",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/src-tauri/icons/icon.png": {
+    "mtime": 1779786209.9830108,
+    "ast_hash": "230ae1c9d0a36fbf45b6580011d25921",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/perspective_dev.mp4": {
+    "mtime": 1776963951.4114878,
+    "ast_hash": "be00db09fe55ce1298d076cf8d54c4ba",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/flappy_dino_raw.mp4": {
+    "mtime": 1776964318.3412716,
+    "ast_hash": "027a08eabe415c0eb67284fedc491bda",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/flappy_dino_trimmed.mp4": {
+    "mtime": 1776964346.906172,
+    "ast_hash": "698618d844c1ebc49f55f7682b7cce50",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/perspective_user_trimmed.mp4": {
+    "mtime": 1776963951.4404879,
+    "ast_hash": "596ea2dcf8570e56a0a8192b7e065981",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/exports/perspective_user.mp4": {
+    "mtime": 1776963951.433488,
+    "ast_hash": "ae97138ed0e722b0d9de20d07f2529cb",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/recordings/recording.mkv": {
+    "mtime": 1776963765.4510374,
+    "ast_hash": "78aac5547c36434fdcda485d44375ed8",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/recordings/1.mkv": {
+    "mtime": 1776963951.4554877,
+    "ast_hash": "c67d712a756b9d9f99d476bf06f50559",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/recordings/2.mkv": {
+    "mtime": 1776963951.5024877,
+    "ast_hash": "c89e16050d631f2db944240f3382c21c",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/output/waiting-game-teaser-v1.mp4": {
+    "mtime": 1780208419.562428,
+    "ast_hash": "0560dfef356942c56f10a149d8503bd8",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/output/waiting-game-teaser-v3-launch.mp4": {
+    "mtime": 1780212849.1001644,
+    "ast_hash": "28370b32e220fefba57b8974bac5f9ec",
+    "semantic_hash": ""
+  },
+  "/home/zius/Projects/waiting-game/video/teaser-15s/output/waiting-game-teaser-v2-premium.mp4": {
+    "mtime": 1780211903.4013004,
+    "ast_hash": "d5e6c369bc1a854b7cd42668e15b1ff7",
+    "semantic_hash": ""
+  }
+}

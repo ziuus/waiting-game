@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head><title>View Images</title>
+<style>
+body { background: #111; color: white; font-family: monospace; padding: 20px; }
+img { max-width: 90vw; image-rendering: pixelated; }
+.info { margin: 10px 0; color: #888; }
+</style>
+</head>
+<body>
+<h2>Image 1 (10:09:29)</h2>
+<div class="info">1920x1080</div>
+<img src="file:///home/zius/.hermes/images/clip_20260623_100929_1.png" crossorigin="anonymous">
+<h2>Image 2 (10:09:39)</h2>
+<div class="info">1920x1080</div>
+<img src="file:///home/zius/.hermes/images/clip_20260623_100939_2.png" crossorigin="anonymous">
+<script>
+// Analyze game state from the images
+const imgs = document.querySelectorAll('img');
+let loaded = 0;
+imgs.forEach((img, i) => {
+    img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const data = ctx.getImageData(0, 0, c.width, c.height).data;
+        
+        // Count pixels by color ranges
+        let gameOverPixels = 0, scorePixels = 0, playerPixels = 0, obsPixels = 0;
+        for (let y = 0; y < c.height; y++) {
+            for (let x = 0; x < c.width; x++) {
+                const idx = (y * c.width + x) * 4;
+                const r = data[idx], g = data[idx+1], b = data[idx+2], a = data[idx+3];
+                // TERMINATED red: ~255,75,43
+                if (r > 230 && g < 100 && b < 70 && a > 200) gameOverPixels++;
+                // Green player: ~104,186,127
+                if (r > 90 && r < 120 && g > 170 && g < 200 && b > 110 && b < 140 && a > 200) playerPixels++;
+                // Red obstacle: ~255,75,43
+                if (r > 230 && g < 100 && b < 70 && a > 200) obsPixels++;
+                // Score green text (smaller, different tone)
+                if (r > 90 && r < 130 && g > 160 && g < 210 && b > 100 && b < 150 && a > 200) scorePixels++;
+            }
+        }
+        document.body.innerHTML += `<div class="info">Image ${i+1}: GameOver=${gameOverPixels} Player=${playerPixels} Obstacles=${obsPixels} Score=${scorePixels}</div>`;
+        loaded++;
+        if (loaded === 2) {
+            // Show comparison
+            document.body.innerHTML += '<h2>Analysis Complete</h2>';
+        }
+    };
+});
+</script>
+</body>
+</html>

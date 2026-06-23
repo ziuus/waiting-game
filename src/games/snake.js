@@ -127,9 +127,14 @@ export default class CyberSnakeGame {
     }
 
     updateParticles() {
-        this.particles = this.particles
-            .map((p) => ({ ...p, x: p.x + p.vx, y: p.y + p.vy, life: p.life - 0.035, size: p.size * 0.97 }))
-            .filter((p) => p.life > 0);
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.035;
+            p.size *= 0.97;
+            if (p.life <= 0) this.particles.splice(i, 1);
+        }
     }
 
     burst(cell, color, count, force) {

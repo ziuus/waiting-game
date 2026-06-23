@@ -125,6 +125,75 @@
         color: rgba(255, 255, 255, 0.7);
         letter-spacing: 2px;
         text-align: center;
+        width: 100%;
+        max-width: 400px;
+      }
+      
+      /* Modern UI Components */
+      .menu-select, .menu-btn, .menu-input {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px 15px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .menu-select:hover, .menu-input:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      .menu-btn {
+        background: rgba(104, 186, 127, 0.1);
+        color: #68BA7F;
+        border-color: rgba(104, 186, 127, 0.3);
+        font-weight: 700;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .menu-btn:hover {
+        background: rgba(104, 186, 127, 0.2);
+        border-color: #68BA7F;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(104, 186, 127, 0.2);
+      }
+
+      .menu-btn.primary {
+        background: #68BA7F;
+        color: #081212;
+        border: none;
+      }
+
+      .menu-btn.primary:hover {
+        background: #7bd094;
+        box-shadow: 0 4px 20px rgba(104, 186, 127, 0.4);
+      }
+
+      .menu-input {
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+        margin-bottom: 8px;
+      }
+
+      .profile-section {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 15px;
+        animation: slide-up 0.3s ease-out;
+      }
+
+      @keyframes slide-up {
+        from { transform: translateY(10px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
       }
     </style>
   </head>
@@ -139,42 +208,10 @@
       <div id="game-over-layer">
         <div class="go-title">TERMINATED</div>
         <div class="go-subtitle">
-            SPACE TO INITIALIZE<br><br>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <select id="game-select" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 5px; font-family: inherit;">
-                    <option value="dino">Dino Runner</option>
-                    <option value="flappy">Flappy Bird</option>
-                    <option value="gravity">Gravity Runner</option>
-                </select>
-                <select id="difficulty-select" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid white; padding: 5px; font-family: inherit;">
-                    <option value="easy">Easy</option>
-                    <option value="normal" selected>Normal</option>
-                    <option value="hard">Hard</option>
-                </select>
-            </div>
-            <div style="margin-top: 20px;">
-                <button id="leaderboard-btn" style="background: transparent; color: #68BA7F; border: 1px solid #68BA7F; padding: 8px 16px; font-family: inherit; font-weight: bold; cursor: pointer; border-radius: 4px; transition: all 0.2s;">
-                    🏆 GLOBAL RANKS
-                </button>
-            </div>
+            <!-- Content injected by main.js -->
         </div>
       </div>
 
-      <!-- Player Profile Setup -->
-      <div id="profile-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 30; background: rgba(0,0,0,0.9);">
-          <div style="background: #111; padding: 30px; border: 1px solid #333; border-radius: 12px; text-align: center; width: 300px;">
-              <h2 style="color: #68BA7F; margin-top: 0; font-family: 'Space Grotesk', sans-serif;">PLAYER PROFILE</h2>
-              <p style="color: #aaa; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 20px;">Enter your details for the Global Leaderboard</p>
-              
-              <input type="text" id="profile-username" placeholder="Username" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: white; padding: 10px; margin-bottom: 10px; font-family: 'JetBrains Mono', monospace;">
-              <input type="email" id="profile-email" placeholder="Email (optional)" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: white; padding: 10px; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace;">
-              
-              <div style="display: flex; gap: 10px;">
-                  <button id="profile-cancel" style="flex: 1; background: transparent; color: #888; border: 1px solid #555; padding: 10px; cursor: pointer; border-radius: 4px;">CANCEL</button>
-                  <button id="profile-save" style="flex: 1; background: #68BA7F; color: #000; border: none; font-weight: bold; padding: 10px; cursor: pointer; border-radius: 4px;">SAVE</button>
-              </div>
-          </div>
-      </div>
       <canvas id="gameCanvas"></canvas>
     </div>
     <script src="main.js"></script>

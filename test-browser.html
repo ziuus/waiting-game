@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiting Game - Browser Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background: #0a0a0a;
+            color-scheme: dark;
+            -webkit-font-smoothing: antialiased;
+        }
+        #game-container {
+            width: 100vw; height: 100vh;
+            display: flex; align-items: flex-end; justify-content: center;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            position: absolute; top: 0; left: 0; z-index: 1;
+            image-rendering: pixelated;
+        }
+        #ui-layer {
+            position: absolute; top: 40px;
+            left: 50%; transform: translateX(-50%);
+            z-index: 10; display: flex; flex-direction: column;
+            align-items: center; pointer-events: none;
+        }
+        .score-board {
+            background: rgba(8, 18, 18, 0.85);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 12px 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            color: #68BA7F; font-family: 'Space Grotesk', sans-serif;
+            text-align: center; text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex; flex-direction: column; gap: 2px;
+        }
+        .score-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; text-shadow: 0 0 10px rgba(104,186,127,0.5); }
+        .high-score { font-family: 'JetBrains Mono', monospace; font-size: 12px; opacity: 0.7; display: flex; justify-content: center; gap: 6px; color: #A0A0A0; }
+        .high-score span { color: #68BA7F; }
+        #game-over-layer {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 20; opacity: 0; pointer-events: none;
+            background: transparent;
+        }
+        #game-over-layer.terminated { backdrop-filter: none; }
+        .go-title { font-family: 'Space Grotesk', sans-serif; font-size: 42px; font-weight: 700; color: #ff4b2b; letter-spacing: 6px; margin-bottom: 12px; text-shadow: 0 0 20px rgba(255,75,43,0.4); }
+        .go-subtitle { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: rgba(255,255,255,0.7); letter-spacing: 2px; text-align: center; width: 100%; max-width: 400px; }
+        .menu-select, .menu-btn, .menu-input {
+            background: rgba(255,255,255,0.05); color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 15px; font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; border-radius: 8px; outline: none;
+        }
+        .menu-btn { background: rgba(104,186,127,0.1); color: #68BA7F; border-color: rgba(104,186,127,0.3); font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .menu-btn:hover { background: rgba(104,186,127,0.2); border-color: #68BA7F; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="ui-layer">
+            <div class="score-board">
+                <div class="score-value" id="score">00000</div>
+                <div class="high-score">HI <span id="highScore">00000</span></div>
+            </div>
+        </div>
+        <div id="game-over-layer">
+            <div class="go-title">TERMINATED</div>
+            <div class="go-subtitle"></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    <script>
+        // Mock Tauri bridge for browser testing
+        window.__TAURI__ = {
+            core: {
+                invoke: async (cmd, args) => {
+                    if (cmd === 'get_config') {
+                        // Return a mock/default config
+                        const response = await fetch('src/config.json');
+                        if (response.ok) return response.json();
+                        // Fallback to inline default
+                        return {
+                            "showScore": true,
+                            "activeGame": "dino",
+                            "activeDifficulty": "normal",
+                            "background": { "opacity": 0, "color": "0, 0, 0" },
+                            "themes": { "dino": { "player": "#68BA7F", "obstacle": "#ff4b2b", "score": "rgba(104, 186, 127, 0.8)" },
+                                "flappy": { "player": "#FFC107", "obstacle": "#4CAF50", "score": "rgba(255, 193, 7, 0.8)" },
+                                "gravity": { "player": "#00E5FF", "obstacle": "#FF00FF", "score": "rgba(0, 229, 255, 0.8)" },
+                                "snake": { "player": "#39FF14", "obstacle": "#FF2D55", "score": "rgba(57, 255, 20, 0.8)" },
+                                "breakout": { "player": "#7C4DFF", "obstacle": "#00E5FF", "score": "rgba(124, 77, 255, 0.85)" },
+                                "defender": { "player": "#00F5FF", "obstacle": "#FF3B81", "score": "rgba(0, 245, 255, 0.85)" }
+                            },
+                            "difficultyModes": { "normal": { "dino": { "initialSpeed": 8, "gravity": 0.7, "jumpForce": 15, "obstacleGap": 160 } } },
+                            "games": [{ "id": "dino", "name": "Dino Runner", "enabled": true },
+                                      { "id": "flappy", "name": "Flappy Bird", "enabled": true },
+                                      { "id": "gravity", "name": "Gravity Runner", "enabled": true },
+                                      { "id": "snake", "name": "Cyber Snake", "enabled": true },
+                                      { "id": "breakout", "name": "Neon Breakout", "enabled": true },
+                                      { "id": "defender", "name": "Defender", "enabled": true }]
+                        };
+                    }
+                    if (cmd === 'open_url') { window.open(args.url, '_blank'); }
+                    if (cmd === 'hide_window') { console.log('hide_window'); }
+                    if (cmd === 'save_preferences') { console.log('saved', args); }
+                }
+            }
+        };
+    </script>
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

@@ -176,13 +176,22 @@ export default class NeonBreakoutGame {
     }
 
     updateTrail() {
-        this.trail = this.trail.map((p) => ({ ...p, life: p.life - 0.08 })).filter((p) => p.life > 0);
+        for (let i = this.trail.length - 1; i >= 0; i--) {
+            const p = this.trail[i];
+            p.life -= 0.08;
+            if (p.life <= 0) this.trail.splice(i, 1);
+        }
     }
 
     updateParticles() {
-        this.particles = this.particles
-            .map((p) => ({ ...p, x: p.x + p.vx, y: p.y + p.vy, life: p.life - 0.035, size: p.size * 0.96 }))
-            .filter((p) => p.life > 0);
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.035;
+            p.size *= 0.96;
+            if (p.life <= 0) this.particles.splice(i, 1);
+        }
     }
 
     burst(point, color, count, force) {

@@ -75,53 +75,66 @@ export default class DefenderGame {
     }
 
     updateBullets() {
-        this.bullets = this.bullets
-            .map((bullet) => ({ ...bullet, x: bullet.x + bullet.speed, life: bullet.life - 1 }))
-            .filter((bullet) => bullet.x < window.innerWidth + 80 && bullet.life > 0);
+        for (let i = this.bullets.length - 1; i >= 0; i--) {
+            const b = this.bullets[i];
+            b.x += b.speed;
+            b.life--;
+            if (b.x >= window.innerWidth + 80 || b.life <= 0) {
+                this.bullets.splice(i, 1);
+            }
+        }
     }
 
     updateEnemies() {
         const speed = this.config.difficulty.initialSpeed || 6;
         const fireChance = this.config.difficulty.gravity || 0.14;
-        this.enemies = this.enemies
-            .map((enemy) => {
-                enemy.x -= speed + enemy.drift;
-                enemy.y += Math.sin((this.frame + enemy.phase) * 0.04) * enemy.wave;
-                enemy.pulse += 0.08;
+        
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+            const enemy = this.enemies[i];
+            enemy.x -= speed + enemy.drift;
+            enemy.y += Math.sin((this.frame + enemy.phase) * 0.04) * enemy.wave;
+            enemy.pulse += 0.08;
 
-                if (Math.random() < fireChance / 120) {
-                    this.enemyShots.push({
-                        x: enemy.x - 18,
-                        y: enemy.y,
-                        speed: speed + 4,
-                        radius: 5,
-                        life: 180
-                    });
-                }
-
-                return enemy;
-            })
-            .filter((enemy) => enemy.x > -90 && enemy.hp > 0);
+            if (Math.random() < fireChance / 120) {
+                this.enemyShots.push({
+                    x: enemy.x - 18,
+                    y: enemy.y,
+                    speed: speed + 4,
+                    radius: 5,
+                    life: 180
+                });
+            }
+            
+            if (enemy.x <= -90 || enemy.hp <= 0) {
+                this.enemies.splice(i, 1);
+            }
+        }
     }
 
     updateEnemyShots() {
-        this.enemyShots = this.enemyShots
-            .map((shot) => ({ ...shot, x: shot.x - shot.speed, life: shot.life - 1 }))
-            .filter((shot) => shot.x > -40 && shot.life > 0);
+        for (let i = this.enemyShots.length - 1; i >= 0; i--) {
+            const shot = this.enemyShots[i];
+            shot.x -= shot.speed;
+            shot.life--;
+            if (shot.x <= -40 || shot.life <= 0) {
+                this.enemyShots.splice(i, 1);
+            }
+        }
     }
 
     updateParticles() {
-        this.particles = this.particles
-            .map((p) => ({
-                ...p,
-                x: p.x + p.vx,
-                y: p.y + p.vy,
-                vx: p.vx * 0.98,
-                vy: p.vy * 0.98,
-                life: p.life - 0.035,
-                size: p.size * 0.965
-            }))
-            .filter((p) => p.life > 0 && p.size > 0.2);
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vx *= 0.98;
+            p.vy *= 0.98;
+            p.life -= 0.035;
+            p.size *= 0.965;
+            if (p.life <= 0 || p.size <= 0.2) {
+                this.particles.splice(i, 1);
+            }
+        }
     }
 
     spawnEnemies() {
