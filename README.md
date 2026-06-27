@@ -7,60 +7,45 @@
   <img src="exports/demo_workflow.gif" width="100%" alt="Waiting Game Workflow" />
 </p>
 
-> **Kinetic Overlay Intelligence — An ultra-lightweight, full-screen transparent overlay game powered by a high-performance Rust core.**
+A full-screen transparent overlay game that sits on your desktop and responds to keyboard input. Built with Tauri v2 and Rust for minimal resource usage — activates when summoned, stays quiet otherwise.
 
-Waiting Game is a minimalist, cinematic overlay built with **Tauri and Rust**. It sits invisibly in the background of your desktop environment and only appears when summoned, providing a frictionless kinetic experience during idle time without impacting system resources.
+Current release: **v0.4.2** — Dino Runner, Flappy Bird, Gravity Runner, Cyber Snake, Neon Breakout, and Defender.
 
-Current release: **v0.3.11** — includes Dino Runner, Flappy Bird, Gravity Runner, Cyber Snake, Neon Breakout, and Defender.
+## Features
 
-## ⚡ Core Features
+- **Transparent overlay**: Full-screen, no window chrome, doesn't block the desktop.
+- **Always-on-top**: Available with a keypress, never lost behind other windows.
+- **Six game modes**: Dino Runner, Flappy Bird, Gravity Runner, Cyber Snake, Neon Breakout, and Defender.
+- **Global leaderboards**: Submit scores to a live leaderboard and see your rank across all players.
+- **Dynamic difficulty**: Easy, Normal, and Hard presets with per-game speed, physics, and spacing.
+- **Customizable roster**: Enable, disable, rename, and theme games through the config file.
+- **Near-zero idle cost**: No CPU or RAM draw when the game isn't running.
 
-- **Invisible Protocol**: Starts completely hidden; zero UI footprint until triggered.
-- **Pure Transparency**: Advanced compositing keeps the overlay lightweight and visually clean.
-- **Cross-Platform Performance**: Near-zero CPU/RAM overhead when inactive, leveraging Rust's memory safety and speed.
-- **Multiple Game Modes**: Dino Runner, Flappy Bird, Gravity Runner, Cyber Snake, Neon Breakout, and Defender.
-- **Dynamic Difficulty**: Easy, Normal, and Hard presets with per-game speed, physics, and spacing parameters.
-- **Customizable Roster**: Enable, disable, rename, and theme games through the config file.
-
-## 📸 Interface
+## Interface
 
 <p align="center">
   <img src="exports/1.png" width="48%" />
   <img src="exports/2.png" width="48%" />
 </p>
 
-## 🚀 Installation
+## Installation
 
-Waiting Game is cross-platform and provides multiple ways to install.
+Download the latest release from the [Releases Page](https://github.com/ziuus/waiting-game/releases/latest).
 
-### ✅ Recommended Install
-
-Download the latest native build from the [Releases Page](https://github.com/ziuus/waiting-game/releases/latest).
-
-#### Linux AppImage
+### Linux
 
 ```bash
 curl -L -o waiting-game.AppImage \
-  https://github.com/ziuus/waiting-game/releases/download/v0.3.11/waiting-game_0.3.11_amd64.AppImage
+  https://github.com/ziuus/waiting-game/releases/download/v0.4.2/waiting-game_0.4.2_amd64.AppImage
 chmod +x waiting-game.AppImage
 ./waiting-game.AppImage
 ```
 
-On this development system, the latest AppImage is installed at:
+On this development system, the AppImage is at `~/Applications/waiting-game-0.4.2.AppImage`.
 
-```bash
-~/Applications/waiting-game-0.3.11.AppImage
-```
+### Package Managers
 
-and symlinked as:
-
-```bash
-~/bin/waiting-game
-```
-
-### 📦 Package Managers
-
-Package-manager manifests exist in `packaging/`, but they are **not published to public registries yet**. Until publishing is complete, use the GitHub Releases install method above.
+Package-manager manifests exist in `packaging/` but are not published to public registries yet.
 
 | OS | Method | Command |
 | :--- | :--- | :--- |
@@ -68,96 +53,59 @@ Package-manager manifests exist in `packaging/`, but they are **not published to
 | **Windows** | **WinGet** | Planned: `ziuus.WaitingGame` |
 | **Universal** | **npm** | Planned: `npx waiting-game` |
 
-### ⬇️ Native Downloads
+### Other Platforms
 
-Download the latest release in your preferred format from the [Releases Page](https://github.com/ziuus/waiting-game/releases/latest).
+- **Windows**: Download the `.exe` / `.msi` installer from Releases.
+- **macOS**: Download the `.dmg` from Releases (Intel and Apple Silicon).
 
-#### Linux
-- **AppImage**: Universal Linux binary.
-- **.deb**: For Debian/Ubuntu-based distros.
-- **.rpm**: For Fedora/RHEL-based distros.
+## Configuration
 
-#### Windows
-- **.exe / .msi**: Native installers for Windows 10/11.
+The game reads `~/.config/waiting-game/config.json`. It auto-creates one with defaults if missing.
 
-#### macOS
-- **.dmg**: Apple Disk Image for Intel and Apple Silicon.
+Supported settings:
+- `activeGame` / `activeDifficulty` — startup game and difficulty.
+- `games` — enable/disable individual games and set display names.
+- `themes` — per-game player, obstacle, and score colors.
+- `difficultyModes` — fine-tune easy/normal/hard physics per game.
 
----
+## Usage
 
-## 🌍 Environment Compatibility
+Run the binary. The game window appears full-screen and transparent.
 
-We are actively testing across multiple environments. Want to help? Check out our [Contribution Guidelines](CONTRIBUTING.md).
+- **`SPACE`** — Jump / Initialize
+- **`H`** — Hide the game window
+- **`Tab`** — Switch between game, difficulty, and leaderboard controls on the game-over screen
 
-| OS / Environment | Status | Notes |
-| :--- | :---: | :--- |
-| **Windows 11** | ⏳ Needs Testing | Testing window transparency |
-| **Windows 10 / WSL2** | ⏳ Needs Testing | |
-| **macOS (Apple Silicon)** | ⏳ Needs Testing | Checking input latency |
-| **macOS (Intel)** | ⏳ Needs Testing | |
-| **Ubuntu / Debian** | ⏳ Needs Testing | |
-| **Arch Linux** | ✅ Working | Wayland + Hyprland tested |
-| **Tiling WMs (River, i3)** | ⏳ Needs Testing | Window focus handling |
+On Linux compositors that support custom keybinds (Hyprland, COSMIC), you can bind a hotkey to toggle the game window. See `install.sh` for an example Hyprland config.
 
----
+## Shortcuts
 
-### 🧩 Premium Hyprland Integration (Linux Only)
-Waiting Game offers specialized integration for the Hyprland compositor. You can use the automated installer:
-```bash
-curl -sSL https://raw.githubusercontent.com/ziuus/waiting-game/master/install.sh | bash
-```
-This sets up dedicated window rules and autostart configuration at `~/.config/hypr/waiting-game.conf`.
+| Key | Action |
+| :--- | :--- |
+| **`SPACE`** | Jump / Initialize game |
+| **`H`** | Instant hide |
 
-## 🕹️ Configuration & Difficulty
+Compositor-side bindings can toggle visibility (e.g., `SUPER + SHIFT + G` on Hyprland).
 
-### Game Modes
+## Tech Stack
 
-- **Dino Runner**: Classic kinetic runner.
-- **Flappy Bird**: Polished bird, neon pipes, and momentum-based flight.
-- **Gravity Runner**: Cyber gravity-flip runner with neon spikes.
-- **Cyber Snake**: Grid-based snake with glowing food, obstacles, and particle effects.
-- **Neon Breakout**: Paddle, glowing ball, brick waves, and trail effects.
-- **Defender**: Side-scrolling neon space defense with movement, shooting, shields, enemies, and enemy fire.
+- **Core**: Rust, Tauri v2
+- **Frontend**: Vanilla JS / Canvas API
+- **Backend (leaderboard)**: Firebase Firestore
 
-### Difficulty Modes
-You can switch between difficulty modes via the in-game UI:
-- **Easy**: Relaxed speed and higher jump force.
-- **Normal**: The standard balanced experience.
-- **Hard**: Faster obstacles and increased gravity for a real challenge.
+## Development
 
-### Manual Configuration
-Advanced users can modify the game parameters directly at:
-`~/.config/waiting-game/config.json`
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and contribution guidelines.
 
-Supported parameters include:
-- `initialSpeed`: Movement speed of obstacles.
-- `gravity`: Game-specific vertical physics where applicable.
-- `jumpForce`: Vertical thrust or action intensity where applicable.
-- `obstacleGap`: Game-specific spacing, rows, or density tuning.
-- `themes`: Per-game player, obstacle, and score colors.
-- `games`: Enable/disable games and customize display names.
+## Game Modes
 
-## 🕹️ CLI Commands
+- **Dino Runner** — Classic runner with jump physics.
+- **Flappy Bird** — Momentum-based flight with neon pipes.
+- **Gravity Runner** — Gravity-flip runner with spikes.
+- **Cyber Snake** — Grid-based snake with glowing food and particles.
+- **Neon Breakout** — Paddle-and-ball breakout with brick waves.
+- **Defender** — Side-scrolling space shooter with shields and enemy fire.
 
-- **`waiting-game run`**: Start the game in the background.
-- **`waiting-game stop`**: Terminate the game process.
+## License
 
-## 🕹️ Tech Stack
-
-- **Core Logic**: [Rust](https://www.rust-lang.org/)
-- **Framework**: [Tauri v2](https://v2.tauri.app/)
-- **Frontend**: Vanilla JS / Canvas
-
-## 🕹️ Shortcuts
-
-- **`SUPER` + `SHIFT` + `G`**: **Toggle Visibility** (Linux/Hyprland)
-- **`SUPER` + `SHIFT` + `P`**: **Toggle Sticky Mode** (Linux/Hyprland)
-- **`SPACE`**: Jump / Initialize
-- **`H`**: Instant Hide
-
-## 🤝 Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
----
-*Built for the Autonomous Desktop Era.*
+MIT — see [LICENSE](LICENSE).

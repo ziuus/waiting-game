@@ -46,8 +46,8 @@
         "desktopTemplate": "main.desktop"
       }
     },
-    "shortDescription": "Cinematic kinetic overlay game for developers.",
-    "longDescription": "An ultra-lightweight, full-screen transparent overlay game designed for high-performance focus during idle times.",
+    "shortDescription": "Transparent overlay game for the desktop.",
+    "longDescription": "A full-screen transparent overlay game built with Tauri v2 and Rust. Minimal resource usage, multiple game modes, and global leaderboards.",
     "copyright": "Copyright © 2026 Noel Paul Tomy",
     "category": "Game"
   }
