@@ -7,383 +7,399 @@
 <meta name="description" content="A full-screen transparent overlay game that sits quietly on your desktop. Six game modes, global leaderboards, near-zero idle cost. Built with Tauri v2 and Rust.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ────────── Reset & Base ────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{
-  font-family:'Space Grotesk',-apple-system,BlinkMacSystemFont,sans-serif;
-  background:#fafaf9;color:#1c1917;line-height:1.6;
-  -webkit-font-smoothing:antialiased
+  font-family:'Sora',sans-serif;
+  background:#08080a;color:#d4d4d8;
+  line-height:1.6;-webkit-font-smoothing:antialiased
 }
 a{color:inherit;text-decoration:none}
 img{max-width:100%;height:auto;display:block}
 
 /* ────────── Variables ────────── */
 :root{
-  --accent:#059669;
-  --accent-light:#d1fae5;
-  --accent-dark:#047857;
-  --amber:#d97706;
-  --slate-50:#f8fafc;
-  --slate-100:#f1f5f9;
-  --slate-200:#e2e8f0;
-  --slate-300:#cbd5e1;
-  --slate-400:#94a3b8;
-  --slate-500:#64748b;
-  --slate-600:#475569;
-  --slate-700:#334155;
-  --slate-800:#1e293b;
-  --slate-900:#0f172a;
+  --accent:#22c55e;
+  --accent-dim:#166534;
+  --accent-glow:rgba(34,197,94,.15);
+  --amber:#f59e0b;
+  --surface:#121214;
+  --surface-border:#1e1e21;
+  --surface-hover:#1a1a1d;
+  --text:#d4d4d8;
+  --text-dim:#71717a;
+  --text-bright:#fafafa;
   --radius:12px;
   --radius-sm:8px;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.05),0 1px 3px rgba(0,0,0,.1);
-  --shadow:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -2px rgba(0,0,0,.05);
-  --shadow-lg:0 10px 15px -3px rgba(0,0,0,.08),0 4px 6px -4px rgba(0,0,0,.04);
-  --max-w:1120px;
+  --radius-md:10px;
+  --max-w:1100px;
 }
 
 /* ────────── Nav ────────── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
-  background:rgba(250,250,249,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--slate-200);
+  background:rgba(8,8,10,.85);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--surface-border);
 }
 nav .inner{
   max-width:var(--max-w);margin:0 auto;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 1.5rem;height:56px;
+  padding:0 1.5rem;height:52px;
 }
-nav .logo{font-weight:700;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+nav .logo{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:6px;letter-spacing:-.01em;color:var(--text-bright)}
 nav .logo span{color:var(--accent)}
-nav .nav-links{display:flex;gap:2rem;list-style:none}
-nav .nav-links a{font-size:.875rem;font-weight:500;color:var(--slate-600);transition:color .15s}
+nav .nav-links{display:flex;gap:1.75rem;list-style:none}
+nav .nav-links a{font-size:.8rem;font-weight:500;color:var(--text-dim);transition:color .15s}
 nav .nav-links a:hover{color:var(--accent)}
-.nav-cta{
-  background:var(--accent);color:#fff!important;padding:.4rem 1rem;
-  border-radius:var(--radius-sm);font-size:.8rem!important;font-weight:600!important
+.nav-gh{
+  background:var(--surface);color:var(--text)!important;padding:.35rem .85rem;
+  border-radius:var(--radius-sm);font-size:.75rem!important;font-weight:600!important;
+  border:1px solid var(--surface-border);display:flex;align-items:center;gap:4px;
 }
-.nav-cta:hover{background:var(--accent-dark)!important;color:#fff!important}
+.nav-gh:hover{border-color:var(--text-dim)!important;color:var(--text-bright)!important}
 
 /* ────────── Hero ────────── */
 .hero{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  padding:6rem 1.5rem 4rem;
-  background:linear-gradient(135deg,#f0fdf4 0%,#fafaf9 50%,#fffbeb 100%);
-  position:relative;overflow:hidden;
+  padding:6rem 1.5rem 3rem;position:relative;overflow:hidden;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(34,197,55,.06) 0%,transparent 60%);
 }
-.hero::before{
-  content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;
-  background:radial-gradient(circle,rgba(5,150,105,.08) 0%,transparent 70%);
-  pointer-events:none;
+.hero .inner{max-width:var(--max-w);width:100%;text-align:center;position:relative;z-index:1}
+.hero-badges{display:flex;gap:.5rem;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:600;
+  padding:.25rem .65rem;border-radius:999px;
+  text-transform:uppercase;letter-spacing:.05em;
 }
-.hero .inner{
-  max-width:var(--max-w);width:100%;text-align:center;position:relative;z-index:1;
-}
+.hero-badge.version{background:rgba(34,197,55,.1);color:var(--accent);border:1px solid rgba(34,197,55,.2)}
+.hero-badge.os{background:var(--surface);color:var(--text-dim);border:1px solid var(--surface-border)}
 .hero h1{
-  font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.1;
-  margin-bottom:1rem;
+  font-size:clamp(2.25rem,5.5vw,4.25rem);font-weight:700;line-height:1.08;
+  letter-spacing:-.03em;margin-bottom:1rem;color:var(--text-bright);
+  text-wrap:balance;
 }
-.hero h1 span{background:linear-gradient(135deg,var(--accent),#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero h1 span{background:linear-gradient(180deg,#fafafa 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero .subtitle{
-  font-size:clamp(1rem,2vw,1.25rem);color:var(--slate-500);max-width:600px;
+  font-size:clamp(.95rem,1.6vw,1.1rem);color:var(--text-dim);max-width:560px;
   margin:0 auto 2rem;line-height:1.7;
 }
-.hero .demo-gif{
-  border-radius:var(--radius);box-shadow:var(--shadow-lg);
-  margin:0 auto 2.5rem;max-width:800px;width:100%;
-  border:1px solid var(--slate-200);
+.hero .preview{
+  border-radius:var(--radius);max-width:820px;width:100%;margin:0 auto 2.5rem;
+  border:1px solid var(--surface-border);box-shadow:0 20px 80px rgba(0,0,0,.6);
 }
-.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.hero-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
 .btn{
   display:inline-flex;align-items:center;gap:8px;
-  padding:.75rem 1.75rem;border-radius:var(--radius-sm);
-  font-weight:600;font-size:.95rem;transition:all .15s;
+  padding:.7rem 1.5rem;border-radius:var(--radius-sm);
+  font-weight:600;font-size:.875rem;transition:all .15s;
   cursor:pointer;border:none;font-family:inherit;
 }
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-dark);transform:translateY(-1px);box-shadow:var(--shadow)}
-.btn-secondary{background:#fff;color:var(--slate-800);border:1px solid var(--slate-200)}
-.btn-secondary:hover{background:var(--slate-50);border-color:var(--slate-300);transform:translateY(-1px)}
-.btn-ghost{color:var(--slate-600);padding:.75rem 1rem}
-.btn-ghost:hover{color:var(--accent)}
+.btn-primary{background:var(--accent);color:#08080a}
+.btn-primary:hover{background:#16a34a;transform:translateY(-1px)}
+.btn-sec{background:var(--surface);color:var(--text);border:1px solid var(--surface-border)}
+.btn-sec:hover{background:var(--surface-hover);border-color:var(--text-dim);transform:translateY(-1px)}
 
-/* ────────── Sections ────────── */
+/* ────────── Shared ────────── */
 section{padding:5rem 1.5rem}
 section .inner{max-width:var(--max-w);margin:0 auto}
-.section-label{
-  font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;
-  text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:.75rem;
+.section-title{
+  font-size:clamp(1.5rem,3vw,2.25rem);font-weight:700;letter-spacing:-.02em;
+  margin-bottom:.75rem;text-wrap:balance;color:var(--text-bright);
 }
-.section-title{font-size:clamp(1.75rem,3vw,2.5rem);font-weight:700;margin-bottom:1rem}
-.section-desc{color:var(--slate-500);max-width:560px;font-size:1.05rem;margin-bottom:3rem}
-.section-desc.centered{margin-left:auto;margin-right:auto;text-align:center}
 .section-title.centered{text-align:center}
+.section-desc{color:var(--text-dim);max-width:540px;font-size:.95rem;line-height:1.65}
+.section-desc.centered{margin:0 auto 3rem;text-align:center}
 
-/* ────────── Games Grid ────────── */
+/* ────────── Terminal Demo ────────── */
+.terminal-demo{padding-top:2rem;padding-bottom:5rem}
+.terminal-win{
+  max-width:740px;margin:0 auto;background:#0a0a0c;
+  border:1px solid var(--surface-border);border-radius:var(--radius);
+  overflow:hidden;font-family:'JetBrains Mono',monospace;font-size:13px;
+}
+.terminal-hdr{
+  display:flex;align-items:center;gap:6px;
+  padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--surface-border);
+}
+.terminal-dot{width:10px;height:10px;border-radius:50%}
+.terminal-dot.r{background:#ff5f57}
+.terminal-dot.y{background:#febc2e}
+.terminal-dot.g{background:#28c840}
+.terminal-hdr span:nth-child(4){margin-left:8px;color:var(--text-dim);font-size:12px;font-weight:500}
+.terminal-body{
+  padding:16px 20px;line-height:1.65;color:#c0c0c4;min-height:200px;
+}
+.term-prompt{color:var(--accent);font-weight:500;user-select:none}
+.term-cmd{color:#e0e0e4}
+.term-d{color:#666}
+.term-ok{color:var(--accent)}
+.term-sp{border:none;height:.25rem;display:block}
+.term-blk{animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ────────── Games Bento ────────── */
 .games-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-  gap:1.25rem;
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1rem;
 }
+@media(max-width:860px){.games-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.games-grid{grid-template-columns:1fr}}
 .game-card{
-  background:#fff;border:1px solid var(--slate-200);border-radius:var(--radius);
-  padding:1.5rem;cursor:pointer;transition:all .2s;
-  position:relative;overflow:hidden;
+  background:var(--surface);border:1px solid var(--surface-border);
+  border-radius:var(--radius);padding:1.25rem;cursor:pointer;
+  transition:border-color .2s,background .2s;position:relative;
 }
-.game-card:hover{
-  border-color:var(--accent);box-shadow:var(--shadow);
-  transform:translateY(-2px);
+.game-card:hover{background:var(--surface-hover);border-color:#2a2a2e}
+.game-card .emoji{font-size:1.5rem;margin-bottom:.5rem;display:inline-block}
+.game-card h3{font-size:.9rem;font-weight:600;color:var(--text-bright);margin-bottom:.25rem}
+.game-card p{font-size:.8rem;color:var(--text-dim);line-height:1.5}
+
+/* Special bento: first card spans 2 cols */
+.game-card:first-child{
+  grid-column:span 2;
+  background:linear-gradient(135deg,rgba(34,197,55,.06),transparent 60%);
+  border-color:rgba(34,197,55,.15);
 }
-.game-card .icon{font-size:2rem;margin-bottom:.75rem}
-.game-card h3{font-size:1.1rem;font-weight:600;margin-bottom:.35rem}
-.game-card p{font-size:.875rem;color:var(--slate-500);line-height:1.5}
-.game-card .arrow{
-  position:absolute;bottom:1.25rem;right:1.25rem;color:var(--slate-300);
-  font-size:1.25rem;transition:all .2s;
-}
-.game-card:hover .arrow{color:var(--accent);transform:translateX(3px)}
+.game-card:first-child .emoji{font-size:2rem}
+.game-card:first-child h3{font-size:1.1rem}
 
 /* ────────── Features ────────── */
-.features-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-  gap:1.5rem;
+.features{background:var(--surface);border-top:1px solid var(--surface-border);border-bottom:1px solid var(--surface-border)}
+.features-alt{
+  display:grid;grid-template-columns:1fr 1fr;gap:0;
+  border:1px solid var(--surface-border);border-radius:var(--radius);overflow:hidden;
 }
-.feature-card{
-  background:#fff;border:1px solid var(--slate-100);border-radius:var(--radius);
-  padding:1.5rem;transition:border-color .15s;
+@media(max-width:700px){.features-alt{grid-template-columns:1fr}}
+.feat-item{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:1.25rem;border-bottom:1px solid var(--surface-border);
+  transition:background .15s;
 }
-.feature-card:hover{border-color:var(--slate-200)}
-.feature-card .icon{font-size:1.5rem;margin-bottom:.75rem;display:inline-block}
-.feature-card h4{font-size:.95rem;font-weight:600;margin-bottom:.35rem}
-.feature-card p{font-size:.85rem;color:var(--slate-500);line-height:1.5}
+.feat-item:hover{background:var(--surface-hover)}
+.feat-item:nth-last-child(-n+2){border-bottom:none}
+.feat-item .fi{font-size:1.25rem;flex-shrink:0;margin-top:.1rem}
+.feat-item h4{font-size:.85rem;font-weight:600;color:var(--text-bright);margin-bottom:.15rem}
+.feat-item p{font-size:.8rem;color:var(--text-dim);line-height:1.5}
 
 /* ────────── Download ────────── */
-.download-section{background:var(--slate-50);border-top:1px solid var(--slate-200);border-bottom:1px solid var(--slate-200)}
-.tabs{display:flex;gap:0;margin-bottom:2rem;border-bottom:2px solid var(--slate-200)}
+.tabs{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:1px solid var(--surface-border)}
 .tab{
-  padding:.75rem 1.5rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;
+  padding:.65rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;
   font-weight:500;cursor:pointer;border:none;background:none;
-  color:var(--slate-400);border-bottom:2px solid transparent;margin-bottom:-2px;
+  color:var(--text-dim);border-bottom:2px solid transparent;margin-bottom:-1px;
   transition:all .15s;
 }
-.tab:hover{color:var(--slate-600)}
+.tab:hover{color:var(--text)}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .tab-content{display:none}
 .tab-content.active{display:block}
 .install-block{
-  background:#fff;border:1px solid var(--slate-200);border-radius:var(--radius);
-  padding:1.5rem;
+  background:var(--surface);border:1px solid var(--surface-border);
+  border-radius:var(--radius);padding:1.25rem;margin-bottom:.75rem;
 }
+.install-badge{
+  display:inline-block;background:rgba(34,197,55,.1);color:var(--accent);
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:600;
+  padding:.15rem .45rem;border-radius:4px;text-transform:uppercase;letter-spacing:.05em;
+  margin-bottom:.4rem;
+}
+.install-block h4{font-size:.85rem;color:var(--text-bright);margin-bottom:.15rem}
+.install-block p{font-size:.8rem;color:var(--text-dim);margin-bottom:.65rem}
 .install-block code{
-  display:block;background:var(--slate-900);color:#e2e8f0;
-  padding:1rem 1.25rem;border-radius:var(--radius-sm);
-  font-family:'JetBrains Mono',monospace;font-size:.85rem;line-height:1.6;
-  overflow-x:auto;margin-top:.75rem;
-}
-.install-block h4{font-size:.95rem;margin-bottom:.25rem}
-.install-block p{font-size:.85rem;color:var(--slate-500);margin-bottom:.75rem}
-.install-block .badge{
-  display:inline-block;background:var(--accent-light);color:var(--accent-dark);
-  font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;
-  padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;
-  margin-bottom:.5rem;
+  display:block;background:#060608;color:#d4d4d8;
+  padding:.85rem 1rem;border-radius:var(--radius-sm);
+  font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:1.6;
+  overflow-x:auto;border:1px solid var(--surface-border);
 }
 
 /* ────────── Leaderboard ────────── */
-.leaderboard-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
-.leaderboard-controls button{
-  padding:.5rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;
-  font-weight:500;border:1px solid var(--slate-200);border-radius:var(--radius-sm);
-  background:#fff;color:var(--slate-500);cursor:pointer;transition:all .15s;
+.lb-filters{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.lb-filters button{
+  padding:.4rem .85rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  font-weight:500;border:1px solid var(--surface-border);border-radius:var(--radius-sm);
+  background:var(--surface);color:var(--text-dim);cursor:pointer;transition:all .15s;
 }
-.leaderboard-controls button:hover{border-color:var(--accent);color:var(--accent)}
-.leaderboard-controls button.active{
-  background:var(--accent);border-color:var(--accent);color:#fff;
+.lb-filters button:hover{border-color:var(--text-dim);color:var(--text)}
+.lb-filters button.active{background:rgba(34,197,55,.12);border-color:var(--accent);color:var(--accent)}
+.lb-wrap{
+  background:var(--surface);border:1px solid var(--surface-border);
+  border-radius:var(--radius);overflow:hidden;
 }
-.lb-table-wrap{
-  background:#fff;border:1px solid var(--slate-200);border-radius:var(--radius);
-  overflow:hidden;
+.lb-wrap table{width:100%;border-collapse:collapse}
+.lb-wrap th{
+  text-align:left;padding:.85rem 1rem;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);
+  background:rgba(0,0,0,.15);border-bottom:1px solid var(--surface-border);
 }
-.lb-table{width:100%;border-collapse:collapse}
-.lb-table th{
-  text-align:left;padding:1rem 1.25rem;
-  font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600;
-  text-transform:uppercase;letter-spacing:1px;color:var(--slate-400);
-  background:var(--slate-50);border-bottom:1px solid var(--slate-200);
+.lb-wrap td{padding:.75rem 1rem;font-size:.85rem;border-bottom:1px solid var(--surface-border)}
+.lb-wrap tr:last-child td{border-bottom:none}
+.lb-wrap tr:hover td{background:rgba(255,255,255,.02)}
+.rank{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:50%;
+  font-weight:700;font-size:.75rem;background:var(--surface-hover);color:var(--text-dim);
 }
-.lb-table td{
-  padding:.875rem 1.25rem;font-size:.9rem;border-bottom:1px solid var(--slate-100);
-}
-.lb-table tr:last-child td{border-bottom:none}
-.lb-table tr:hover td{background:var(--slate-50)}
-.rank{display:inline-flex;align-items:center;justify-content:center;
-  width:28px;height:28px;border-radius:50%;
-  font-weight:700;font-size:.8rem;background:var(--slate-100);color:var(--slate-500);
-}
-.rank-1{background:#fef3c7;color:#92400e;box-shadow:0 0 0 2px #fbbf24}
-.rank-2{background:#f1f5f9;color:#475569;box-shadow:0 0 0 2px #cbd5e1}
-.rank-3{background:#fef2f2;color:#991b1b;box-shadow:0 0 0 2px #fca5a5}
-.score{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent)}
-.lb-empty{text-align:center;padding:3rem 1.25rem;color:var(--slate-400);font-size:.9rem}
-
-/* ────────── Docs ────────── */
-.docs-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-  gap:1.5rem;
-}
-.doc-card{
-  background:#fff;border:1px solid var(--slate-100);border-radius:var(--radius);
-  padding:1.5rem;
-}
-.doc-card h4{font-size:.95rem;font-weight:600;margin-bottom:.75rem}
-.doc-card table{width:100%;border-collapse:collapse;font-size:.85rem}
-.doc-card th,.doc-card td{
-  padding:.5rem .75rem;text-align:left;border-bottom:1px solid var(--slate-100);
-}
-.doc-card th{font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--slate-400);font-weight:600;padding-top:0}
-.doc-card td:first-child{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--slate-800);white-space:nowrap}
-.doc-card td:last-child{color:var(--slate-500)}
-.doc-card pre{
-  background:var(--slate-900);color:#e2e8f0;padding:.75rem 1rem;
-  border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;
-  font-size:.8rem;overflow-x:auto;
-}
+.rank-gold{background:rgba(251,191,36,.12);color:#fbbf24}
+.rank-silver{background:#f1f5f90d;color:#94a3b8}
+.rank-bronze{background:#fef2f20d;color:#fca5a5}
+.sc{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent)}
+.lb-empty{text-align:center;padding:2.5rem 1rem;color:var(--text-dim);font-size:.85rem}
 
 /* ────────── Footer ────────── */
 footer{
-  text-align:center;padding:2.5rem 1.5rem;border-top:1px solid var(--slate-200);
-  font-size:.85rem;color:var(--slate-400);
+  text-align:center;padding:2rem 1.5rem;border-top:1px solid var(--surface-border);
+  font-size:.8rem;color:var(--text-dim);
 }
 footer a{color:var(--accent);font-weight:500}
 footer a:hover{text-decoration:underline}
 
 /* ────────── Lightbox ────────── */
-.lightbox-overlay{
-  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
-  background:rgba(0,0,0,.85);z-index:999;overflow-y:auto;
-  padding:2rem;cursor:pointer;
+.lb{display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.9);z-index:999;overflow-y:auto;padding:2rem;
 }
-.lightbox-overlay.open{display:flex;align-items:center;justify-content:center}
-.lightbox-content{
-  background:#fff;border-radius:var(--radius);max-width:900px;
-  width:100%;padding:1.5rem;cursor:default;position:relative;
+.lb.open{display:flex;align-items:center;justify-content:center}
+.lb-inner{
+  background:var(--surface);border:1px solid var(--surface-border);
+  border-radius:var(--radius);max-width:860px;width:100%;padding:1.25rem;position:relative;
 }
-.lightbox-close{
-  position:absolute;top:1rem;right:1rem;width:32px;height:32px;
-  border-radius:50%;border:none;background:var(--slate-100);
-  font-size:1.25rem;cursor:pointer;display:flex;align-items:center;
-  justify-content:center;color:var(--slate-500);transition:all .15s;
+.lb-x{
+  position:absolute;top:.75rem;right:.75rem;width:28px;height:28px;
+  border-radius:50%;border:1px solid var(--surface-border);background:var(--surface-hover);
+  font-size:1rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;color:var(--text-dim);transition:all .15s;
 }
-.lightbox-close:hover{background:var(--slate-200)}
-.lightbox-content h2{font-size:1.25rem;margin-bottom:.25rem}
-.lightbox-content .sub{color:var(--slate-500);font-size:.875rem;margin-bottom:1rem}
-.lightbox-gallery{display:flex;flex-direction:column;gap:1rem}
-.lightbox-gallery img{
-  border-radius:var(--radius-sm);border:1px solid var(--slate-200);width:100%;
-}
+.lb-x:hover{color:var(--text);border-color:var(--text-dim)}
+.lb-inner h2{font-size:1.1rem;color:var(--text-bright);margin-bottom:.2rem}
+.lb-inner .sub{color:var(--text-dim);font-size:.8rem;margin-bottom:1rem}
+.lb-gal{display:flex;flex-direction:column;gap:.75rem}
+.lb-gal img{border-radius:var(--radius-sm);border:1px solid var(--surface-border);width:100%}
+
+/* ────────── Scroll Reveal ────────── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 
 /* ────────── Responsive ────────── */
 @media(max-width:768px){
   nav .nav-links{display:none}
-  .games-grid{grid-template-columns:1fr}
-  .features-grid{grid-template-columns:1fr 1fr}
-  .docs-grid{grid-template-columns:1fr}
-  .hero{padding-top:5rem;min-height:auto}
-}
-@media(max-width:480px){
-  .features-grid{grid-template-columns:1fr}
-  .hero-btns .btn{width:100%;justify-content:center}
+  .hero{padding-top:4rem;min-height:auto}
+  .game-card:first-child{grid-column:span 1}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ Navigation ═══ -->
+<!-- ═══ Nav ═══ -->
 <nav>
   <div class="inner">
-    <a href="#" class="logo">⏳ <span>waiting</span> game</a>
+    <a href="#" class="logo">⌛ <span>waiting</span> game</a>
     <ul class="nav-links">
       <li><a href="#games">Games</a></li>
       <li><a href="#features">Features</a></li>
-      <li><a href="#download">Download</a></li>
+      <li><a href="#download">Install</a></li>
       <li><a href="#leaderboard">Leaderboard</a></li>
-      <li><a href="#docs">Docs</a></li>
-      <li><a href="https://github.com/ziuus/waiting-game" class="nav-cta" target="_blank">GitHub ↗</a></li>
+      <li><a href="https://github.com/ziuus/waiting-game" class="nav-gh" target="_blank">GitHub →</a></li>
     </ul>
   </div>
 </nav>
 
 <!-- ═══ Hero ═══ -->
-<section class="hero" id="hero">
+<section class="hero">
   <div class="inner">
+    <div class="hero-badges">
+      <span class="hero-badge version">v0.4.2</span>
+      <span class="hero-badge os">Linux · macOS · Windows</span>
+    </div>
     <h1>
-      A game that waits<br>
-      <span>so you don't have to.</span>
+      A game that<br>
+      <span>waits.</span>
     </h1>
     <p class="subtitle">
-      A full-screen transparent overlay that sits quietly on your desktop.
-      Six game modes, global leaderboards, and near-zero idle cost.
-      Play while you wait.
+      Full-screen transparent overlay. Six game modes. Global leaderboards.
+      Zero idle cost. Play while you build, wait, or deploy.
     </p>
-    <img class="demo-gif" src="https://github.com/ziuus/waiting-game/raw/master/exports/demo_workflow.gif" alt="Waiting Game demo workflow" />
+    <img class="preview" src="https://github.com/ziuus/waiting-game/raw/master/exports/demo_workflow.gif" alt="Waiting Game overlay on desktop" />
     <div class="hero-btns">
-      <a href="#download" class="btn btn-primary">⬇ Download</a>
-      <a href="https://github.com/ziuus/waiting-game" class="btn btn-secondary" target="_blank">View on GitHub →</a>
+      <a href="#download" class="btn btn-primary">⬇ Install</a>
+      <a href="https://github.com/ziuus/waiting-game" class="btn btn-sec" target="_blank">Source →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Terminal Demo ═══ -->
+<section class="terminal-demo reveal">
+  <div class="inner">
+    <h2 class="section-title centered">One binary, one keypress</h2>
+    <p class="section-desc centered">No runtime deps. No config files. Just launch and play.</p>
+    <div class="terminal-win">
+      <div class="terminal-hdr">
+        <span class="terminal-dot r"></span>
+        <span class="terminal-dot y"></span>
+        <span class="terminal-dot g"></span>
+        <span>~/ waiting-game</span>
+      </div>
+      <div class="terminal-body">
+        <div><span class="term-prompt">$</span> <span class="term-cmd">./waiting-game</span></div>
+        <div class="term-sp"></div>
+        <div><span class="term-d">[game]</span> loading overlay…</div>
+        <div><span class="term-d">[game]</span> mode: <span class="term-ok">dino-runner</span></div>
+        <div><span class="term-d">[game]</span> score: 2,450 — press <span class="term-ok">H</span> to hide</div>
+        <div class="term-sp"></div>
+        <div><span class="term-d">[player]</span> Zius ranked #1 on leaderboard</div>
+        <div><span class="term-d">[game]</span> <span class="term-ok">✓</span> score submitted</div>
+        <div class="term-sp"></div>
+        <div><span class="term-prompt">$</span> <span class="term-cmd term-blk">▊</span></div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- ═══ Games ═══ -->
-<section id="games">
+<section id="games" class="reveal">
   <div class="inner">
-    <div class="section-label">Game Modes</div>
-    <h2 class="section-title">Six ways to play</h2>
-    <p class="section-desc">
-      Each mode has its own physics, scoring, and visual style. Click a game to see screenshots.
-    </p>
+    <h2 class="section-title centered">Six ways to play</h2>
+    <p class="section-desc centered">Each mode has its own physics, scoring, and look. Click any game to see screenshots.</p>
     <div class="games-grid">
 
-      <div class="game-card" data-game="dino" onclick="openLightbox('dino')">
-        <div class="icon">🦖</div>
+      <div class="game-card" onclick="openLB('dino')">
+        <span class="emoji">🦖</span>
         <h3>Dino Runner</h3>
-        <p>Classic runner with jump physics. Dodge cacti and birds as the speed increases.</p>
-        <span class="arrow">→</span>
+        <p>Classic runner with jump physics. Speed increases as you dodge cacti and birds.</p>
       </div>
 
-      <div class="game-card" data-game="flappy" onclick="openLightbox('flappy')">
-        <div class="icon">🐦</div>
+      <div class="game-card" onclick="openLB('flappy')">
+        <span class="emoji">🐦</span>
         <h3>Flappy Bird</h3>
-        <p>Momentum-based flight through neon pipe gaps. Tap to flap, find the rhythm.</p>
-        <span class="arrow">→</span>
+        <p>Momentum-based flight. Navigate neon pipe gaps.</p>
       </div>
 
-      <div class="game-card" data-game="gravity" onclick="openLightbox('gravity')">
-        <div class="icon">🌀</div>
+      <div class="game-card" onclick="openLB('gravity')">
+        <span class="emoji">🌀</span>
         <h3>Gravity Runner</h3>
-        <p>Gravity-flip runner. Reverse gravity to navigate spikes and survive.</p>
-        <span class="arrow">→</span>
+        <p>Flip gravity to dodge spikes. Survival through reversal.</p>
       </div>
 
-      <div class="game-card" data-game="snake" onclick="openLightbox('snake')">
-        <div class="icon">🐍</div>
+      <div class="game-card" onclick="openLB('snake')">
+        <span class="emoji">🐍</span>
         <h3>Cyber Snake</h3>
-        <p>Grid-based snake with glowing neon food. Grow longer, don't crash.</p>
-        <span class="arrow">→</span>
+        <p>Grid-based snake. Collect neon food, grow longer.</p>
       </div>
 
-      <div class="game-card" data-game="breakout" onclick="openLightbox('breakout')">
-        <div class="icon">🧱</div>
+      <div class="game-card" onclick="openLB('breakout')">
+        <span class="emoji">🧱</span>
         <h3>Neon Breakout</h3>
-        <p>Paddle-and-ball breakout with brick waves. Clear the board for points.</p>
-        <span class="arrow">→</span>
+        <p>Paddle-and-ball. Clear brick waves for points.</p>
       </div>
 
-      <div class="game-card" data-game="defender" onclick="openLightbox('defender')">
-        <div class="icon">🛡️</div>
+      <div class="game-card" onclick="openLB('defender')">
+        <span class="emoji">🛡️</span>
         <h3>Defender</h3>
-        <p>Side-scrolling space shooter. Destroy enemy waves and protect your shields.</p>
-        <span class="arrow">→</span>
+        <p>Side-scrolling shooter. Destroy enemies, survive.</p>
       </div>
 
     </div>
@@ -391,49 +407,58 @@ footer a:hover{text-decoration:underline}
 </section>
 
 <!-- ═══ Features ═══ -->
-<section id="features" style="background:var(--slate-50);border-top:1px solid var(--slate-200);border-bottom:1px solid var(--slate-200)">
+<section class="features reveal" id="features">
   <div class="inner">
-    <div class="section-label centered">Why Waiting Game</div>
-    <h2 class="section-title centered">Built for the in-between moments</h2>
-    <p class="section-desc centered">
-      Waiting for a build, a deploy, or a meeting to start? That's game time.
-    </p>
-    <div class="features-grid">
+    <h2 class="section-title centered">Built for downtime</h2>
+    <p class="section-desc centered">Waiting for a build, deploy, or meeting to start? That's game time.</p>
+    <div class="features-alt">
 
-      <div class="feature-card">
-        <div class="icon">🪟</div>
-        <h4>Transparent Overlay</h4>
-        <p>Full-screen, no chrome. The game renders on top of your desktop — your workspace stays visible underneath.</p>
+      <div class="feat-item">
+        <span class="fi">🪟</span>
+        <div>
+          <h4>Transparent overlay</h4>
+          <p>Renders on top of your desktop. Your workspace stays visible underneath.</p>
+        </div>
       </div>
 
-      <div class="feature-card">
-        <div class="icon">⚡</div>
-        <h4>Near-Zero Idle Cost</h4>
-        <p>When hidden, the game uses negligible CPU and RAM. No impact on your work when you don't need it.</p>
+      <div class="feat-item">
+        <span class="fi">⚡</span>
+        <div>
+          <h4>Near-zero idle cost</h4>
+          <p>Negligible CPU and RAM when hidden. No impact on work.</p>
+        </div>
       </div>
 
-      <div class="feature-card">
-        <div class="icon">⌨️</div>
-        <h4>Instant Toggle</h4>
-        <p>Hide with a keypress. Bind a global hotkey in your compositor and the game is always a keystroke away.</p>
+      <div class="feat-item">
+        <span class="fi">⌨️</span>
+        <div>
+          <h4>Instant toggle</h4>
+          <p>Hide with a keypress. Bind to any hotkey in your compositor.</p>
+        </div>
       </div>
 
-      <div class="feature-card">
-        <div class="icon">📊</div>
-        <h4>Global Leaderboards</h4>
-        <p>Every score submits to a live leaderboard. Track your rank across all players, in every game mode.</p>
+      <div class="feat-item">
+        <span class="fi">📊</span>
+        <div>
+          <h4>Global leaderboards</h4>
+          <p>Every score submits. Track your rank across all players.</p>
+        </div>
       </div>
 
-      <div class="feature-card">
-        <div class="icon">🎮</div>
-        <h4>Six Game Modes</h4>
-        <p>Dino Runner, Flappy Bird, Gravity Runner, Cyber Snake, Neon Breakout, and Defender — each with unique physics.</p>
+      <div class="feat-item">
+        <span class="fi">🎮</span>
+        <div>
+          <h4>Six game modes</h4>
+          <p>Dino, Flappy, Gravity, Snake, Breakout, Defender — unique physics each.</p>
+        </div>
       </div>
 
-      <div class="feature-card">
-        <div class="icon">🎨</div>
-        <h4>Customizable</h4>
-        <p>Enable, disable, rename, and theme every game through the config file. Full control over your roster.</p>
+      <div class="feat-item">
+        <span class="fi">🎨</span>
+        <div>
+          <h4>Customizable roster</h4>
+          <p>Enable, disable, rename, and theme every game through config.</p>
+        </div>
       </div>
 
     </div>
@@ -441,15 +466,12 @@ footer a:hover{text-decoration:underline}
 </section>
 
 <!-- ═══ Download ═══ -->
-<section class="download-section" id="download">
+<section id="download" class="reveal">
   <div class="inner">
-    <div class="section-label centered">Get Started</div>
-    <h2 class="section-title centered">Download & Install</h2>
-    <p class="section-desc centered">
-      Available for Linux, macOS, and Windows. Pick your platform below.
-    </p>
+    <h2 class="section-title centered">Download</h2>
+    <p class="section-desc centered">Pick your platform and you're running in seconds.</p>
 
-    <div class="tabs" id="download-tabs">
+    <div class="tabs" id="dl-tabs">
       <button class="tab active" data-tab="linux">Linux</button>
       <button class="tab" data-tab="macos">macOS</button>
       <button class="tab" data-tab="windows">Windows</button>
@@ -457,31 +479,31 @@ footer a:hover{text-decoration:underline}
 
     <div class="tab-content active" id="tab-linux">
       <div class="install-block">
-        <span class="badge">Recommended</span>
+        <span class="install-badge">Recommended</span>
         <h4>AppImage</h4>
-        <p>Download and run — no dependencies required.</p>
-        <code>curl -L -o waiting-game.AppImage \<br>  https://github.com/ziuus/waiting-game/releases/download/v0.4.2/waiting-game_0.4.2_amd64.AppImage<br>chmod +x waiting-game.AppImage<br>./waiting-game.AppImage</code>
+        <p>Single binary, no dependencies.</p>
+        <code>$ curl -L -o waiting-game.AppImage https://github.com/ziuus/waiting-game/releases/download/v0.4.2/waiting-game_0.4.2_amd64.AppImage<br>$ chmod +x waiting-game.AppImage<br>$ ./waiting-game.AppImage</code>
       </div>
-      <div style="margin-top:1rem;" class="install-block">
-        <h4>Toggle Binding (Hyprland)</h4>
-        <p>Add this to your <code>hyprland.conf</code> for quick toggle:</p>
-        <code>bind = SUPER SHIFT, G, exec, pkill waiting-game \|\| ~/Applications/waiting-game-0.4.2.AppImage</code>
+      <div class="install-block">
+        <h4>Hyprland toggle</h4>
+        <p>Add to <code style="background:var(--surface-border);padding:.1rem .3rem;border-radius:3px;font-size:.75rem">hyprland.conf</code>:</p>
+        <code>bind = SUPER SHIFT, G, exec, pkill waiting-game || ~/Applications/waiting-game-0.4.2.AppImage</code>
       </div>
     </div>
 
     <div class="tab-content" id="tab-macos">
       <div class="install-block">
-        <h4>DMG Installer</h4>
-        <p>Intel & Apple Silicon supported. Download from releases.</p>
-        <code># Download waiting-game_0.4.2.dmg from<br># https://github.com/ziuus/waiting-game/releases/latest<br># Open the DMG and drag to Applications</code>
+        <h4>DMG</h4>
+        <p>Intel & Apple Silicon supported. Download the DMG from releases.</p>
+        <code># github.com/ziuus/waiting-game/releases/latest<br># Open the DMG and drag to Applications</code>
       </div>
     </div>
 
     <div class="tab-content" id="tab-windows">
       <div class="install-block">
         <h4>Installer</h4>
-        <p>Windows .exe / .msi installer available.</p>
-        <code># Download the .exe or .msi from<br># https://github.com/ziuus/waiting-game/releases/latest<br># Run the installer and follow the prompts</code>
+        <p>Download the .exe or .msi from releases and run.</p>
+        <code># github.com/ziuus/waiting-game/releases/latest<br># Run the installer and follow the prompts</code>
       </div>
     </div>
 
@@ -489,277 +511,119 @@ footer a:hover{text-decoration:underline}
 </section>
 
 <!-- ═══ Leaderboard ═══ -->
-<section id="leaderboard">
+<section id="leaderboard" class="reveal" style="background:var(--surface);border-top:1px solid var(--surface-border);border-bottom:1px solid var(--surface-border)">
   <div class="inner">
-    <div class="section-label centered">Global Ranks</div>
     <h2 class="section-title centered">Leaderboard</h2>
-    <p class="section-desc centered">
-      Top scores submitted from players around the world. Filter by game mode.
-    </p>
+    <p class="section-desc centered">Top scores from players worldwide. Filter by mode.</p>
 
-    <div class="leaderboard-controls" id="lb-controls">
-      <button class="active" data-game="dino">Dino Runner</button>
-      <button data-game="flappy">Flappy Bird</button>
-      <button data-game="gravity">Gravity Runner</button>
-      <button data-game="snake">Cyber Snake</button>
-      <button data-game="breakout">Neon Breakout</button>
+    <div class="lb-filters" id="lb-filters">
+      <button class="active" data-game="dino">Dino</button>
+      <button data-game="flappy">Flappy</button>
+      <button data-game="gravity">Gravity</button>
+      <button data-game="snake">Snake</button>
+      <button data-game="breakout">Breakout</button>
       <button data-game="defender">Defender</button>
     </div>
 
-    <div class="lb-table-wrap">
-      <table class="lb-table">
+    <div class="lb-wrap">
+      <table>
         <thead>
           <tr>
-            <th style="width:60px">Rank</th>
+            <th style="width:50px">#</th>
             <th>Player</th>
-            <th style="width:100px">Score</th>
-            <th style="width:120px">Date</th>
+            <th style="width:85px">Score</th>
+            <th style="width:110px">Date</th>
           </tr>
         </thead>
         <tbody id="lb-body">
-          <tr><td colspan="4" class="lb-empty">Loading scores...</td></tr>
+          <tr><td colspan="4" class="lb-empty">Loading…</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </section>
 
-<!-- ═══ Docs ═══ -->
-<section id="docs" style="background:var(--slate-50);border-top:1px solid var(--slate-200);border-bottom:1px solid var(--slate-200)">
-  <div class="inner">
-    <div class="section-label centered">Reference</div>
-    <h2 class="section-title centered">Documentation</h2>
-    <p class="section-desc centered">
-      Keyboard shortcuts, configuration, and everything you need to get started.
-    </p>
-    <div class="docs-grid">
-
-      <div class="doc-card">
-        <h4>⌨️ Keyboard Shortcuts</h4>
-        <table>
-          <tr><th>Key</th><th>Action</th></tr>
-          <tr><td>Space</td><td>Jump / Initialize</td></tr>
-          <tr><td>H</td><td>Hide the game window</td></tr>
-          <tr><td>Tab</td><td>Cycle controls on game-over</td></tr>
-        </table>
-      </div>
-
-      <div class="doc-card">
-        <h4>⚙️ Configuration</h4>
-        <p style="font-size:.85rem;color:var(--slate-500);margin-bottom:.75rem;">
-          The game reads <code style="background:var(--slate-100);padding:.1rem .35rem;border-radius:3px;font-size:.8rem;">~/.config/waiting-game/config.json</code>
-          (auto-created with defaults).
-        </p>
-        <pre>{
-  "activeGame": "dino",
-  "activeDifficulty": "normal",
-  "games": {
-    "dino": { "enabled": true },
-    "flappy": { "enabled": true },
-    "gravity": { "enabled": true },
-    "snake": { "enabled": true },
-    "breakout": { "enabled": true },
-    "defender": { "enabled": true }
-  }
-}</pre>
-      </div>
-
-      <div class="doc-card">
-        <h4>🔗 Resources</h4>
-        <table>
-          <tr><th>Link</th><th></th></tr>
-          <tr><td>Source Code</td><td><a href="https://github.com/ziuus/waiting-game" style="color:var(--accent);font-weight:500;">github.com/ziuus/waiting-game →</a></td></tr>
-          <tr><td>Releases</td><td><a href="https://github.com/ziuus/waiting-game/releases" style="color:var(--accent);font-weight:500;">All Versions →</a></td></tr>
-          <tr><td>Issues</td><td><a href="https://github.com/ziuus/waiting-game/issues" style="color:var(--accent);font-weight:500;">Report a Bug →</a></td></tr>
-          <tr><td>License</td><td>MIT — Free to use</td></tr>
-        </table>
-      </div>
-
-    </div>
-  </div>
-</section>
-
 <!-- ═══ Footer ═══ -->
 <footer>
-  <p>Built with ❤️ by <a href="https://github.com/ziuus">Noel Paul Tomy</a></p>
-  <p style="margin-top:.25rem;">MIT &mdash; <a href="https://github.com/ziuus/waiting-game">Waiting Game on GitHub</a></p>
+  <p>MIT &mdash; <a href="https://github.com/ziuus/waiting-game">Waiting Game</a> by <a href="https://github.com/ziuus">Noel Paul Tomy</a></p>
 </footer>
 
 <!-- ═══ Lightbox ═══ -->
-<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox(event)">
-  <div class="lightbox-content" onclick="event.stopPropagation()">
-    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+<div class="lb" id="lb" onclick="closeLB(event)">
+  <div class="lb-inner" onclick="event.stopPropagation()">
+    <button class="lb-x" onclick="closeLB()">✕</button>
     <h2 id="lb-title"></h2>
     <p class="sub" id="lb-sub"></p>
-    <div class="lightbox-gallery" id="lb-gallery"></div>
+    <div class="lb-gal" id="lb-gal"></div>
   </div>
 </div>
 
 <script>
-// ── Leaderboard ──
-const MOCK_DATA = {
-  dino: [
-    { username: "Zius", score: 2450, date: "2026-05-15" },
-    { username: "NeonNinja", score: 1840, date: "2026-05-14" },
-    { username: "Ghost", score: 1200, date: "2026-05-10" },
-    { username: "Runner42", score: 980, date: "2026-05-08" },
-    { username: "PixelDino", score: 755, date: "2026-05-05" }
-  ],
-  flappy: [
-    { username: "Zius", score: 145, date: "2026-05-15" },
-    { username: "BirdWatcher", score: 89, date: "2026-05-12" },
-    { username: "FlapMaster", score: 67, date: "2026-05-10" }
-  ],
-  gravity: [
-    { username: "ZeroG", score: 3200, date: "2026-05-14" },
-    { username: "SpikeDodge", score: 2100, date: "2026-05-13" },
-    { username: "FlipKing", score: 1500, date: "2026-05-11" }
-  ],
-  snake: [
-    { username: "Nibbler", score: 580, date: "2026-05-15" },
-    { username: "GridRunner", score: 420, date: "2026-05-12" },
-    { username: "SnakeEyes", score: 310, date: "2026-05-09" }
-  ],
-  breakout: [
-    { username: "BrickBreaker", score: 5200, date: "2026-05-14" },
-    { username: "PaddlePro", score: 4100, date: "2026-05-13" },
-    { username: "NeonWave", score: 2800, date: "2026-05-10" }
-  ],
-  defender: [
-    { username: "SpaceAce", score: 7800, date: "2026-05-15" },
-    { username: "ShieldWall", score: 5600, date: "2026-05-12" },
-    { username: "EnemySponge", score: 3900, date: "2026-05-08" }
-  ]
+// ── Leaderboard data ──
+const LB = {
+  dino:[{u:"Zius",s:2450,d:"2026-05-15"},{u:"NeonNinja",s:1840,d:"2026-05-14"},{u:"Ghost",s:1200,d:"2026-05-10"},{u:"Runner42",s:980,d:"2026-05-08"},{u:"PixelDino",s:755,d:"2026-05-05"}],
+  flappy:[{u:"Zius",s:145,d:"2026-05-15"},{u:"BirdWatcher",s:89,d:"2026-05-12"},{u:"FlapMaster",s:67,d:"2026-05-10"}],
+  gravity:[{u:"ZeroG",s:3200,d:"2026-05-14"},{u:"SpikeDodge",s:2100,d:"2026-05-13"},{u:"FlipKing",s:1500,d:"2026-05-11"}],
+  snake:[{u:"Nibbler",s:580,d:"2026-05-15"},{u:"GridRunner",s:420,d:"2026-05-12"},{u:"SnakeEyes",s:310,d:"2026-05-09"}],
+  breakout:[{u:"BrickBreaker",s:5200,d:"2026-05-14"},{u:"PaddlePro",s:4100,d:"2026-05-13"},{u:"NeonWave",s:2800,d:"2026-05-10"}],
+  defender:[{u:"SpaceAce",s:7800,d:"2026-05-15"},{u:"ShieldWall",s:5600,d:"2026-05-12"},{u:"EnemySponge",s:3900,d:"2026-05-08"}]
 };
 
-const GAME_NAMES = {
-  dino: "Dino Runner", flappy: "Flappy Bird", gravity: "Gravity Runner",
-  snake: "Cyber Snake", breakout: "Neon Breakout", defender: "Defender"
-};
+const GN = {dino:"Dino Runner",flappy:"Flappy Bird",gravity:"Gravity Runner",snake:"Cyber Snake",breakout:"Neon Breakout",defender:"Defender"};
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded',()=>{
   // Leaderboard
-  const buttons = document.querySelectorAll('#lb-controls button');
-  const tbody = document.getElementById('lb-body');
-  let currentGame = 'dino';
-
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentGame = btn.dataset.game;
-      loadLeaderboard(currentGame);
-    });
-  });
-
-  function loadLeaderboard(game) {
-    const data = MOCK_DATA[game] || [];
-    if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">No scores yet. Be the first!</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.map((entry, i) => {
-      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
-      const date = entry.date ? new Date(entry.date).toLocaleDateString() : 'Unknown';
-      return `<tr>
-        <td><span class="rank ${rankClass}">${i + 1}</span></td>
-        <td>${escapeHtml(entry.username || 'Anonymous')}</td>
-        <td class="score">${String(entry.score).padStart(5, '0')}</td>
-        <td style="color:var(--slate-400);font-size:.85rem">${date}</td>
-      </tr>`;
+  const btns=document.querySelectorAll('#lb-filters button'),tb=document.getElementById('lb-body');
+  let g='dino';
+  btns.forEach(b=>b.addEventListener('click',()=>{
+    btns.forEach(x=>x.classList.remove('active'));b.classList.add('active');g=b.dataset.game;load(g);
+  }));
+  load(g);
+  function load(game){
+    const d=LB[game]||[];
+    if(!d.length){tb.innerHTML='<tr><td colspan="4" class="lb-empty">No scores yet.</td></tr>';return}
+    tb.innerHTML=d.map((e,i)=>{
+      const rc=i===0?'rank-gold':i===1?'rank-silver':i===2?'rank-bronze':'';
+      const dt=e.d?new Date(e.d).toLocaleDateString():'—';
+      return `<tr><td><span class="rank ${rc}">${i+1}</span></td><td>${esc(e.u||'Anon')}</td><td class="sc">${String(e.s).padStart(5,'0')}</td><td style="color:var(--text-dim);font-size:.8rem">${dt}</td></tr>`;
     }).join('');
   }
-
-  loadLeaderboard('dino');
-
   // Download tabs
-  const tabs = document.querySelectorAll('#download-tabs .tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-    });
-  });
+  const tabs=document.querySelectorAll('#dl-tabs .tab');
+  tabs.forEach(t=>t.addEventListener('click',()=>{
+    tabs.forEach(x=>x.classList.remove('active'));t.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+  }));
+  // Scroll reveal
+  const ro=new IntersectionObserver(es=>{
+    es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target)}});
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
 });
-
-function escapeHtml(s) {
-  return (s || '').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function esc(s){return(s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
 // ── Lightbox ──
-const GH = 'https://github.com/ziuus/waiting-game/raw/master';
-const SCREENSHOTS = {
-  dino: {
-    desc: "Classic runner with jump physics. Dodge cacti and birds.",
-    images: [
-      "Pictures/Screenshot_2026-07-05_10-57-49.png",
-      "Pictures/Screenshot_2026-07-05_10-58-09.png",
-      "Pictures/Screenshot_2026-07-05_10-57-05.png",
-      "Pictures/Screenshot_2026-07-05_10-57-55.png"
-    ]
-  },
-  flappy: {
-    desc: "Momentum-based flight through neon pipe gaps.",
-    images: [
-      "Pictures/Screenshot_2026-07-05_10-53-36.png",
-      "Pictures/Screenshot_2026-07-05_10-53-53.png",
-      "Pictures/Screenshot_2026-07-05_10-53-57.png"
-    ]
-  },
-  gravity: {
-    desc: "Gravity-flip runner. Navigate spikes by reversing gravity.",
-    images: [
-      "Pictures/Screenshot_2026-07-05_10-54-09.png",
-      "Pictures/Screenshot_2026-07-05_10-54-26.png"
-    ]
-  },
-  snake: {
-    desc: "Grid-based snake. Collect glowing food, avoid walls.",
-    images: [
-      "Pictures/Screenshot_2026-07-05_10-56-00.png",
-      "Pictures/Screenshot_2026-07-05_10-58-00.png"
-    ]
-  },
-  breakout: {
-    desc: "Paddle-and-ball breakout. Clear brick waves for points.",
-    images: [
-      "Pictures/Screenshot_2026-07-05_10-58-39.png"
-    ]
-  },
-  defender: {
-    desc: "Side-scrolling space shooter. Destroy enemies, protect shields.",
-    images: [
-      "Pictures/Screenshot_2026-07-05_10-54-43.png",
-      "Pictures/Screenshot_2026-07-05_10-58-17.png",
-      "Pictures/Screenshot_2026-07-05_10-58-22.png"
-    ]
-  }
+const GH='https://github.com/ziuus/waiting-game/raw/master';
+const SS={
+  dino:{imgs:["Pictures/Screenshot_2026-07-05_10-57-49.png","Pictures/Screenshot_2026-07-05_10-58-09.png","Pictures/Screenshot_2026-07-05_10-57-05.png","Pictures/Screenshot_2026-07-05_10-57-55.png"]},
+  flappy:{imgs:["Pictures/Screenshot_2026-07-05_10-53-36.png","Pictures/Screenshot_2026-07-05_10-53-53.png","Pictures/Screenshot_2026-07-05_10-53-57.png"]},
+  gravity:{imgs:["Pictures/Screenshot_2026-07-05_10-54-09.png","Pictures/Screenshot_2026-07-05_10-54-26.png"]},
+  snake:{imgs:["Pictures/Screenshot_2026-07-05_10-56-00.png","Pictures/Screenshot_2026-07-05_10-58-00.png"]},
+  breakout:{imgs:["Pictures/Screenshot_2026-07-05_10-58-39.png"]},
+  defender:{imgs:["Pictures/Screenshot_2026-07-05_10-54-43.png","Pictures/Screenshot_2026-07-05_10-58-17.png","Pictures/Screenshot_2026-07-05_10-58-22.png"]}
 };
-
-function openLightbox(game) {
-  const data = SCREENSHOTS[game];
-  if (!data) return;
-  document.getElementById('lb-title').textContent = GAME_NAMES[game] || game;
-  document.getElementById('lb-sub').textContent = data.desc;
-  const gallery = document.getElementById('lb-gallery');
-  gallery.innerHTML = data.images.map(src =>
-    `<img src="${GH}/${src}" alt="${GAME_NAMES[game]} screenshot" loading="lazy" />`
-  ).join('');
-  document.getElementById('lightbox').classList.add('open');
-  document.body.style.overflow = 'hidden';
+function openLB(game){
+  const d=SS[game];if(!d)return;
+  document.getElementById('lb-title').textContent=GN[game];
+  document.getElementById('lb-sub').textContent='Screenshots';
+  document.getElementById('lb-gal').innerHTML=d.imgs.map(s=>`<img src="${GH}/${s}" alt="${GN[game]}" loading="lazy">`).join('');
+  document.getElementById('lb').classList.add('open');document.body.style.overflow='hidden';
 }
-
-function closeLightbox(e) {
-  if (e && e.target !== document.getElementById('lightbox')) return;
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
+function closeLB(e){if(e&&e.target!==document.getElementById('lb'))return;
+  document.getElementById('lb').classList.remove('open');document.body.style.overflow='';
 }
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeLightbox();
-});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLB()});
 </script>
 </body>
 </html>
