@@ -1,5 +1,7 @@
 <div align="center">
 
+**Live demo → https://waiting-game.vercel.app**
+
 # 🦖 Waiting Game
 
 **A transparent overlay game that lives on your desktop — play while you wait.**
