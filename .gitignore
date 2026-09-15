@@ -22,3 +22,23 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Dev artifacts — do not commit
+graphify-out/
+clip_*.png
+recordings/
+actual_diff.txt
+diff_main.txt
+real_diff.txt
+run_log.txt
+
+# IDE / tool leftovers
+.geminiignore
+.opencode/
+
+# Package manager — using pnpm only
+package-lock.json
+
+# Root duplicates of packaging/aur/
+PKGBUILD
+.SRCINFO
