@@ -1,6 +1,6 @@
 <div align="center">
 
-**Live demo → https://waiting-game.vercel.app**
+**Live demo → https://waiting-game-site.vercel.app**
 
 # 🦖 Waiting Game
 
