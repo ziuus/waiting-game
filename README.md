@@ -21,6 +21,10 @@
 
 Waiting Game is a full-screen transparent overlay that sits quietly on your desktop until summoned. Six game modes, global leaderboards, and near-zero resource cost when idle. Built with **Tauri v2** and **Rust** — runs natively on Linux, Windows, and macOS.
 
+> Building this in the open — if it saves you time, a star helps others find it.
+> Found a bug, or have an idea? [Open an issue](https://github.com/ziuus/waiting-game/issues).
+> Cross-platform bug reports (Windows/macOS/Linux) help most.
+
 ---
 
 ## Gallery
